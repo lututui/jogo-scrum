@@ -1,0 +1,9 @@
+{
+    "name": "prototipo-jogo-scrum",
+    "version": "0.1.0",
+    "description": "Protótipo de jogo sério para ensino de Scrum",
+    "scripts": {
+        "start": "node servidor.js"
+    },
+    "private": true
+}
