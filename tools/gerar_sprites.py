@@ -13,9 +13,9 @@ DIR_ASSETS = os.path.join(RAIZ, "assets")
 
 TRANSPARENTE = (0, 0, 0, 0)
 
-# traço escuro comum a olhos, óculos, fones e contornos
 CONTORNO = "#2b3348"
-LENTE_OCULOS = "#f7fafc"
+COR_DA_ARMACAO = "#7b88a5"
+COR_DA_LENTE = "#eef4fb"
 
 TOM_DE_PELE = {
     "clara": "#f1d3bb",
@@ -141,12 +141,11 @@ def desenhar_oculos(d):
     # armacao vazada, desenhada ANTES da expressao
     # as lentes ficam como fundo claro e os olhos aparecem por cima
     for x in (12, 17):
-        r(d, x, 9, 4, 1, CONTORNO)
-        r(d, x, 12, 4, 1, CONTORNO)
-        r(d, x, 10, 1, 2, CONTORNO)
-        r(d, x + 3, 10, 1, 2, CONTORNO)
-        r(d, x + 1, 10, 2, 2, LENTE_OCULOS)
-    r(d, 16, 10, 1, 1, CONTORNO)
+        r(d, x, 10, 4, 2, COR_DA_LENTE)
+        r(d, x, 9, 4, 1, COR_DA_ARMACAO)
+        r(d, x, 10, 1, 2, COR_DA_ARMACAO)
+        r(d, x + 3, 10, 1, 2, COR_DA_ARMACAO)
+    r(d, 16, 9, 1, 1, COR_DA_ARMACAO)
 
 
 def desenhar_expressao(d, expressao, tipo_cabelo):
