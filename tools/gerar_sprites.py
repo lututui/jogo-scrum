@@ -49,6 +49,8 @@ COR_DE_ROUPA = {
 COR_DE_CALCA = "#39465c"
 COR_DE_SAPATO = "#20283a"
 COR_DO_OBJETO_NA_MAO = "#f5f1e4"
+COR_DA_CAPA_DO_OBJETO = "#8a5f3c"
+COR_DA_LINHA_DO_OBJETO = "#8f9cb3"
 
 # crachá do avatar: mesma cor do mentor de cada cadeira
 COR_DE_CRACHA = {
@@ -138,7 +140,7 @@ def desenhar_cabelo(d, tipo, cor):
 
 
 def desenhar_oculos(d):
-    # armacao vazada, desenhada ANTES da expressao
+    # armacao desenhada antes da expressao
     # as lentes ficam como fundo claro e os olhos aparecem por cima
     for x in (12, 17):
         r(d, x, 10, 4, 2, COR_DA_LENTE)
@@ -168,8 +170,11 @@ def desenhar_acessorio(d, acessorio):
         r(d, 20, 15, 3, 3, CONTORNO)
         r(d, 12, 15, 8, 1, CONTORNO)
     elif acessorio == "objeto":
-        r(d, 22, 19, 6, 5, COR_DO_OBJETO_NA_MAO)
-        r(d, 22, 19, 6, 1, CONTORNO)
+        r(d, 24, 18, 5, 6, CONTORNO)
+        r(d, 25, 19, 3, 4, COR_DO_OBJETO_NA_MAO)
+        r(d, 24, 19, 1, 4, COR_DA_CAPA_DO_OBJETO)
+        r(d, 25, 20, 3, 1, COR_DA_LINHA_DO_OBJETO)
+        r(d, 25, 22, 2, 1, COR_DA_LINHA_DO_OBJETO)
 
 
 def desenhar_cracha(d, cadeira):
