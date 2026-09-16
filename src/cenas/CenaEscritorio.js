@@ -1,13 +1,14 @@
 // Cena do escritório
 
-import {ELENCO, MESAS, OBJETOS} from "../dados/elenco.js";
-import {CADEIRAS} from "../dados/cadeiras.js";
-import {CaixaDialogo} from "../ui/CaixaDialogo.js";
+import { ELENCO, MESAS, OBJETOS } from "../dados/elenco.js";
+import { CADEIRAS } from "../dados/cadeiras.js";
+import { COR, COR_HEX, FONTE } from "../dados/tema.js";
+import { CaixaDialogo } from "../ui/CaixaDialogo.js";
 
 export class CenaEscritorio extends Phaser.Scene {
 
     constructor() {
-        super({key: "CenaEscritorio"});
+        super({ key: "CenaEscritorio" });
         this.alcanceInteracao = 64;
         this.velocidade = 160;
     }
@@ -33,7 +34,7 @@ export class CenaEscritorio extends Phaser.Scene {
         this.add.tileSprite(0, 0, 960, 104, "parede").setOrigin(0, 0).setDepth(0);
         this.add.tileSprite(0, 104, 960, 436, "chao").setOrigin(0, 0).setDepth(0);
 
-        const rodape = this.add.rectangle(480, 104, 960, 4, 0x9fb0cf);
+        const rodape = this.add.rectangle(480, 104, 960, 4, COR_HEX.rodape);
         rodape.setDepth(1);
 
         this.physics.world.setBounds(0, 100, 960, 440);
@@ -43,7 +44,7 @@ export class CenaEscritorio extends Phaser.Scene {
     criarMobiliario() {
         this.mobiliario = this.physics.add.staticGroup();
 
-        MESAS.forEach(function (mesa) {
+        MESAS.forEach(function(mesa) {
             const sprite = this.mobiliario.create(mesa.x, mesa.y, "mesa");
             sprite.setDepth(mesa.y);
             sprite.body.setSize(48, 22);
@@ -54,24 +55,46 @@ export class CenaEscritorio extends Phaser.Scene {
 
     // Objetos de cenário com fala própria
     criarObjetos() {
-        OBJETOS.forEach(function (objeto) {
+        OBJETOS.forEach(function(objeto) {
             const sprite = this.add.image(objeto.x, objeto.y, objeto.chave);
             sprite.setDepth(2);
-            this.interativos.push({dados: objeto, sprite: sprite, alturaRotulo: 26});
+            this.interativos.push({ dados: objeto, sprite: sprite, alturaRotulo: 26 });
         }, this);
     }
 
     criarNpcs() {
         this.npcs = this.physics.add.staticGroup();
+        this.marcarAreaDeTeste();
 
-        ELENCO.forEach(function (npc) {
+        ELENCO.forEach(function(npc) {
             const sprite = this.npcs.create(npc.x, npc.y, "corpo_" + npc.chave, 0);
             sprite.setDepth(npc.y);
             sprite.body.setSize(18, 12);
             sprite.body.setOffset(7, 19);
             sprite.refreshBody();
-            this.interativos.push({dados: npc, sprite: sprite, alturaRotulo: 24});
+            this.interativos.push({ dados: npc, sprite: sprite, alturaRotulo: 24 });
         }, this);
+    }
+
+    // Faixa da direita onde ficam os personagens da escola
+    marcarAreaDeTeste() {
+        const visitantes = ELENCO.filter(function(npc) {
+            return npc.teste;
+        });
+
+        if (visitantes.length === 0) {
+            return;
+        }
+
+        const faixa = this.add.rectangle(900, 322, 88, 420, 0xffffff, 0.35);
+        faixa.setDepth(1);
+        faixa.setStrokeStyle(1, 0x9fb0cf);
+
+        this.add.text(900, 120, "área de teste", {
+            fontFamily: "monospace",
+            fontSize: "11px",
+            color: "#6d7b95"
+        }).setOrigin(0.5).setDepth(2);
     }
 
     criarJogador() {
@@ -88,34 +111,34 @@ export class CenaEscritorio extends Phaser.Scene {
     // Barra superior e rótulo de interação
     criarInterface() {
         const barra = this.add.graphics();
-        barra.fillStyle(0xfbfcfe, 1);
+        barra.fillStyle(COR_HEX.painel, 1);
         barra.fillRect(0, 0, 960, 40);
-        barra.lineStyle(2, 0x2b3348, 1);
+        barra.lineStyle(2, COR_HEX.contorno, 1);
         barra.lineBetween(0, 40, 960, 40);
         barra.setScrollFactor(0).setDepth(9000);
 
-        const estilo = {fontFamily: "monospace", fontSize: "14px", color: "#2b3348"};
+        const estilo = { fontFamily: FONTE, fontSize: "14px", color: COR.texto };
 
         this.textoSprint = this.add.text(20, 13, "SPRINT 1 DE 6", estilo);
         this.textoDia = this.add.text(480, 13, "DIA 1 DE 10", estilo).setOrigin(0.5, 0);
         this.textoCadeira = this.add.text(940, 13, "", estilo).setOrigin(1, 0);
 
-        [this.textoSprint, this.textoDia, this.textoCadeira].forEach(function (texto) {
+        [this.textoSprint, this.textoDia, this.textoCadeira].forEach(function(texto) {
             texto.setScrollFactor(0).setDepth(9001);
         });
 
         this.textoAjuda = this.add.text(20, 516, "setas ou WASD para andar, ENTER para falar", {
-            fontFamily: "monospace",
+            fontFamily: FONTE,
             fontSize: "12px",
-            color: "#6d7b95"
+            color: COR.textoSecundario
         }).setScrollFactor(0).setDepth(9001);
 
         this.rotulo = this.add.text(0, 0, "ENTER", {
-            fontFamily: "monospace",
+            fontFamily: FONTE,
             fontSize: "12px",
-            color: "#fbfcfe",
-            backgroundColor: "#2b3348",
-            padding: {x: 6, y: 3}
+            color: COR.textoInvertido,
+            backgroundColor: COR.contorno,
+            padding: { x: 6, y: 3 }
         }).setOrigin(0.5, 1).setDepth(8000).setVisible(false);
 
         this.atualizarCadeira("po");
@@ -133,18 +156,17 @@ export class CenaEscritorio extends Phaser.Scene {
             d: Phaser.Input.Keyboard.KeyCodes.D
         });
 
+        this.bloqueioAcaoAte = 0;
+        this.events.on("resume", function() {
+            this.bloqueioAcaoAte = this.time.now + 250;
+        }, this);
+
         this.teclaAcao = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.teclaEspaco = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-        this.input.keyboard.on("keydown-ONE", function () {
-            this.atualizarCadeira("po");
-        }, this);
-        this.input.keyboard.on("keydown-TWO", function () {
-            this.atualizarCadeira("sm");
-        }, this);
-        this.input.keyboard.on("keydown-THREE", function () {
-            this.atualizarCadeira("dev");
-        }, this);
+        this.input.keyboard.on("keydown-ONE", function() { this.atualizarCadeira("po"); }, this);
+        this.input.keyboard.on("keydown-TWO", function() { this.atualizarCadeira("sm"); }, this);
+        this.input.keyboard.on("keydown-THREE", function() { this.atualizarCadeira("dev"); }, this);
     }
 
     // Troca o crachá do avatar; placeholder da seleção de papel do RF01
@@ -178,8 +200,9 @@ export class CenaEscritorio extends Phaser.Scene {
     }
 
     acaoPressionada() {
-        return Phaser.Input.Keyboard.JustDown(this.teclaAcao)
+        const pressionou = Phaser.Input.Keyboard.JustDown(this.teclaAcao)
             || Phaser.Input.Keyboard.JustDown(this.teclaEspaco);
+        return pressionou && this.time.now >= this.bloqueioAcaoAte;
     }
 
     moverJogador() {
@@ -218,7 +241,7 @@ export class CenaEscritorio extends Phaser.Scene {
         let escolhido = null;
         let menorDistancia = this.alcanceInteracao;
 
-        this.interativos.forEach(function (item) {
+        this.interativos.forEach(function(item) {
             const distancia = Phaser.Math.Distance.Between(
                 this.jogador.x, this.jogador.y + 8,
                 item.sprite.x, item.sprite.y + 8
@@ -247,7 +270,7 @@ export class CenaEscritorio extends Phaser.Scene {
         this.jogador.setVelocity(0, 0);
 
         const cena = this;
-        this.caixa.abrir(alvo.dados, function () {
+        this.caixa.abrir(alvo.dados, function() {
             cena.emDialogo = false;
         });
     }

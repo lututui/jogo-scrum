@@ -2,11 +2,12 @@
 
 import {ELENCO} from "../dados/elenco.js";
 import {CADEIRAS} from "../dados/cadeiras.js";
+import {COR, FONTE} from "../dados/tema.js";
 
 const LARGURA_CORPO = 32;
 const ALTURA_CORPO = 32;
 const LARGURA_RETRATO = 72;
-const ALTURA_RETRATO = 64;
+const ALTURA_RETRATO = 96;
 
 export class CenaCarregamento extends Phaser.Scene {
 
@@ -44,9 +45,9 @@ export class CenaCarregamento extends Phaser.Scene {
 
     mostrarAviso() {
         this.add.text(480, 270, "carregando", {
-            fontFamily: "monospace",
+            fontFamily: FONTE,
             fontSize: "16px",
-            color: "#6d7b95"
+            color: COR.textoSecundario
         }).setOrigin(0.5);
     }
 

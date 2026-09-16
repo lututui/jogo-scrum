@@ -78,6 +78,45 @@ export const ELENCO = [
             "Olha, esse contrato da escola é importante para a casa. Se a diretora ficar satisfeita, tem renovação.",
             "Qualquer coisa que ela pedir, a gente dá um jeito. Sempre deu."
         ]
+    },
+    {
+        chave: "estela",
+        nome: "Estela",
+        papel: "Diretora da escola",
+        cor: "#c9a96a",
+        teste: true,
+        x: 900,
+        y: 180,
+        falas: [
+            "Então é aqui que o sistema está sendo feito.",
+            "Vim conhecer o lugar e repetir uma data: em fevereiro as aulas começam, com ou sem sistema pronto."
+        ]
+    },
+    {
+        chave: "helio",
+        nome: "Hélio",
+        papel: "Professor",
+        cor: "#3f7a52",
+        teste: true,
+        x: 900,
+        y: 300,
+        falas: [
+            "Vim junto com a diretora, mas quero falar de outra coisa.",
+            "Para marcar uma falta hoje eu preciso de seis cliques. Seis. Multiplica por trinta e duas turmas na semana."
+        ]
+    },
+    {
+        chave: "sandra",
+        nome: "Sandra",
+        papel: "Secretaria da escola",
+        cor: "#a87fc4",
+        teste: true,
+        x: 900,
+        y: 420,
+        falas: [
+            "Sei que estão esperando a base de matrículas.",
+            "Não é má vontade minha. São dados de criança, e quem assina embaixo se algo vazar sou eu."
+        ]
     }
 ];
 

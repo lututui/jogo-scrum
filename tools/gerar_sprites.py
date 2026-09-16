@@ -15,7 +15,7 @@ TRANSPARENTE = (0, 0, 0, 0)
 
 # traço escuro comum a olhos, óculos, fones e contornos
 CONTORNO = "#2b3348"
-LENTE_OCULOS = "#ffffff"
+LENTE_OCULOS = "#f7fafc"
 
 TOM_DE_PELE = {
     "clara": "#f1d3bb",
@@ -25,7 +25,7 @@ TOM_DE_PELE = {
 }
 
 COR_DE_CABELO = {
-    "preto": "#241f24",
+    "preto": "#171320",
     "castanho": "#5d3a20",
     "castanho_claro": "#8f5c2c",
     "grisalho": "#b6b3ac",
@@ -83,15 +83,15 @@ CORES_DOS_CARTOES = [
 
 # cada personagem é uma combinação: cabelo, cor do cabelo, roupa, acessório, pele
 ELENCO = {
-    "marcia":  ("franja_reta",  "preto",          "vermelho",      "oculos", "clara"),
-    "renan":   ("raspado",      "preto",          "azul_petroleo", "objeto", "escura"),
-    "bia":     ("coque_alto",   "castanho",       "roxo",          "oculos", "parda"),
-    "caio":    ("topete",       "castanho_claro", "laranja",       "fone",   "clara"),
-    "lu":      ("curto_liso",   "verde_agua",     "cinza_claro",   None,     "media"),
-    "gustavo": ("curto_liso",   "grisalho",       "cinza_azulado", None,     "clara"),
-    "estela":  ("coque_baixo",  "grisalho",       "bege",          "objeto", "escura"),
-    "helio":   ("curto_liso",   "castanho",       "verde_escuro",  "objeto", "parda"),
-    "sandra":  ("rabo_cavalo",  "loiro",          "lilas",         "oculos", "clara"),
+    "marcia": ("franja_reta", "preto", "vermelho", "oculos", "clara"),
+    "renan": ("raspado", "preto", "azul_petroleo", "objeto", "escura"),
+    "bia": ("coque_alto", "castanho", "roxo", "oculos", "parda"),
+    "caio": ("topete", "castanho_claro", "laranja", "fone", "clara"),
+    "lu": ("curto_liso", "verde_agua", "cinza_claro", None, "media"),
+    "gustavo": ("curto_liso", "grisalho", "cinza_azulado", None, "clara"),
+    "estela": ("coque_baixo", "grisalho", "bege", "objeto", "escura"),
+    "helio": ("curto_liso", "castanho", "verde_escuro", "objeto", "parda"),
+    "sandra": ("rabo_cavalo", "loiro", "lilas", "oculos", "clara"),
 }
 
 AVATAR_DO_JOGADOR = ("curto_liso", "castanho", "branco", None, "media")
@@ -104,7 +104,8 @@ ALTURA_SPRITE = 32
 CABECA_X = 11
 CABECA_Y = 5
 LARGURA_RETRATO = 72
-ALTURA_RETRATO = 64
+ALTURA_RETRATO = 96
+RECORTE_RETRATO = (7, 0, 25, 24)
 
 
 def r(d, x, y, w, h, cor):
@@ -117,7 +118,6 @@ def desenhar_cabelo(d, tipo, cor):
     hx, hy = CABECA_X, CABECA_Y
     r(d, hx, hy - 2, 10, 4, cor)
     if tipo == "franja_reta":
-        r(d, hx, hy - 2, 10, 6, cor)
         r(d, hx - 1, hy - 2, 1, 9, cor)
         r(d, hx + 10, hy - 2, 1, 9, cor)
     elif tipo == "raspado":
@@ -125,7 +125,7 @@ def desenhar_cabelo(d, tipo, cor):
         r(d, hx, hy + 2, 1, 2, cor)
         r(d, hx + 9, hy + 2, 1, 2, cor)
     elif tipo == "coque_alto":
-        r(d, hx + 3, hy - 6, 5, 4, cor)
+        r(d, hx + 3, hy - 5, 5, 4, cor)
     elif tipo == "coque_baixo":
         r(d, hx + 10, hy + 4, 3, 3, cor)
     elif tipo == "topete":
@@ -137,32 +137,48 @@ def desenhar_cabelo(d, tipo, cor):
     # curto_liso usa apenas a touca base
 
 
-def desenhar_expressao(d, expressao):
-    if expressao == "aprovacao":
-        r(d, 13, 10, 2, 1, CONTORNO)
-        r(d, 18, 10, 2, 1, CONTORNO)
-        return
-    r(d, 13, 10, 1, 2, CONTORNO)
-    r(d, 18, 10, 1, 2, CONTORNO)
-    if expressao == "tenso":
+def desenhar_oculos(d):
+    # armacao vazada, desenhada ANTES da expressao
+    # as lentes ficam como fundo claro e os olhos aparecem por cima
+    for x in (12, 17):
+        r(d, x, 9, 4, 1, CONTORNO)
+        r(d, x, 12, 4, 1, CONTORNO)
+        r(d, x, 10, 1, 2, CONTORNO)
+        r(d, x + 3, 10, 1, 2, CONTORNO)
+        r(d, x + 1, 10, 2, 2, LENTE_OCULOS)
+    r(d, 16, 10, 1, 1, CONTORNO)
+
+
+def desenhar_expressao(d, expressao, tipo_cabelo):
+    for x in (13, 18):
+        if expressao == "neutro":
+            r(d, x, 10, 1, 2, CONTORNO)
+        elif expressao == "tenso":
+            r(d, x, 10, 2, 1, CONTORNO)
+        elif expressao == "aprovacao":
+            r(d, x, 11, 2, 1, CONTORNO)
+
+    if expressao == "tenso" and tipo_cabelo != "franja_reta":
         r(d, 12, 8, 2, 1, CONTORNO)
-        r(d, 19, 8, 2, 1, CONTORNO)
+        r(d, 18, 8, 2, 1, CONTORNO)
 
 
 def desenhar_acessorio(d, acessorio):
-    if acessorio == "oculos":
-        r(d, 12, 9, 3, 3, CONTORNO)
-        r(d, 17, 9, 3, 3, CONTORNO)
-        r(d, 15, 10, 2, 1, CONTORNO)
-        r(d, 13, 10, 1, 1, LENTE_OCULOS)
-        r(d, 18, 10, 1, 1, LENTE_OCULOS)
-    elif acessorio == "fone":
+    if acessorio == "fone":
         r(d, 9, 15, 3, 3, CONTORNO)
         r(d, 20, 15, 3, 3, CONTORNO)
         r(d, 12, 15, 8, 1, CONTORNO)
     elif acessorio == "objeto":
         r(d, 22, 19, 6, 5, COR_DO_OBJETO_NA_MAO)
         r(d, 22, 19, 6, 1, CONTORNO)
+
+
+def desenhar_cracha(d, cadeira):
+    r(d, 13, 15, 1, 1, CONTORNO)
+    r(d, 18, 15, 1, 1, CONTORNO)
+    r(d, 13, 16, 6, 6, CONTORNO)
+    r(d, 14, 17, 4, 4, COR_DE_CRACHA[cadeira])
+    r(d, 14, 17, 4, 1, COR_DO_OBJETO_NA_MAO)
 
 
 def montar(spec, frame=0, expressao="neutro", cadeira=None):
@@ -194,12 +210,14 @@ def montar(spec, frame=0, expressao="neutro", cadeira=None):
     # cabeça
     r(d, CABECA_X, CABECA_Y, 10, 9, pele)
     desenhar_cabelo(d, tipo_cabelo, cabelo)
-    desenhar_expressao(d, expressao)
+    # a lente entra como fundo e os olhos ficam por cima
+    if acessorio == "oculos":
+        desenhar_oculos(d)
+    desenhar_expressao(d, expressao, tipo_cabelo)
     if acessorio:
         desenhar_acessorio(d, acessorio)
     if cadeira:
-        r(d, 13, 17, 2, 3, COR_DE_CRACHA[cadeira])
-        r(d, 13, 16, 2, 1, CONTORNO)
+        desenhar_cracha(d, cadeira)
     return img
 
 
@@ -216,7 +234,7 @@ def folha_retrato(spec, cadeira=None):
     folha = Image.new("RGBA", (LARGURA_RETRATO * 3, ALTURA_RETRATO), TRANSPARENTE)
     for i, expressao in enumerate(("neutro", "tenso", "aprovacao")):
         corpo = montar(spec, frame=0, expressao=expressao, cadeira=cadeira)
-        cabeca = corpo.crop((7, 0, 25, 16))
+        cabeca = corpo.crop(RECORTE_RETRATO)
         cabeca = cabeca.resize((LARGURA_RETRATO, ALTURA_RETRATO), Image.NEAREST)
         folha.paste(cabeca, (i * LARGURA_RETRATO, 0))
     return folha

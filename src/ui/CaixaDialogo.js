@@ -1,5 +1,9 @@
 // Caixa de diálogo do jogo
 
+import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+
+const TOTAL_DE_EXPRESSOES = 3;
+
 export class CaixaDialogo {
 
     constructor(cena) {
@@ -19,40 +23,40 @@ export class CaixaDialogo {
         const cena = this.cena;
 
         this.painel = cena.add.graphics();
-        this.painel.fillStyle(0xfbfcfe, 1);
+        this.painel.fillStyle(COR_HEX.painel, 1);
         this.painel.fillRect(24, 56, 912, 116);
-        this.painel.lineStyle(2, 0x2b3348, 1);
+        this.painel.lineStyle(2, COR_HEX.contorno, 1);
         this.painel.strokeRect(24, 56, 912, 116);
-        this.painel.lineStyle(1, 0x9fb0cf, 1);
+        this.painel.lineStyle(1, COR_HEX.contornoSuave, 1);
         this.painel.strokeRect(29, 61, 902, 106);
 
         this.molduraRetrato = cena.add.graphics();
-        this.molduraRetrato.fillStyle(0xe7ebf4, 1);
-        this.molduraRetrato.fillRect(40, 72, 72, 84);
-        this.molduraRetrato.lineStyle(1, 0x2b3348, 1);
-        this.molduraRetrato.strokeRect(40, 72, 72, 84);
+        this.molduraRetrato.fillStyle(COR_HEX.fundo, 1);
+        this.molduraRetrato.fillRect(40, 64, 72, 100);
+        this.molduraRetrato.lineStyle(1, COR_HEX.contorno, 1);
+        this.molduraRetrato.strokeRect(40, 64, 72, 100);
 
         this.retrato = cena.add.image(76, 114, "retrato_marcia", 0);
 
         this.textoNome = cena.add.text(132, 74, "", {
-            fontFamily: "monospace",
+            fontFamily: FONTE,
             fontSize: "16px",
-            color: "#2b3348",
+            color: COR.texto,
             fontStyle: "bold"
         });
 
         this.textoCorpo = cena.add.text(132, 100, "", {
-            fontFamily: "monospace",
+            fontFamily: FONTE,
             fontSize: "15px",
-            color: "#1b2430",
+            color: COR.texto,
             lineSpacing: 6,
             wordWrap: {width: 780}
         });
 
         this.textoDica = cena.add.text(916, 150, "ENTER para continuar", {
-            fontFamily: "monospace",
+            fontFamily: FONTE,
             fontSize: "12px",
-            color: "#6d7b95"
+            color: COR.textoSecundario
         }).setOrigin(1, 0);
 
         this.elementos = [
@@ -78,24 +82,42 @@ export class CaixaDialogo {
         this.indiceFala = 0;
         this.aoFechar = aoFechar || null;
 
-        const chaveRetrato = "retrato_" + interlocutor.chave;
-        if (this.cena.textures.exists(chaveRetrato)) {
-            this.retrato.setTexture(chaveRetrato, 0);
-            this.retrato.setVisible(true);
-        } else {
-            this.retrato.setVisible(false);
-        }
-
         this.textoNome.setText(interlocutor.nome + " — " + interlocutor.papel);
         this.textoNome.setColor(interlocutor.cor);
         this.elementos.forEach(function (elemento) {
             elemento.setVisible(true);
         });
+        this.definirRetrato(interlocutor);
         this.iniciarFala();
     }
 
+    // Objetos de cenário não têm retrato próprio.
+    // Quem está olhando para eles é o jogador, então o retrato usado é o do avatar.
+    // Sem nenhum dos dois, o espaço fica vazio.
+    definirRetrato(interlocutor) {
+        const cadeira = this.cena.cadeiraAtual || "po";
+        const candidatos = [
+            "retrato_" + interlocutor.chave,
+            "retrato_jogador_" + cadeira
+        ];
+
+        const disponivel = candidatos.find(function (chave) {
+            return this.cena.textures.exists(chave);
+        }, this);
+
+        if (disponivel) {
+            this.retrato.setTexture(disponivel, 0);
+        }
+        this.retrato.setVisible(Boolean(disponivel));
+    }
+
     // Prepara a revelação gradual da fala atual
+    //
+    // O retrato troca de expressão a cada fala a fim de testar as expressões.
     iniciarFala() {
+        if (this.retrato.visible) {
+            this.retrato.setFrame(this.indiceFala % TOTAL_DE_EXPRESSOES);
+        }
         this.textoRevelado = "";
         this.acumulador = 0;
         this.textoCorpo.setText("");
