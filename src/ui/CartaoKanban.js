@@ -49,15 +49,22 @@ export class CartaoKanban {
         this.montarEtiquetas();
 
         this.container.setSize(LARGURA_CARTAO, ALTURA_CARTAO);
+
+        // Ajustar a área clicável
         this.container.setInteractive(
-            new Phaser.Geom.Rectangle(0, 0, LARGURA_CARTAO, ALTURA_CARTAO),
+            new Phaser.Geom.Rectangle(
+                this.container.displayOriginX,
+                this.container.displayOriginY,
+                LARGURA_CARTAO,
+                ALTURA_CARTAO
+            ),
             Phaser.Geom.Rectangle.Contains
         );
         this.container.setData("cartao", this);
         this.container.input.cursor = "pointer";
         cena.input.setDraggable(this.container);
 
-        this.container.on("pointerdown", function() {
+        this.container.on("pointerdown", function () {
             cena.selecionarCartao(this);
         }, this);
     }
@@ -66,7 +73,7 @@ export class CartaoKanban {
         let direita = LARGURA_CARTAO - MARGEM_INTERNA;
         const y = 6;
 
-        this.item.etiquetas.slice().reverse().forEach(function(etiqueta) {
+        this.item.etiquetas.slice().reverse().forEach(function (etiqueta) {
             const texto = this.cena.add.text(0, y + 3, etiqueta, {
                 fontFamily: FONTE,
                 fontSize: "9px",
