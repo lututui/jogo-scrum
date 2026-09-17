@@ -1,14 +1,14 @@
 // Cena do escritório
 
-import { ELENCO, MESAS, OBJETOS } from "../dados/elenco.js";
-import { CADEIRAS } from "../dados/cadeiras.js";
-import { COR, COR_HEX, FONTE } from "../dados/tema.js";
-import { CaixaDialogo } from "../ui/CaixaDialogo.js";
+import {ELENCO, MESAS, OBJETOS} from "../dados/elenco.js";
+import {CADEIRAS} from "../dados/cadeiras.js";
+import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {CaixaDialogo} from "../ui/CaixaDialogo.js";
 
 export class CenaEscritorio extends Phaser.Scene {
 
     constructor() {
-        super({ key: "CenaEscritorio" });
+        super({key: "CenaEscritorio"});
         this.alcanceInteracao = 64;
         this.velocidade = 160;
     }
@@ -44,7 +44,7 @@ export class CenaEscritorio extends Phaser.Scene {
     criarMobiliario() {
         this.mobiliario = this.physics.add.staticGroup();
 
-        MESAS.forEach(function(mesa) {
+        MESAS.forEach(function (mesa) {
             const sprite = this.mobiliario.create(mesa.x, mesa.y, "mesa");
             sprite.setDepth(mesa.y);
             sprite.body.setSize(48, 22);
@@ -55,10 +55,10 @@ export class CenaEscritorio extends Phaser.Scene {
 
     // Objetos de cenário com fala própria
     criarObjetos() {
-        OBJETOS.forEach(function(objeto) {
+        OBJETOS.forEach(function (objeto) {
             const sprite = this.add.image(objeto.x, objeto.y, objeto.chave);
             sprite.setDepth(2);
-            this.interativos.push({ dados: objeto, sprite: sprite, alturaRotulo: 26 });
+            this.interativos.push({dados: objeto, sprite: sprite, alturaRotulo: 26});
         }, this);
     }
 
@@ -66,19 +66,19 @@ export class CenaEscritorio extends Phaser.Scene {
         this.npcs = this.physics.add.staticGroup();
         this.marcarAreaDeTeste();
 
-        ELENCO.forEach(function(npc) {
+        ELENCO.forEach(function (npc) {
             const sprite = this.npcs.create(npc.x, npc.y, "corpo_" + npc.chave, 0);
             sprite.setDepth(npc.y);
             sprite.body.setSize(18, 12);
             sprite.body.setOffset(7, 19);
             sprite.refreshBody();
-            this.interativos.push({ dados: npc, sprite: sprite, alturaRotulo: 24 });
+            this.interativos.push({dados: npc, sprite: sprite, alturaRotulo: 24});
         }, this);
     }
 
     // Faixa da direita onde ficam os personagens da escola
     marcarAreaDeTeste() {
-        const visitantes = ELENCO.filter(function(npc) {
+        const visitantes = ELENCO.filter(function (npc) {
             return npc.teste;
         });
 
@@ -117,13 +117,13 @@ export class CenaEscritorio extends Phaser.Scene {
         barra.lineBetween(0, 40, 960, 40);
         barra.setScrollFactor(0).setDepth(9000);
 
-        const estilo = { fontFamily: FONTE, fontSize: "14px", color: COR.texto };
+        const estilo = {fontFamily: FONTE, fontSize: "14px", color: COR.texto};
 
         this.textoSprint = this.add.text(20, 13, "SPRINT 1 DE 6", estilo);
         this.textoDia = this.add.text(480, 13, "DIA 1 DE 10", estilo).setOrigin(0.5, 0);
         this.textoCadeira = this.add.text(940, 13, "", estilo).setOrigin(1, 0);
 
-        [this.textoSprint, this.textoDia, this.textoCadeira].forEach(function(texto) {
+        [this.textoSprint, this.textoDia, this.textoCadeira].forEach(function (texto) {
             texto.setScrollFactor(0).setDepth(9001);
         });
 
@@ -138,7 +138,7 @@ export class CenaEscritorio extends Phaser.Scene {
             fontSize: "12px",
             color: COR.textoInvertido,
             backgroundColor: COR.contorno,
-            padding: { x: 6, y: 3 }
+            padding: {x: 6, y: 3}
         }).setOrigin(0.5, 1).setDepth(8000).setVisible(false);
 
         this.atualizarCadeira("po");
@@ -157,16 +157,22 @@ export class CenaEscritorio extends Phaser.Scene {
         });
 
         this.bloqueioAcaoAte = 0;
-        this.events.on("resume", function() {
+        this.events.on("resume", function () {
             this.bloqueioAcaoAte = this.time.now + 250;
         }, this);
 
         this.teclaAcao = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.teclaEspaco = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-        this.input.keyboard.on("keydown-ONE", function() { this.atualizarCadeira("po"); }, this);
-        this.input.keyboard.on("keydown-TWO", function() { this.atualizarCadeira("sm"); }, this);
-        this.input.keyboard.on("keydown-THREE", function() { this.atualizarCadeira("dev"); }, this);
+        this.input.keyboard.on("keydown-ONE", function () {
+            this.atualizarCadeira("po");
+        }, this);
+        this.input.keyboard.on("keydown-TWO", function () {
+            this.atualizarCadeira("sm");
+        }, this);
+        this.input.keyboard.on("keydown-THREE", function () {
+            this.atualizarCadeira("dev");
+        }, this);
     }
 
     // Troca o crachá do avatar; placeholder da seleção de papel do RF01
@@ -195,7 +201,7 @@ export class CenaEscritorio extends Phaser.Scene {
         this.atualizarRotulo(alvo);
 
         if (alvo && this.acaoPressionada()) {
-            this.iniciarDialogo(alvo);
+            this.interagir(alvo);
         }
     }
 
@@ -241,7 +247,7 @@ export class CenaEscritorio extends Phaser.Scene {
         let escolhido = null;
         let menorDistancia = this.alcanceInteracao;
 
-        this.interativos.forEach(function(item) {
+        this.interativos.forEach(function (item) {
             const distancia = Phaser.Math.Distance.Between(
                 this.jogador.x, this.jogador.y + 8,
                 item.sprite.x, item.sprite.y + 8
@@ -264,13 +270,31 @@ export class CenaEscritorio extends Phaser.Scene {
         this.rotulo.setVisible(true);
     }
 
+    // O alvo abre outra cena ou conversa, conforme o que estiver declarado
+    interagir(alvo) {
+        if (alvo.dados.cena) {
+            this.abrirCena(alvo.dados.cena);
+            return;
+        }
+        this.iniciarDialogo(alvo);
+    }
+
+    abrirCena(chaveDaCena) {
+        this.rotulo.setVisible(false);
+        this.jogador.setVelocity(0, 0);
+        this.jogador.anims.play("jogador_" + this.cadeiraAtual + "_parado", true);
+
+        this.scene.pause();
+        this.scene.launch(chaveDaCena);
+    }
+
     iniciarDialogo(alvo) {
         this.emDialogo = true;
         this.rotulo.setVisible(false);
         this.jogador.setVelocity(0, 0);
 
         const cena = this;
-        this.caixa.abrir(alvo.dados, function() {
+        this.caixa.abrir(alvo.dados, function () {
             cena.emDialogo = false;
         });
     }

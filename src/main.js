@@ -3,6 +3,7 @@
 import {COR} from "./dados/tema.js";
 import {CenaCarregamento} from "./cenas/CenaCarregamento.js";
 import {CenaEscritorio} from "./cenas/CenaEscritorio.js";
+import {CenaKanban} from "./cenas/CenaKanban.js";
 
 const LARGURA = 960;
 const ALTURA = 540;
@@ -22,7 +23,7 @@ const configuracao = {
         default: "arcade",
         arcade: {debug: false}
     },
-    scene: [CenaCarregamento, CenaEscritorio]
+    scene: [CenaCarregamento, CenaEscritorio, CenaKanban]
 };
 
 new Phaser.Game(configuracao);

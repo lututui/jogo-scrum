@@ -141,9 +141,6 @@ export const OBJETOS = [
         cor: "#5f7ba8",
         x: 480,
         y: 84,
-        falas: [
-            "Um quadro branco com três cartões colados, ainda sem colunas.",
-            "O quadro Kanban interativo entra no incremento 2."
-        ]
+        cena: "CenaKanban"
     }
 ];

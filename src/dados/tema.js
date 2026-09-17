@@ -13,6 +13,7 @@ export const COR = {
     textoSecundario: "#6d7b95",
     textoInvertido: "#fbfcfe",
     alerta: "#c0392b",
+    alertaSuave: "#faeceb",
     destaque: "#1f6f8b"
 };
 
@@ -24,6 +25,7 @@ export const COR_HEX = {
     contornoSuave: 0x9fb0cf,
     rodape: 0x9fb0cf,
     alerta: 0xc0392b,
+    alertaSuave: 0xfaeceb,
     destaque: 0x1f6f8b,
     sombra: 0xd7dfec
 };
