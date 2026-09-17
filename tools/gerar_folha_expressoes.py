@@ -116,9 +116,7 @@ def main():
     )
     parser.add_argument("--escala", type=int, default=6, help="ampliação de cada retrato")
     parser.add_argument("--saida", default="expressoes.png", help="nome do arquivo em figuras/")
-    parser.add_argument(
-        "--titulo", default="Expressões do retrato", help="título; vazio para omitir"
-    )
+    parser.add_argument("--titulo", default="", help="título; vazio para omitir")
     argumentos = parser.parse_args()
 
     desconhecidos = [c for c in argumentos.personagens if c not in sprites.ELENCO]

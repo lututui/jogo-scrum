@@ -97,7 +97,7 @@ def main():
     parser.add_argument("--escala", type=int, default=6, help="ampliação de cada sprite")
     parser.add_argument("--colunas", type=int, default=3, help="personagens por linha")
     parser.add_argument("--saida", default="elenco.png", help="nome do arquivo em figuras/")
-    parser.add_argument("--titulo", default="Elenco do protótipo", help="título; vazio para omitir")
+    parser.add_argument("--titulo", default="", help="título; vazio para omitir")
     argumentos = parser.parse_args()
 
     cartoes = montar_cartoes(argumentos.escala)
