@@ -34,13 +34,13 @@ export class CenaKanban extends Phaser.Scene {
         this.itens = this.carregarItens();
         this.cartoes = [];
         this.selecao = {coluna: 0, indice: 0};
-        this.segurando = false;
         this.arrastando = null;
 
         this.criarFundo();
         this.criarCabecalho();
         this.criarColunas();
         this.criarAviso();
+        this.criarDicaDeMover();
         this.criarControles();
         this.desenharCartoes();
     }
@@ -52,7 +52,7 @@ export class CenaKanban extends Phaser.Scene {
             return salvos;
         }
 
-        const copia = ITENS_INICIAIS.map(function (item) {
+        const copia = ITENS_INICIAIS.map(function(item) {
             return Object.assign({}, item);
         });
         this.registry.set(CHAVE_DO_ESTADO, copia);
@@ -78,14 +78,15 @@ export class CenaKanban extends Phaser.Scene {
         this.add.text(
             MARGEM,
             516,
-            "setas escolhem, ENTER pega e solta, ou arraste com o mouse",
+            "setas escolhem o cartão, SHIFT com as setas move o cartão, "
+            + "ou arraste com o mouse",
             {fontFamily: FONTE, fontSize: "12px", color: COR.textoSecundario}
         );
     }
 
     // Cada coluna guarda seus elementos para o contador e o alerta de limite
     criarColunas() {
-        this.colunas = COLUNAS.map(function (coluna, indice) {
+        this.colunas = COLUNAS.map(function(coluna, indice) {
             const x = MARGEM + indice * (LARGURA_DA_COLUNA + ESPACO_ENTRE_COLUNAS);
 
             const fundo = this.add.rectangle(
@@ -123,6 +124,16 @@ export class CenaKanban extends Phaser.Scene {
         }, this);
     }
 
+    criarDicaDeMover() {
+        this.dica = this.add.text(0, 0, "SHIFT + setas move", {
+            fontFamily: FONTE,
+            fontSize: "10px",
+            color: COR.textoInvertido,
+            backgroundColor: COR.destaque,
+            padding: {x: 5, y: 2}
+        }).setOrigin(0.5, 0).setDepth(600).setVisible(false);
+    }
+
     criarAviso() {
         this.aviso = this.add.text(480, 504, "", {
             fontFamily: FONTE,
@@ -137,8 +148,7 @@ export class CenaKanban extends Phaser.Scene {
             baixo: Phaser.Input.Keyboard.KeyCodes.DOWN,
             esquerda: Phaser.Input.Keyboard.KeyCodes.LEFT,
             direita: Phaser.Input.Keyboard.KeyCodes.RIGHT,
-            acao: Phaser.Input.Keyboard.KeyCodes.ENTER,
-            espaco: Phaser.Input.Keyboard.KeyCodes.SPACE,
+            mover: Phaser.Input.Keyboard.KeyCodes.SHIFT,
             sair: Phaser.Input.Keyboard.KeyCodes.ESC
         });
 
@@ -151,24 +161,24 @@ export class CenaKanban extends Phaser.Scene {
     // desenho
 
     itensDaColuna(idColuna) {
-        return this.itens.filter(function (item) {
+        return this.itens.filter(function(item) {
             return item.coluna === idColuna;
         });
     }
 
     desenharCartoes() {
-        this.cartoes.forEach(function (cartao) {
+        this.cartoes.forEach(function(cartao) {
             cartao.destruir();
         });
         this.cartoes = [];
 
         const capacidade = capacidadeDaColuna();
 
-        this.colunas.forEach(function (coluna) {
+        this.colunas.forEach(function(coluna) {
             const itens = this.itensDaColuna(coluna.dados.id);
             let y = TOPO_DA_COLUNA + ALTURA_DO_CABECALHO + ESPACO_ENTRE_CARTOES;
 
-            itens.slice(0, capacidade).forEach(function (item) {
+            itens.slice(0, capacidade).forEach(function(item) {
                 const cartao = new CartaoKanban(this, item);
                 cartao.posicionar(coluna.x + (LARGURA_DA_COLUNA - LARGURA_CARTAO) / 2, y);
                 this.cartoes.push(cartao);
@@ -205,7 +215,7 @@ export class CenaKanban extends Phaser.Scene {
     atualizarColunas() {
         let algumaAcimaDoLimite = false;
 
-        this.colunas.forEach(function (coluna) {
+        this.colunas.forEach(function(coluna) {
             const total = this.itensDaColuna(coluna.dados.id).length;
             const limite = coluna.dados.limite;
 
@@ -227,10 +237,35 @@ export class CenaKanban extends Phaser.Scene {
     atualizarEstadoDosCartoes() {
         const selecionado = this.cartaoSelecionado();
 
-        this.cartoes.forEach(function (cartao) {
-            const eSelecionado = cartao === selecionado;
-            cartao.definirEstado(eSelecionado, eSelecionado && this.segurando);
+        this.cartoes.forEach(function(cartao) {
+            cartao.definirEstado(cartao === selecionado, cartao === this.arrastando);
         }, this);
+
+        this.posicionarDica(selecionado);
+    }
+
+    posicionarDica(cartao) {
+        if (!cartao || this.arrastando) {
+            this.dica.setVisible(false);
+            return;
+        }
+
+        this.dica.setPosition(
+            cartao.container.x + LARGURA_CARTAO / 2,
+            cartao.container.y + ALTURA_CARTAO + 3
+        );
+        this.dica.setVisible(true);
+    }
+
+    selecionarCartao(cartao) {
+        const indice = this.itensDaColuna(cartao.item.coluna).indexOf(cartao.item);
+        if (indice < 0) {
+            return;
+        }
+
+        this.selecao.coluna = this.indiceDaColuna(cartao.item.coluna);
+        this.selecao.indice = indice;
+        this.atualizarEstadoDosCartoes();
     }
 
     cartaoSelecionado() {
@@ -239,7 +274,7 @@ export class CenaKanban extends Phaser.Scene {
             return null;
         }
 
-        return this.cartoes.find(function (cartao) {
+        return this.cartoes.find(function(cartao) {
             return cartao.item.id === item.id;
         });
     }
@@ -264,7 +299,7 @@ export class CenaKanban extends Phaser.Scene {
 
     mostrarAviso(texto) {
         this.aviso.setText(texto);
-        this.time.delayedCall(2600, function () {
+        this.time.delayedCall(2600, function() {
             if (this.aviso.text === texto) {
                 this.aviso.setText("");
             }
@@ -275,7 +310,7 @@ export class CenaKanban extends Phaser.Scene {
     // regras
 
     podeReceber(idColuna) {
-        const coluna = COLUNAS.find(function (c) {
+        const coluna = COLUNAS.find(function(c) {
             return c.id === idColuna;
         });
 
@@ -292,7 +327,7 @@ export class CenaKanban extends Phaser.Scene {
         }
 
         if (!this.podeReceber(idColuna)) {
-            const coluna = COLUNAS.find(function (c) {
+            const coluna = COLUNAS.find(function(c) {
                 return c.id === idColuna;
             });
             this.mostrarAviso(
@@ -308,7 +343,7 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     reordenar(item, posicao) {
-        const daColuna = this.itensDaColuna(item.coluna).filter(function (outro) {
+        const daColuna = this.itensDaColuna(item.coluna).filter(function(outro) {
             return outro.id !== item.id;
         });
 
@@ -317,7 +352,7 @@ export class CenaKanban extends Phaser.Scene {
         );
         daColuna.splice(destino, 0, item);
 
-        const outros = this.itens.filter(function (outro) {
+        const outros = this.itens.filter(function(outro) {
             return outro.coluna !== item.coluna;
         });
         this.itens = outros.concat(daColuna);
@@ -333,46 +368,30 @@ export class CenaKanban extends Phaser.Scene {
 
     update() {
         if (Phaser.Input.Keyboard.JustDown(this.teclas.sair)) {
-            this.aoPressionarEsc();
+            this.voltarAoEscritorio();
             return;
         }
 
-        if (this.acaoPressionada()) {
-            this.alternarSegurar();
-            return;
-        }
+        const levandoCartao = this.teclas.mover.isDown;
 
         if (Phaser.Input.Keyboard.JustDown(this.teclas.esquerda)) {
-            this.navegarLateral(-1);
+            this.navegarLateral(-1, levandoCartao);
         } else if (Phaser.Input.Keyboard.JustDown(this.teclas.direita)) {
-            this.navegarLateral(1);
+            this.navegarLateral(1, levandoCartao);
         } else if (Phaser.Input.Keyboard.JustDown(this.teclas.cima)) {
-            this.navegarVertical(-1);
+            this.navegarVertical(-1, levandoCartao);
         } else if (Phaser.Input.Keyboard.JustDown(this.teclas.baixo)) {
-            this.navegarVertical(1);
+            this.navegarVertical(1, levandoCartao);
         }
     }
 
-    acaoPressionada() {
-        return Phaser.Input.Keyboard.JustDown(this.teclas.acao)
-            || Phaser.Input.Keyboard.JustDown(this.teclas.espaco);
-    }
-
-    alternarSegurar() {
-        if (!this.itemSelecionado()) {
-            return;
-        }
-        this.segurando = !this.segurando;
-        this.atualizarEstadoDosCartoes();
-    }
-
-    navegarLateral(passo) {
+    navegarLateral(passo, levandoCartao) {
         const destino = Phaser.Math.Clamp(this.selecao.coluna + passo, 0, this.colunas.length - 1);
         if (destino === this.selecao.coluna) {
             return;
         }
 
-        if (!this.segurando) {
+        if (!levandoCartao) {
             this.selecao.coluna = destino;
             this.ajustarSelecao();
             this.atualizarEstadoDosCartoes();
@@ -390,13 +409,13 @@ export class CenaKanban extends Phaser.Scene {
         this.desenharCartoes();
     }
 
-    navegarVertical(passo) {
+    navegarVertical(passo, levandoCartao) {
         const item = this.itemSelecionado();
         if (!item) {
             return;
         }
 
-        if (!this.segurando) {
+        if (!levandoCartao) {
             const total = Math.min(this.itensDaColuna(item.coluna).length, capacidadeDaColuna());
             this.selecao.indice = Phaser.Math.Clamp(this.selecao.indice + passo, 0, total - 1);
             this.atualizarEstadoDosCartoes();
@@ -406,15 +425,6 @@ export class CenaKanban extends Phaser.Scene {
         this.reordenar(item, this.selecao.indice + passo);
         this.selecao.indice = this.itensDaColuna(item.coluna).indexOf(item);
         this.desenharCartoes();
-    }
-
-    aoPressionarEsc() {
-        if (this.segurando) {
-            this.segurando = false;
-            this.atualizarEstadoDosCartoes();
-            return;
-        }
-        this.voltarAoEscritorio();
     }
 
     voltarAoEscritorio() {
@@ -428,22 +438,49 @@ export class CenaKanban extends Phaser.Scene {
     aoComecarArrasto(ponteiro, container) {
         const cartao = container.getData("cartao");
         this.arrastando = cartao;
-        this.segurando = false;
 
         this.selecao.coluna = this.indiceDaColuna(cartao.item.coluna);
         this.selecao.indice = this.itensDaColuna(cartao.item.coluna).indexOf(cartao.item);
 
+        this.dica.setVisible(false);
         cartao.definirEstado(true, true);
     }
 
     aoArrastar(ponteiro, container, x, y) {
         container.setPosition(x, y);
+        this.realcarColunaAlvo(ponteiro.x);
+    }
+
+    // Mostra desde o arrasto se a coluna aceita o cartão em vez de só
+    // recusar depois que o jogador solta
+    realcarColunaAlvo(x) {
+        const alvo = this.colunaSobOPonteiro(x);
+        const item = this.arrastando ? this.arrastando.item : null;
+
+        this.colunas.forEach(function(coluna) {
+            const eAlvo = coluna === alvo;
+            const mesmaColuna = item && item.coluna === coluna.dados.id;
+            const aceita = mesmaColuna || this.podeReceber(coluna.dados.id);
+
+            if (!eAlvo) {
+                coluna.fundo.setStrokeStyle(1, COR_HEX.contornoSuave);
+                return;
+            }
+            coluna.fundo.setStrokeStyle(2, aceita ? COR_HEX.destaque : COR_HEX.alerta);
+        }, this);
+    }
+
+    limparRealce() {
+        this.colunas.forEach(function(coluna) {
+            coluna.fundo.setStrokeStyle(1, COR_HEX.contornoSuave);
+        }, this);
     }
 
     aoSoltarArrasto(ponteiro, container) {
         const cartao = container.getData("cartao");
         const coluna = this.colunaSobOPonteiro(ponteiro.x);
         this.arrastando = null;
+        this.limparRealce();
 
         if (!coluna) {
             cartao.voltarAoLugar();
@@ -464,13 +501,13 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     indiceDaColuna(idColuna) {
-        return this.colunas.findIndex(function (coluna) {
+        return this.colunas.findIndex(function(coluna) {
             return coluna.dados.id === idColuna;
         });
     }
 
     colunaSobOPonteiro(x) {
-        return this.colunas.find(function (coluna) {
+        return this.colunas.find(function(coluna) {
             return x >= coluna.x && x <= coluna.x + LARGURA_DA_COLUNA;
         }) || null;
     }
@@ -479,7 +516,7 @@ export class CenaKanban extends Phaser.Scene {
     posicaoPelaAltura(idColuna, y, item) {
         const topo = TOPO_DA_COLUNA + ALTURA_DO_CABECALHO + ESPACO_ENTRE_CARTOES;
         const passo = ALTURA_CARTAO + ESPACO_ENTRE_CARTOES;
-        const total = this.itensDaColuna(idColuna).filter(function (outro) {
+        const total = this.itensDaColuna(idColuna).filter(function(outro) {
             return outro.id !== item.id;
         }).length;
 

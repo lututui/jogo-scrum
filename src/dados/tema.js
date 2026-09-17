@@ -27,6 +27,7 @@ export const COR_HEX = {
     alerta: 0xc0392b,
     alertaSuave: 0xfaeceb,
     destaque: 0x1f6f8b,
+    selecao: 0xe8f1f5,
     sombra: 0xd7dfec
 };
 

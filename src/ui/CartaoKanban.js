@@ -54,14 +54,19 @@ export class CartaoKanban {
             Phaser.Geom.Rectangle.Contains
         );
         this.container.setData("cartao", this);
+        this.container.input.cursor = "pointer";
         cena.input.setDraggable(this.container);
+
+        this.container.on("pointerdown", function() {
+            cena.selecionarCartao(this);
+        }, this);
     }
 
     montarEtiquetas() {
         let direita = LARGURA_CARTAO - MARGEM_INTERNA;
         const y = 6;
 
-        this.item.etiquetas.slice().reverse().forEach(function (etiqueta) {
+        this.item.etiquetas.slice().reverse().forEach(function(etiqueta) {
             const texto = this.cena.add.text(0, y + 3, etiqueta, {
                 fontFamily: FONTE,
                 fontSize: "9px",
@@ -93,19 +98,23 @@ export class CartaoKanban {
     }
 
     // Selecionado é o cartão sob o cursor do teclado
-    // Segurado é o que está sendo movido
-    definirEstado(selecionado, segurado) {
-        if (segurado) {
-            this.fundo.setStrokeStyle(2, COR_HEX.alerta);
+    // Arrastado é o que está preso ao ponteiro.
+    definirEstado(selecionado, arrastado) {
+        if (arrastado) {
+            this.fundo.setStrokeStyle(3, COR_HEX.destaque);
+            this.fundo.setFillStyle(COR_HEX.painel);
             this.container.setDepth(500);
             return;
         }
 
         this.container.setDepth(10);
+
         if (selecionado) {
-            this.fundo.setStrokeStyle(2, COR_HEX.destaque);
+            this.fundo.setStrokeStyle(3, COR_HEX.destaque);
+            this.fundo.setFillStyle(COR_HEX.selecao);
         } else {
             this.fundo.setStrokeStyle(1, COR_HEX.contornoSuave);
+            this.fundo.setFillStyle(COR_HEX.painel);
         }
     }
 
