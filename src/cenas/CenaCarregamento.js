@@ -39,6 +39,7 @@ export class CenaCarregamento extends Phaser.Scene {
         this.load.image("parede", "assets/parede.png");
         this.load.image("mesa", "assets/mesa.png");
         this.load.image("quadro_parede", "assets/quadro_parede.png");
+        this.load.image("agenda_parede", "assets/agenda_parede.png");
 
         this.personagens = personagens;
     }

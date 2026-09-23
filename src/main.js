@@ -4,6 +4,11 @@ import {COR} from "./dados/tema.js";
 import {CenaCarregamento} from "./cenas/CenaCarregamento.js";
 import {CenaEscritorio} from "./cenas/CenaEscritorio.js";
 import {CenaKanban} from "./cenas/CenaKanban.js";
+import {CenaAgenda} from "./cenas/CenaAgenda.js";
+import {CenaSprintPlanning} from "./cenas/CenaSprintPlanning.js";
+import {CenaDailyScrum} from "./cenas/CenaDailyScrum.js";
+import {CenaSprintReview} from "./cenas/CenaSprintReview.js";
+import {CenaSprintRetrospective} from "./cenas/CenaSprintRetrospective.js";
 
 const LARGURA = 960;
 const ALTURA = 540;
@@ -23,7 +28,16 @@ const configuracao = {
         default: "arcade",
         arcade: {debug: false}
     },
-    scene: [CenaCarregamento, CenaEscritorio, CenaKanban]
+    scene: [
+        CenaCarregamento,
+        CenaEscritorio,
+        CenaKanban,
+        CenaAgenda,
+        CenaSprintPlanning,
+        CenaDailyScrum,
+        CenaSprintReview,
+        CenaSprintRetrospective
+    ]
 };
 
 new Phaser.Game(configuracao);

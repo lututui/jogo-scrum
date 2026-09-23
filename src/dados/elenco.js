@@ -142,5 +142,14 @@ export const OBJETOS = [
         x: 480,
         y: 84,
         cena: "CenaKanban"
+    },
+    {
+        chave: "agenda_parede",
+        nome: "Agenda da sprint",
+        papel: "Cenário",
+        cor: "#5f7ba8",
+        x: 620,
+        y: 82,
+        cena: "CenaAgenda"
     }
 ];

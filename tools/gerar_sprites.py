@@ -374,6 +374,22 @@ def sprite_quadro():
     return img
 
 
+def sprite_agenda():
+    # calendário da parede: abre a agenda da sprint, com os eventos do Scrum
+    img = Image.new("RGBA", (32, 36), TRANSPARENTE)
+    d = ImageDraw.Draw(img)
+    r(d, 0, 0, 32, 36, COR_DA_MOLDURA_DO_QUADRO)
+    r(d, 2, 2, 28, 32, COR_DO_FUNDO_DO_QUADRO)
+    r(d, 2, 2, 28, 7, COR_DA_MOLDURA_DO_QUADRO)
+    for linha in range(3):
+        for coluna in range(4):
+            cor = CORES_DOS_CARTOES[(linha + coluna) % len(CORES_DOS_CARTOES)]
+            marcado = (linha * 4 + coluna) % 5 == 0
+            r(d, 5 + coluna * 6, 12 + linha * 7, 4, 4,
+              cor if marcado else COR_DO_FRISO_DA_PAREDE)
+    return img
+
+
 # ------------------------------------------------------------------
 # saída
 
@@ -393,6 +409,7 @@ def main():
     imagens["parede"] = tile_parede()
     imagens["mesa"] = sprite_mesa()
     imagens["quadro_parede"] = sprite_quadro()
+    imagens["agenda_parede"] = sprite_agenda()
 
     for nome, img in sorted(imagens.items()):
         img.save(os.path.join(DIR_ASSETS, nome + ".png"))

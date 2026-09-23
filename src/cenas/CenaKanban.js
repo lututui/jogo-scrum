@@ -2,11 +2,10 @@
 //
 // O quadro é aberto pelo quadro da parede do escritório.
 
-import {COLUNAS, ITENS_INICIAIS} from "../dados/quadro.js";
+import {COLUNAS} from "../dados/quadro.js";
+import {lerItensDoQuadro, salvarItensDoQuadro} from "../dados/estadoDoQuadro.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ALTURA_CARTAO, CartaoKanban, LARGURA_CARTAO} from "../ui/CartaoKanban.js";
-
-const CHAVE_DO_ESTADO = "itensDoQuadro";
 
 const MARGEM = 20;
 const LARGURA_DA_COLUNA = 218;
@@ -47,16 +46,7 @@ export class CenaKanban extends Phaser.Scene {
 
     // O estado vem do registry quando o jogador já esteve no quadro antes
     carregarItens() {
-        const salvos = this.registry.get(CHAVE_DO_ESTADO);
-        if (salvos) {
-            return salvos;
-        }
-
-        const copia = ITENS_INICIAIS.map(function(item) {
-            return Object.assign({}, item);
-        });
-        this.registry.set(CHAVE_DO_ESTADO, copia);
-        return copia;
+        return lerItensDoQuadro(this.registry);
     }
 
     criarFundo() {
@@ -86,7 +76,7 @@ export class CenaKanban extends Phaser.Scene {
 
     // Cada coluna guarda seus elementos para o contador e o alerta de limite
     criarColunas() {
-        this.colunas = COLUNAS.map(function(coluna, indice) {
+        this.colunas = COLUNAS.map(function (coluna, indice) {
             const x = MARGEM + indice * (LARGURA_DA_COLUNA + ESPACO_ENTRE_COLUNAS);
 
             const fundo = this.add.rectangle(
@@ -161,24 +151,24 @@ export class CenaKanban extends Phaser.Scene {
     // desenho
 
     itensDaColuna(idColuna) {
-        return this.itens.filter(function(item) {
+        return this.itens.filter(function (item) {
             return item.coluna === idColuna;
         });
     }
 
     desenharCartoes() {
-        this.cartoes.forEach(function(cartao) {
+        this.cartoes.forEach(function (cartao) {
             cartao.destruir();
         });
         this.cartoes = [];
 
         const capacidade = capacidadeDaColuna();
 
-        this.colunas.forEach(function(coluna) {
+        this.colunas.forEach(function (coluna) {
             const itens = this.itensDaColuna(coluna.dados.id);
             let y = TOPO_DA_COLUNA + ALTURA_DO_CABECALHO + ESPACO_ENTRE_CARTOES;
 
-            itens.slice(0, capacidade).forEach(function(item) {
+            itens.slice(0, capacidade).forEach(function (item) {
                 const cartao = new CartaoKanban(this, item);
                 cartao.posicionar(coluna.x + (LARGURA_DA_COLUNA - LARGURA_CARTAO) / 2, y);
                 this.cartoes.push(cartao);
@@ -215,7 +205,7 @@ export class CenaKanban extends Phaser.Scene {
     atualizarColunas() {
         let algumaAcimaDoLimite = false;
 
-        this.colunas.forEach(function(coluna) {
+        this.colunas.forEach(function (coluna) {
             const total = this.itensDaColuna(coluna.dados.id).length;
             const limite = coluna.dados.limite;
 
@@ -237,7 +227,7 @@ export class CenaKanban extends Phaser.Scene {
     atualizarEstadoDosCartoes() {
         const selecionado = this.cartaoSelecionado();
 
-        this.cartoes.forEach(function(cartao) {
+        this.cartoes.forEach(function (cartao) {
             cartao.definirEstado(cartao === selecionado, cartao === this.arrastando);
         }, this);
 
@@ -274,7 +264,7 @@ export class CenaKanban extends Phaser.Scene {
             return null;
         }
 
-        return this.cartoes.find(function(cartao) {
+        return this.cartoes.find(function (cartao) {
             return cartao.item.id === item.id;
         });
     }
@@ -299,7 +289,7 @@ export class CenaKanban extends Phaser.Scene {
 
     mostrarAviso(texto) {
         this.aviso.setText(texto);
-        this.time.delayedCall(2600, function() {
+        this.time.delayedCall(2600, function () {
             if (this.aviso.text === texto) {
                 this.aviso.setText("");
             }
@@ -310,7 +300,7 @@ export class CenaKanban extends Phaser.Scene {
     // regras
 
     podeReceber(idColuna) {
-        const coluna = COLUNAS.find(function(c) {
+        const coluna = COLUNAS.find(function (c) {
             return c.id === idColuna;
         });
 
@@ -327,7 +317,7 @@ export class CenaKanban extends Phaser.Scene {
         }
 
         if (!this.podeReceber(idColuna)) {
-            const coluna = COLUNAS.find(function(c) {
+            const coluna = COLUNAS.find(function (c) {
                 return c.id === idColuna;
             });
             this.mostrarAviso(
@@ -343,7 +333,7 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     reordenar(item, posicao) {
-        const daColuna = this.itensDaColuna(item.coluna).filter(function(outro) {
+        const daColuna = this.itensDaColuna(item.coluna).filter(function (outro) {
             return outro.id !== item.id;
         });
 
@@ -352,7 +342,7 @@ export class CenaKanban extends Phaser.Scene {
         );
         daColuna.splice(destino, 0, item);
 
-        const outros = this.itens.filter(function(outro) {
+        const outros = this.itens.filter(function (outro) {
             return outro.coluna !== item.coluna;
         });
         this.itens = outros.concat(daColuna);
@@ -360,7 +350,7 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     salvar() {
-        this.registry.set(CHAVE_DO_ESTADO, this.itens);
+        salvarItensDoQuadro(this.registry, this.itens);
     }
 
     // ------------------------------------------------------------
@@ -457,7 +447,7 @@ export class CenaKanban extends Phaser.Scene {
         const alvo = this.colunaSobOPonteiro(x);
         const item = this.arrastando ? this.arrastando.item : null;
 
-        this.colunas.forEach(function(coluna) {
+        this.colunas.forEach(function (coluna) {
             const eAlvo = coluna === alvo;
             const mesmaColuna = item && item.coluna === coluna.dados.id;
             const aceita = mesmaColuna || this.podeReceber(coluna.dados.id);
@@ -471,7 +461,7 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     limparRealce() {
-        this.colunas.forEach(function(coluna) {
+        this.colunas.forEach(function (coluna) {
             coluna.fundo.setStrokeStyle(1, COR_HEX.contornoSuave);
         }, this);
     }
@@ -501,13 +491,13 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     indiceDaColuna(idColuna) {
-        return this.colunas.findIndex(function(coluna) {
+        return this.colunas.findIndex(function (coluna) {
             return coluna.dados.id === idColuna;
         });
     }
 
     colunaSobOPonteiro(x) {
-        return this.colunas.find(function(coluna) {
+        return this.colunas.find(function (coluna) {
             return x >= coluna.x && x <= coluna.x + LARGURA_DA_COLUNA;
         }) || null;
     }
@@ -516,7 +506,7 @@ export class CenaKanban extends Phaser.Scene {
     posicaoPelaAltura(idColuna, y, item) {
         const topo = TOPO_DA_COLUNA + ALTURA_DO_CABECALHO + ESPACO_ENTRE_CARTOES;
         const passo = ALTURA_CARTAO + ESPACO_ENTRE_CARTOES;
-        const total = this.itensDaColuna(idColuna).filter(function(outro) {
+        const total = this.itensDaColuna(idColuna).filter(function (outro) {
             return outro.id !== item.id;
         }).length;
 
