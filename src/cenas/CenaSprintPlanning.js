@@ -19,7 +19,9 @@ export class CenaSprintPlanning extends CenaEvento {
     }
 
     iniciar() {
-        this.escolhidos = [];
+        this.meta = null;
+        this.opcoesDoBacklog = null;
+        this.medidor = null;
         this.mostrarFala(this.evento.aberturaQuem, this.evento.abertura);
         this.etapaDaMeta();
     }

@@ -24,7 +24,8 @@ export class CenaSprintReview extends CenaEvento {
     }
 
     iniciar() {
-        this.demonstrados = [];
+        this.formato = null;
+        this.opcoesDeItens = null;
         this.mostrarFala(this.evento.aberturaQuem, this.evento.abertura);
         this.etapaDoFormato();
     }

@@ -34,10 +34,14 @@ export class CenaEvento extends Phaser.Scene {
         this.evento = evento;
     }
 
+    // O Phaser reaproveita a instância da cena entre stop e launch: os objetos
+    // de tela são destruídos, mas os campos continuam apontando para eles.
     create() {
         this.lista = null;
         this.emFeedback = false;
         this.aoFecharFeedback = null;
+        this.caixaDeFala = null;
+        this.textoDeFala = null;
 
         this.criarMoldura();
         this.criarPainelDeFeedback();

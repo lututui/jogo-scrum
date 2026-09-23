@@ -14,6 +14,9 @@ export class CenaSprintRetrospective extends CenaEvento {
     }
 
     iniciar() {
+        this.opcoesDeObservacoes = null;
+        this.opcoesDeAcoes = null;
+        this.escolheuRelevante = false;
         this.mostrarFala(this.evento.aberturaQuem, this.evento.abertura);
         this.etapaDasObservacoes();
     }
