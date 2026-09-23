@@ -58,7 +58,9 @@ export const SPRINT_PLANNING = {
     resumo: "Definir a meta e montar o Sprint Backlog",
     objetivo: "Formular uma meta que restrinja o escopo e montar o Sprint "
         + "Backlog dentro da capacidade do time.",
-    aberturaQuem: "Márcia",
+    mentor: "marcia",
+    participantes: ["marcia", "renan", "bia", "caio", "lu"],
+    aberturaQuem: "marcia",
     abertura: "A lista da diretora tem quatorze pedidos. O time cabe em oito "
         + "pontos nesta sprint. Por onde você começa?",
     perguntaDaMeta: "Qual é a meta desta sprint?",
@@ -126,13 +128,15 @@ export const DAILY_SCRUM = {
     resumo: "Quinze minutos para sincronizar o time",
     objetivo: "Conduzir a Daily em quinze minutos, mantendo o time voltado à "
         + "meta e fazendo impedimento declarado virar impedimento tratado.",
-    aberturaQuem: "Renan",
+    mentor: "renan",
+    participantes: ["renan", "bia", "caio", "lu"],
+    aberturaQuem: "renan",
     abertura: "Quinze minutos, de pé. Eu fico só olhando hoje. O relógio no "
         + "canto mostra quanto sobrou.",
     duracaoEmMinutos: 15,
     rodadas: [
         {
-            quem: "Caio",
+            quem: "caio",
             fala: "Ontem mexi no lançamento de presença. Tive um problema com o "
                 + "formato da data, que vem do banco como texto, aí eu tentei "
                 + "converter no cliente, mas o fuso...",
@@ -164,7 +168,7 @@ export const DAILY_SCRUM = {
             ]
         },
         {
-            quem: "Bia",
+            quem: "bia",
             fala: "Continuo bloqueada desde ontem. É isso.",
             opcoes: [
                 {
@@ -195,7 +199,7 @@ export const DAILY_SCRUM = {
             ]
         },
         {
-            quem: "Lu",
+            quem: "lu",
             fala: "Bom... acho que é com você que eu falo, né? Ontem eu fiz as "
                 + "telas e hoje pretendo continuar. Pode ser?",
             opcoes: [
@@ -241,7 +245,9 @@ export const SPRINT_REVIEW = {
     resumo: "Mostrar o incremento e ouvir a escola",
     objetivo: "Apresentar o incremento como inspeção, e não como venda, e sair "
         + "da reunião com feedback aproveitável.",
-    aberturaQuem: "Estela",
+    mentor: "marcia",
+    participantes: ["marcia", "estela", "helio", "bia", "renan"],
+    aberturaQuem: "estela",
     abertura: "Então, o que vocês conseguiram fazer nessas duas semanas?",
     perguntaDoFormato: "Como você conduz a Review?",
     formatos: [
@@ -306,7 +312,9 @@ export const SPRINT_RETROSPECTIVE = {
     resumo: "Transformar o que o time viu em uma ação",
     objetivo: "Transformar o que o time observou em uma ação verificável, com "
         + "responsável, em vez de encerrar a reunião no desabafo.",
-    aberturaQuem: "Renan",
+    mentor: "renan",
+    participantes: ["renan", "bia", "caio", "lu"],
+    aberturaQuem: "renan",
     abertura: "Vinte minutos. Vale mais sair daqui com uma coisa que a gente "
         + "consiga fazer do que com uma lista bonita.",
     perguntaDasObservacoes: "O que o time levanta? Escolha até duas observações.",
@@ -314,25 +322,25 @@ export const SPRINT_RETROSPECTIVE = {
     observacoes: [
         {
             id: "obs-bloqueio",
-            quem: "Bia",
+            quem: "bia",
             titulo: "Fiquei dois dias parada esperando acesso à base",
             relevante: true
         },
         {
             id: "obs-wip",
-            quem: "Caio",
+            quem: "caio",
             titulo: "Comecei quatro coisas e não terminei nenhuma",
             relevante: true
         },
         {
             id: "obs-clima",
-            quem: "Lu",
+            quem: "lu",
             titulo: "A sprint foi corrida, mas a equipe é legal",
             relevante: false
         },
         {
             id: "obs-cafe",
-            quem: "Caio",
+            quem: "caio",
             titulo: "A cafeteira do andar quebrou de novo",
             relevante: false
         }

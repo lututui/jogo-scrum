@@ -3,16 +3,14 @@
 // Mecânica: escolher a meta e montar o Sprint Backlog dentro da capacidade
 // estimada pelo time.
 //
-// O que entra no plano vai para a coluna A FAZER do quadro,
-// que é onde a sprint continua depois desta cena.
+// A meta é dita pelo jogador como resposta, e o retorno vem pela boca de
+// quem ocupa a cadeira de Product Owner.
 
 import {CAPACIDADE_DA_SPRINT, PRODUTO_BACKLOG, SPRINT_PLANNING} from "../dados/eventos.js";
 import {acrescentarItem} from "../dados/estadoDoQuadro.js";
-import {COR, FONTE} from "../dados/tema.js";
-import {CenaEvento, LARGURA_DO_CONTEUDO, MARGEM, TOPO_DO_CONTEUDO, tituloDaAvaliacao}
-    from "./CenaEvento.js";
+import {CenaReuniao} from "./CenaReuniao.js";
 
-export class CenaSprintPlanning extends CenaEvento {
+export class CenaSprintPlanning extends CenaReuniao {
 
     constructor() {
         super(SPRINT_PLANNING.chave, SPRINT_PLANNING);
@@ -21,47 +19,42 @@ export class CenaSprintPlanning extends CenaEvento {
     iniciar() {
         this.meta = null;
         this.opcoesDoBacklog = null;
-        this.medidor = null;
-        this.mostrarFala(this.evento.aberturaQuem, this.evento.abertura);
-        this.etapaDaMeta();
-    }
-
-    // ------------------------------------------------------------ etapas
-
-    etapaDaMeta() {
-        this.definirPergunta(this.evento.perguntaDaMeta);
-        this.definirAjuda("setas escolhem, ENTER confirma");
 
         const cena = this;
-        this.montarLista({
-            x: MARGEM,
-            y: TOPO_DO_CONTEUDO,
-            largura: LARGURA_DO_CONTEUDO,
+        this.falar(this.evento.aberturaQuem, this.evento.abertura, function () {
+            cena.etapaDaMeta();
+        });
+    }
+
+    // -------------------------------------------------------------
+    // meta
+
+    etapaDaMeta() {
+        const cena = this;
+        this.perguntar({
+            pergunta: this.evento.perguntaDaMeta,
             opcoes: this.evento.metas,
             aoConfirmar: function (meta) {
-                cena.confirmarMeta(meta);
+                cena.escolherMeta(meta);
             }
         });
     }
 
-    confirmarMeta(meta) {
+    escolherMeta(meta) {
         this.meta = meta;
         const cena = this;
 
-        this.mostrarFeedback(
-            tituloDaAvaliacao(meta.avaliacao),
-            meta.feedback,
-            meta.principio,
-            function () {
-                cena.etapaDoBacklog();
-            }
-        );
+        this.responder(meta.titulo, function () {
+            cena.falarComoMentor(meta.feedback, meta.principio, function () {
+                cena.abrirBacklog();
+            });
+        });
     }
 
-    etapaDoBacklog() {
-        this.definirPergunta(this.evento.instrucaoDoBacklog);
-        this.definirAjuda("setas escolhem, ENTER marca e desmarca, C fecha o planejamento");
+    // ----------------------------------------------------------
+    // backlog
 
+    abrirBacklog() {
         const cena = this;
         this.opcoesDoBacklog = PRODUTO_BACKLOG.map(function (item) {
             return {
@@ -74,36 +67,28 @@ export class CenaSprintPlanning extends CenaEvento {
             };
         });
 
-        this.montarLista({
-            x: MARGEM,
-            y: TOPO_DO_CONTEUDO,
-            largura: LARGURA_DO_CONTEUDO,
+        this.falar(this.evento.mentor, this.evento.instrucaoDoBacklog, function () {
+            cena.mostrarBacklog();
+        });
+    }
+
+    // A lista é remontada sempre que uma fala passa por cima dela
+    mostrarBacklog() {
+        const cena = this;
+        this.perguntar({
+            pergunta: this.textoDoBacklog(),
+            ajuda: "setas escolhem, ENTER marca e desmarca, C fecha o planejamento",
             multipla: true,
             opcoes: this.opcoesDoBacklog,
             aoConfirmar: function (opcao) {
                 cena.alternarItem(opcao);
             }
         });
-
-        this.criarMedidorDeEsforco();
-        this.atualizarMedidor();
     }
 
-    criarMedidorDeEsforco() {
-        if (this.medidor) {
-            return;
-        }
-        this.medidor = this.add.text(MARGEM + LARGURA_DO_CONTEUDO, TOPO_DO_CONTEUDO - 28, "", {
-            fontFamily: FONTE,
-            fontSize: "14px",
-            color: COR.texto
-        }).setOrigin(1, 0);
-    }
-
-    atualizarMedidor() {
-        const total = this.esforcoEscolhido();
-        this.medidor.setText(total + " de " + CAPACIDADE_DA_SPRINT + " pontos");
-        this.medidor.setColor(total === CAPACIDADE_DA_SPRINT ? COR.destaque : COR.texto);
+    textoDoBacklog() {
+        return "Sprint Backlog — " + this.esforcoEscolhido()
+            + " de " + CAPACIDADE_DA_SPRINT + " pontos";
     }
 
     esforcoEscolhido() {
@@ -117,22 +102,25 @@ export class CenaSprintPlanning extends CenaEvento {
         if (opcao.marcada) {
             opcao.marcada = false;
             this.lista.atualizarDestaque();
-            this.atualizarMedidor();
+            this.atualizarPergunta(this.textoDoBacklog());
             return;
         }
 
         if (this.esforcoEscolhido() + opcao.item.esforco > CAPACIDADE_DA_SPRINT) {
-            this.mostrarFeedback(
-                tituloDaAvaliacao("ruim"),
+            const cena = this;
+            this.falarComoMentor(
                 this.evento.capacidadeExcedida.feedback,
-                this.evento.capacidadeExcedida.principio
+                this.evento.capacidadeExcedida.principio,
+                function () {
+                    cena.mostrarBacklog();
+                }
             );
             return;
         }
 
         opcao.marcada = true;
         this.lista.atualizarDestaque();
-        this.atualizarMedidor();
+        this.atualizarPergunta(this.textoDoBacklog());
     }
 
     aoConcluirEtapa() {
@@ -142,7 +130,7 @@ export class CenaSprintPlanning extends CenaEvento {
         this.fecharPlanejamento();
     }
 
-    // ----------------------------------------------------------
+    // --------------------------------------------------------
     // fechamento
 
     fecharPlanejamento() {
@@ -161,14 +149,9 @@ export class CenaSprintPlanning extends CenaEvento {
         }, this);
 
         const cena = this;
-        this.mostrarFeedback(
-            tituloDaAvaliacao(resultado.avaliacao),
-            resultado.feedback,
-            resultado.principio,
-            function () {
-                cena.sair();
-            }
-        );
+        this.falarComoMentor(resultado.feedback, resultado.principio, function () {
+            cena.sair();
+        });
     }
 
     avaliarPlano(marcados) {

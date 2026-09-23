@@ -178,6 +178,7 @@ export class CenaEscritorio extends Phaser.Scene {
     // Troca o crachá do avatar; placeholder da seleção de papel do RF01
     atualizarCadeira(cadeira) {
         this.cadeiraAtual = cadeira;
+        this.registry.set("cadeira", cadeira);
         this.textoCadeira.setText("CADEIRA: " + CADEIRAS[cadeira].nome.toUpperCase());
         if (this.jogador) {
             this.jogador.setTexture("corpo_jogador_" + cadeira, 0);

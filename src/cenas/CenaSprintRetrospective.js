@@ -1,13 +1,12 @@
 // Sprint Retrospective
 //
-// Mecânica: o time levanta observações e o jogador escolhe até duas para virar
-// uma ação.
+// Mecânica: o time fala o que viu, o jogador escolhe até duas observações
+// e as transforma em uma ação. A reunião fecha com ação escolhida.
 
 import {SPRINT_RETROSPECTIVE} from "../dados/eventos.js";
-import {CenaEvento, LARGURA_DO_CONTEUDO, MARGEM, TOPO_DO_CONTEUDO, tituloDaAvaliacao}
-    from "./CenaEvento.js";
+import {CenaReuniao} from "./CenaReuniao.js";
 
-export class CenaSprintRetrospective extends CenaEvento {
+export class CenaSprintRetrospective extends CenaReuniao {
 
     constructor() {
         super(SPRINT_RETROSPECTIVE.chave, SPRINT_RETROSPECTIVE);
@@ -17,15 +16,26 @@ export class CenaSprintRetrospective extends CenaEvento {
         this.opcoesDeObservacoes = null;
         this.opcoesDeAcoes = null;
         this.escolheuRelevante = false;
-        this.mostrarFala(this.evento.aberturaQuem, this.evento.abertura);
-        this.etapaDasObservacoes();
-    }
-
-    etapaDasObservacoes() {
-        this.definirPergunta(this.evento.perguntaDasObservacoes);
-        this.definirAjuda("setas escolhem, ENTER marca e desmarca, C segue para a ação");
 
         const cena = this;
+        this.falar(this.evento.aberturaQuem, this.evento.abertura, function () {
+            cena.ouvirOTime();
+        });
+    }
+
+    // Cada observação é dita por quem a levantou, antes de virar opção
+    ouvirOTime() {
+        const cena = this;
+        const falas = this.evento.observacoes.map(function (observacao) {
+            return {quem: observacao.quem, texto: observacao.titulo};
+        });
+
+        this.falarEmSequencia(falas, function () {
+            cena.abrirObservacoes();
+        });
+    }
+
+    abrirObservacoes() {
         this.opcoesDeObservacoes = this.evento.observacoes.map(function (observacao) {
             return {
                 id: observacao.id,
@@ -36,10 +46,14 @@ export class CenaSprintRetrospective extends CenaEvento {
             };
         });
 
-        this.montarLista({
-            x: MARGEM,
-            y: TOPO_DO_CONTEUDO,
-            largura: LARGURA_DO_CONTEUDO,
+        this.mostrarObservacoes();
+    }
+
+    mostrarObservacoes() {
+        const cena = this;
+        this.perguntar({
+            pergunta: this.evento.perguntaDasObservacoes,
+            ajuda: "setas escolhem, ENTER marca e desmarca, C segue para a ação",
             multipla: true,
             opcoes: this.opcoesDeObservacoes,
             aoConfirmar: function (opcao) {
@@ -54,7 +68,7 @@ export class CenaSprintRetrospective extends CenaEvento {
         });
     }
 
-    // O limite existe para forçar escolha
+    // O limite existe para forçar escolha: tudo é observação, poucas são o problema
     alternarObservacao(opcao) {
         if (opcao.marcada) {
             opcao.marcada = false;
@@ -84,50 +98,40 @@ export class CenaSprintRetrospective extends CenaEvento {
         this.escolheuRelevante = this.marcadas().some(function (opcao) {
             return opcao.relevante;
         });
-
-        this.definirPergunta(this.evento.perguntaDaAcao);
-        this.definirAjuda("setas escolhem, ENTER confirma");
+        this.opcoesDeAcoes = this.evento.acoes;
 
         const cena = this;
-        this.opcoesDeAcoes = this.evento.acoes;
-        this.montarLista({
-            x: MARGEM,
-            y: TOPO_DO_CONTEUDO,
-            largura: LARGURA_DO_CONTEUDO,
+        this.perguntar({
+            pergunta: this.evento.perguntaDaAcao,
             opcoes: this.opcoesDeAcoes,
             aoConfirmar: function (acao) {
-                cena.confirmarAcao(acao);
+                cena.escolherAcao(acao);
             }
         });
     }
 
-    confirmarAcao(acao) {
+    escolherAcao(acao) {
         const cena = this;
 
-        if (!this.escolheuRelevante) {
-            this.mostrarFeedback(
-                tituloDaAvaliacao("ruim"),
-                this.evento.semObservacaoRelevante.feedback,
-                this.evento.semObservacaoRelevante.principio,
-                function () {
-                    cena.fecharComAcao(acao);
-                }
-            );
-            return;
-        }
-
-        this.fecharComAcao(acao);
+        this.responder(acao.titulo, function () {
+            if (!cena.escolheuRelevante) {
+                cena.falarComoMentor(
+                    cena.evento.semObservacaoRelevante.feedback,
+                    cena.evento.semObservacaoRelevante.principio,
+                    function () {
+                        cena.fecharComAcao(acao);
+                    }
+                );
+                return;
+            }
+            cena.fecharComAcao(acao);
+        });
     }
 
     fecharComAcao(acao) {
         const cena = this;
-        this.mostrarFeedback(
-            tituloDaAvaliacao(acao.avaliacao),
-            acao.feedback,
-            acao.principio,
-            function () {
-                cena.sair();
-            }
-        );
+        this.falarComoMentor(acao.feedback, acao.principio, function () {
+            cena.sair();
+        });
     }
 }
