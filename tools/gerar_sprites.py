@@ -392,17 +392,18 @@ def sprite_agenda():
 
 def sprite_mesa_redonda():
     # mesa da sala de reunião: elipse vista de frente, com tampo e base
-    largura = 280
-    altura = 126
+    largura = 132
+    altura = 68
     img = Image.new("RGBA", (largura, altura), TRANSPARENTE)
     d = ImageDraw.Draw(img)
+    meio = largura // 2
 
-    d.ellipse([0, 34, largura - 1, altura - 26], fill=COR_DA_SOMBRA_DO_TAMPO)
-    d.ellipse([0, 24, largura - 1, altura - 36], fill=COR_DO_TAMPO)
-    d.ellipse([22, 34, largura - 23, altura - 52], fill=COR_DO_BRILHO_DO_TAMPO)
+    d.ellipse([0, 14, largura - 1, 52], fill=COR_DA_SOMBRA_DO_TAMPO)
+    d.ellipse([0, 8, largura - 1, 44], fill=COR_DO_TAMPO)
+    d.ellipse([14, 14, largura - 15, 38], fill=COR_DO_BRILHO_DO_TAMPO)
 
-    r(d, largura // 2 - 18, altura - 34, 36, 22, COR_DA_PERNA_DA_MESA)
-    r(d, largura // 2 - 44, altura - 14, 88, 10, COR_DA_SOMBRA_DO_TAMPO)
+    r(d, meio - 9, 44, 18, 15, COR_DA_PERNA_DA_MESA)
+    r(d, meio - 24, 58, 48, 7, COR_DA_SOMBRA_DO_TAMPO)
     return img
 
 

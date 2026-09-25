@@ -4,15 +4,17 @@
 // o evento declara seus participantes, e o jogador senta sempre de frente para
 // a mesa, na base da tela.
 
-export const MESA = {x: 480, y: 236};
+export const ESCALA = 2;
+
+export const MESA = {x: 480, y: 240};
 
 export const ASSENTOS = [
-    {x: 388, y: 182},
-    {x: 572, y: 182, espelhado: true},
-    {x: 300, y: 236},
-    {x: 660, y: 236, espelhado: true},
-    {x: 388, y: 292},
-    {x: 572, y: 292, espelhado: true}
+    {x: 418, y: 186},
+    {x: 542, y: 186, espelhado: true},
+    {x: 318, y: 240},
+    {x: 642, y: 240, espelhado: true},
+    {x: 392, y: 296},
+    {x: 568, y: 296, espelhado: true}
 ];
 
-export const ASSENTO_DO_JOGADOR = {x: 480, y: 316};
+export const ASSENTO_DO_JOGADOR = {x: 480, y: 306};

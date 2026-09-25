@@ -1,17 +1,15 @@
 // Sala de reunião
 //
-// Base das cenas de evento do Scrum.
-//
-// Os personagens sentados à mesa redonda falam suas linhas.
-// As escolhas do jogador aparecem como respostas que ele diz.
-// O retorno do mentor vem como fala dele, com o princípio ágil
-// registrado embaixo.
+// Base das cenas de evento do Scrum. Tudo acontece em fala: os personagens
+// sentados à mesa redonda falam suas linhas, as escolhas do jogador aparecem
+// como respostas que ele diz, e o retorno do mentor vem como fala dele, com o
+// princípio ágil registrado embaixo.
 //
 // Cada evento herda daqui e implementa a própria mecânica.
 
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {ELENCO} from "../dados/elenco.js";
-import {ASSENTOS, ASSENTO_DO_JOGADOR, MESA} from "../dados/reuniao.js";
+import {ASSENTOS, ASSENTO_DO_JOGADOR, ESCALA, MESA} from "../dados/reuniao.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
@@ -55,7 +53,7 @@ export class CenaReuniao extends Phaser.Scene {
             .setOrigin(0, 0).setDepth(0);
         this.add.rectangle(480, FIM_DA_PAREDE, 960, 3, COR_HEX.contornoSuave).setDepth(1);
 
-        this.add.image(MESA.x, MESA.y, "mesa_redonda").setDepth(MESA.y);
+        this.add.image(MESA.x, MESA.y, "mesa_redonda").setScale(ESCALA).setDepth(MESA.y);
         this.sentarParticipantes();
     }
 
@@ -70,22 +68,31 @@ export class CenaReuniao extends Phaser.Scene {
             }
 
             const sprite = this.add.image(assento.x, assento.y, "corpo_" + chave, 0);
+            sprite.setScale(ESCALA);
             sprite.setDepth(assento.y);
             sprite.setFlipX(Boolean(assento.espelhado));
 
-            // A etiqueta fica acima da cabeça e à frente da mesa
-            this.add.text(assento.x, assento.y - 18, this.personagem(chave).nome, {
-                fontFamily: FONTE,
-                fontSize: "10px",
-                color: COR.textoSecundario
-            }).setOrigin(0.5, 1).setDepth(690);
+            this.etiquetarAssento(assento, this.personagem(chave).nome);
         }, this);
 
         const jogador = this.add.image(
             ASSENTO_DO_JOGADOR.x, ASSENTO_DO_JOGADOR.y,
             "corpo_jogador_" + this.cadeira(), 0
         );
+        jogador.setScale(ESCALA);
         jogador.setDepth(ASSENTO_DO_JOGADOR.y);
+    }
+
+    etiquetarAssento(assento, nome) {
+        const atrasDaMesa = assento.y < MESA.y;
+        const deslocamento = 16 * ESCALA;
+
+        this.add.text(
+            assento.x,
+            atrasDaMesa ? assento.y - deslocamento : assento.y + deslocamento,
+            nome,
+            {fontFamily: FONTE, fontSize: "10px", color: COR.textoSecundario}
+        ).setOrigin(0.5, atrasDaMesa ? 1 : 0).setDepth(690);
     }
 
     montarBarra() {
