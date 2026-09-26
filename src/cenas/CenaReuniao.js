@@ -95,7 +95,7 @@ export class CenaReuniao extends Phaser.Scene {
             assento.x,
             atrasDaMesa ? assento.y - deslocamento : assento.y + deslocamento,
             nome,
-            {fontFamily: FONTE, fontSize: "10px", color: COR.textoSecundario}
+            {fontFamily: FONTE, fontSize: "11px", color: COR.texto}
         ).setOrigin(0.5, atrasDaMesa ? 1 : 0).setDepth(690);
     }
 
