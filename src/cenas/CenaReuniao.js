@@ -18,7 +18,11 @@ const ALTURA_DA_BARRA = 40;
 const ALTURA_DO_OBJETIVO = 36;
 const FIM_DA_PAREDE = 150;
 const ALTURA_DA_LINHA_DE_OPCAO = 34;
-const OPCOES_VISIVEIS = 4;
+const ESPACO_ENTRE_OPCOES = 4;
+
+// Distâncias medidas a partir do painel de fala
+const TOPO_DAS_OPCOES = 32;
+const FOLGA_ABAIXO_DAS_OPCOES = 22;
 
 export class CenaReuniao extends Phaser.Scene {
 
@@ -238,7 +242,7 @@ export class CenaReuniao extends Phaser.Scene {
         if (this.pergunta) {
             this.pergunta.destroy();
         }
-        this.pergunta = this.add.text(PAINEL.x + 16, PAINEL.y + 12, config.pergunta || "", {
+        this.pergunta = this.add.text(PAINEL.x + 16, PAINEL.y + 10, config.pergunta || "", {
             fontFamily: FONTE,
             fontSize: "12px",
             color: COR.textoSecundario,
@@ -248,16 +252,25 @@ export class CenaReuniao extends Phaser.Scene {
         this.fecharLista();
         this.lista = new ListaDeOpcoes(this, {
             x: PAINEL.x + 16,
-            y: PAINEL.y + 34,
+            y: PAINEL.y + TOPO_DAS_OPCOES,
             largura: PAINEL.largura - 32,
             multipla: Boolean(config.multipla),
             comoFala: config.multipla !== true,
             alturaDaLinha: ALTURA_DA_LINHA_DE_OPCAO,
-            espaco: 4,
-            visiveis: OPCOES_VISIVEIS,
+            espaco: ESPACO_ENTRE_OPCOES,
+            visiveis: this.opcoesVisiveis(),
             opcoes: config.opcoes,
             aoConfirmar: config.aoConfirmar
         });
+    }
+
+    // Quantas respostas cabem no painel, contando a folga que o aviso de
+    // rolagem ocupa embaixo da última linha
+    opcoesVisiveis() {
+        const disponivel = PAINEL.altura - TOPO_DAS_OPCOES - FOLGA_ABAIXO_DAS_OPCOES;
+        const porLinha = ALTURA_DA_LINHA_DE_OPCAO + ESPACO_ENTRE_OPCOES;
+
+        return Math.max(Math.floor((disponivel + ESPACO_ENTRE_OPCOES) / porLinha), 1);
     }
 
     atualizarPergunta(texto) {

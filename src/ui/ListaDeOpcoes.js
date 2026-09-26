@@ -13,6 +13,9 @@ const ESPACO_ENTRE_LINHAS = 6;
 const MARGEM_INTERNA = 12;
 const LARGURA_DA_MARCA = 18;
 
+// Abaixo desta altura a linha usa fonte menor
+const ALTURA_CONFORTAVEL = 34;
+
 export class ListaDeOpcoes {
 
     constructor(cena, config) {
@@ -84,14 +87,13 @@ export class ListaDeOpcoes {
         this.atualizarDestaque();
     }
 
-    // Aviso de que há mais linhas acima ou abaixo da janela
+    // O aviso de rolagem fica dentro da área da lista, abaixo da última linha
+    // visível.
     desenharIndicadores() {
-        if (this.indicador) {
-            this.indicador.destroy();
-            this.indicador = null;
-        }
+        this.destruirIndicadores();
 
         const restantes = this.opcoes.length - this.janela;
+
         if (restantes <= 0) {
             return;
         }
@@ -99,19 +101,33 @@ export class ListaDeOpcoes {
         const acima = this.deslocamento;
         const abaixo = restantes - this.deslocamento;
         const partes = [];
+
         if (acima > 0) {
-            partes.push("mais " + acima + " acima");
+            partes.push("\u25b2 mais " + acima + " acima");
         }
+
         if (abaixo > 0) {
-            partes.push("mais " + abaixo + " abaixo");
+            partes.push("\u25bc mais " + abaixo + " abaixo");
         }
 
         this.indicador = this.cena.add.text(
-            this.x + this.largura,
-            this.y + this.janela * (this.alturaDaLinha + this.espaco) - this.espaco + 2,
-            partes.join(", "),
-            {fontFamily: FONTE, fontSize: "10px", color: COR.textoSecundario}
-        ).setOrigin(1, 0).setDepth(806);
+            this.x + this.largura / 2,
+            this.y + this.alturaDaJanela + 4,
+            partes.join("    "),
+            {fontFamily: FONTE, fontSize: "10px", color: COR.destaque}
+        ).setOrigin(0.5, 0).setDepth(806);
+    }
+
+    destruirIndicadores() {
+        if (this.indicador) {
+            this.indicador.destroy();
+            this.indicador = null;
+        }
+    }
+
+    // Altura ocupada pelas linhas visíveis, sem o espaço da última
+    get alturaDaJanela() {
+        return this.janela * (this.alturaDaLinha + this.espaco) - this.espaco;
     }
 
     criarLinha(opcao, indice, posicao) {
@@ -137,21 +153,26 @@ export class ListaDeOpcoes {
             container.setData("marca", marca);
         }
 
-        const titulo = cena.add.text(esquerda, opcao.detalhe ? 4 : this.alturaDaLinha / 2 - 8,
+        const compacta = this.alturaDaLinha < ALTURA_CONFORTAVEL;
+        const alturaDoTitulo = compacta ? 12 : 13;
+
+        const titulo = cena.add.text(esquerda, this.topoDoTitulo(opcao, compacta),
             this.comoFala ? "— " + opcao.titulo : opcao.titulo, {
                 fontFamily: FONTE,
-                fontSize: "13px",
+                fontSize: alturaDoTitulo + "px",
                 color: COR.texto,
                 wordWrap: {width: this.largura - esquerda - MARGEM_INTERNA - 60}
             });
         elementos.push(titulo);
 
         if (opcao.detalhe) {
-            elementos.push(cena.add.text(esquerda, this.alturaDaLinha - 16, opcao.detalhe, {
-                fontFamily: FONTE,
-                fontSize: "11px",
-                color: COR.textoSecundario
-            }));
+            elementos.push(cena.add.text(
+                esquerda, this.alturaDaLinha - (compacta ? 13 : 16), opcao.detalhe, {
+                    fontFamily: FONTE,
+                    fontSize: compacta ? "9px" : "11px",
+                    color: COR.textoSecundario
+                }
+            ));
         }
 
         if (opcao.sufixo) {
@@ -179,6 +200,14 @@ export class ListaDeOpcoes {
         }, this);
 
         return {container: container, fundo: fundo, opcao: opcao};
+    }
+
+    topoDoTitulo(opcao, compacta) {
+        if (!opcao.detalhe) {
+            return this.alturaDaLinha / 2 - 8;
+        }
+
+        return compacta ? 2 : 4;
     }
 
     atualizarDestaque() {
@@ -225,11 +254,7 @@ export class ListaDeOpcoes {
             linha.container.destroy();
         });
         this.linhas = [];
-
-        if (this.indicador) {
-            this.indicador.destroy();
-            this.indicador = null;
-        }
+        this.destruirIndicadores();
     }
 }
 
