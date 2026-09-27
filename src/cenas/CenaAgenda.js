@@ -119,6 +119,7 @@ export class CenaAgenda extends Phaser.Scene {
     abrirEvento(chave) {
         this.scene.stop();
         this.scene.launch(chave);
+        this.scene.bringToTop(chave);
     }
 
     voltarAoEscritorio() {

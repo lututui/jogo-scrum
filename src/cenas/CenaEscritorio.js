@@ -127,7 +127,7 @@ export class CenaEscritorio extends Phaser.Scene {
             texto.setScrollFactor(0).setDepth(9001);
         });
 
-        this.textoAjuda = this.add.text(20, 516, "setas ou WASD para andar, ENTER para falar", {
+        this.textoAjuda = this.add.text(20, 516, "setas ou WASD para andar, ENTER para falar, P para trocar de cadeira", {
             fontFamily: FONTE,
             fontSize: "12px",
             color: COR.textoSecundario
@@ -165,9 +165,7 @@ export class CenaEscritorio extends Phaser.Scene {
         this.teclaAcao = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.teclaEspaco = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-        this.input.keyboard.on("keydown-P", function () {
-            this.abrirSelecaoDePapel();
-        }, this);
+        this.teclaPapel = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
     }
 
     // A troca de cadeira volta para a cena de seleção
@@ -178,6 +176,7 @@ export class CenaEscritorio extends Phaser.Scene {
 
         this.scene.pause();
         this.scene.launch("CenaSelecaoDePapel");
+        this.scene.bringToTop("CenaSelecaoDePapel");
     }
 
     // O escritório volta da seleção com a cadeira escolhida
@@ -200,6 +199,11 @@ export class CenaEscritorio extends Phaser.Scene {
 
     update(tempo, delta) {
         this.caixa.atualizar(delta);
+
+        if (!this.emDialogo && Phaser.Input.Keyboard.JustDown(this.teclaPapel)) {
+            this.abrirSelecaoDePapel();
+            return;
+        }
 
         if (this.emDialogo) {
             this.jogador.setVelocity(0, 0);
@@ -300,6 +304,8 @@ export class CenaEscritorio extends Phaser.Scene {
 
         this.scene.pause();
         this.scene.launch(chaveDaCena);
+
+        this.scene.bringToTop(chaveDaCena);
     }
 
     iniciarDialogo(alvo) {
