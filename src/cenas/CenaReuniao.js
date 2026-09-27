@@ -9,6 +9,7 @@
 
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {ELENCO} from "../dados/elenco.js";
+import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {ASSENTOS, ASSENTO_DO_JOGADOR, ESCALA, MESA} from "../dados/reuniao.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
@@ -63,7 +64,7 @@ export class CenaReuniao extends Phaser.Scene {
 
     // Os participantes ocupam os assentos na ordem em que o evento os declara
     sentarParticipantes() {
-        const participantes = this.evento.participantes || [];
+        const participantes = this.participantes();
 
         participantes.forEach(function (chave, indice) {
             const assento = ASSENTOS[indice];
@@ -99,6 +100,18 @@ export class CenaReuniao extends Phaser.Scene {
         ).setOrigin(0.5, atrasDaMesa ? 1 : 0).setDepth(690);
     }
 
+    // Quem senta à mesa: os participantes do evento e o mentor da cadeira
+    participantes() {
+        const lista = (this.evento.participantes || []).slice();
+        const mentor = this.chaveDoMentor();
+
+        if (lista.indexOf(mentor) < 0) {
+            lista.push(mentor);
+        }
+
+        return lista;
+    }
+
     montarBarra() {
         const barra = this.add.graphics().setDepth(700);
         barra.fillStyle(COR_HEX.painel, 1);
@@ -108,6 +121,11 @@ export class CenaReuniao extends Phaser.Scene {
 
         const estilo = {fontFamily: FONTE, fontSize: "14px", color: COR.texto};
         this.add.text(24, 13, this.evento.nome, estilo).setDepth(701);
+        this.add.text(300, 13, "COMO " + CADEIRAS[this.cadeira()].nome.toUpperCase(), {
+            fontFamily: FONTE,
+            fontSize: "12px",
+            color: CADEIRAS[this.cadeira()].cor
+        }).setDepth(701);
         this.textoDaBarra = this.add.text(660, 13, "", estilo).setOrigin(1, 0).setDepth(701);
         this.add.text(936, 13, "ESC PARA SAIR", estilo).setOrigin(1, 0).setDepth(701);
 
@@ -139,6 +157,23 @@ export class CenaReuniao extends Phaser.Scene {
 
     cadeira() {
         return this.registry.get("cadeira") || "po";
+    }
+
+    // Conteúdo do evento para a cadeira que o jogador ocupa
+    papel() {
+        const doEvento = PAPEIS_DOS_EVENTOS[this.evento.chave] || {};
+
+        return doEvento[this.cadeira()] || {};
+    }
+
+    conduzOEvento() {
+        return Boolean(this.papel().conduz);
+    }
+
+    // O mentor é o titular da cadeira que o jogador está aprendendo, e não uma
+    // pessoa fixa por evento: quem comenta é quem exerce aquele papel
+    chaveDoMentor() {
+        return CADEIRAS[this.cadeira()].titular;
     }
 
     // NPC do elenco ou o jogador
@@ -186,7 +221,7 @@ export class CenaReuniao extends Phaser.Scene {
         this.esperandoFala = true;
         this.aoTerminarFala = aoTerminar || null;
         this.definirAjuda("ENTER continua");
-        this.painel.mostrar(this.personagem(this.evento.mentor), texto, principio);
+        this.painel.mostrar(this.personagem(this.chaveDoMentor()), texto, principio);
     }
 
     // Encadeia falas de pessoas diferentes
@@ -228,6 +263,84 @@ export class CenaReuniao extends Phaser.Scene {
         if (seguinte) {
             seguinte();
         }
+    }
+
+    // ---------------------------------------------------------
+    // decisões de quem participa sem conduzir
+
+    // Sequência de decisões vinda dos dados do papel
+    rodarDecisoes(decisoes, aoTerminar) {
+        const cena = this;
+        let indice = 0;
+
+        function proxima() {
+            if (indice >= decisoes.length) {
+                if (aoTerminar) {
+                    aoTerminar();
+                }
+
+                return;
+            }
+
+            const decisao = decisoes[indice];
+            indice += 1;
+            cena.rodarDecisao(decisao, proxima);
+        }
+
+        proxima();
+    }
+
+    rodarDecisao(decisao, aoTerminar) {
+        const cena = this;
+
+        this.falar(decisao.quem, decisao.fala, function () {
+            cena.perguntar({
+                pergunta: decisao.pergunta,
+                opcoes: decisao.opcoes,
+                aoConfirmar: function (opcao) {
+                    cena.responder(opcao.titulo, function () {
+                        cena.falarComoMentor(opcao.feedback, opcao.principio, aoTerminar);
+                    });
+                }
+            });
+        });
+    }
+
+    abrirComoParticipante(aoTerminar) {
+        const abertura = this.papel().abertura;
+
+        if (!abertura) {
+            aoTerminar();
+            return;
+        }
+
+        this.falar(abertura.quem, abertura.texto, aoTerminar);
+    }
+
+    encerrarComoParticipante() {
+        const fechamento = this.papel().fechamento;
+        const cena = this;
+
+        if (!fechamento) {
+            this.sair();
+            return;
+        }
+
+        this.falarComoMentor(fechamento.texto, fechamento.principio, function () {
+            cena.sair();
+        });
+    }
+
+    // Caminho de quem participa
+    // Abertura, decisões da cadeira e fechamento
+    participarDoEvento() {
+        const cena = this;
+
+        this.abrirComoParticipante(function () {
+            cena.rodarDecisoes(cena.papel().decisoes || [], function () {
+                cena.encerrarComoParticipante();
+            });
+        });
     }
 
     // ---------------------------------------------------------

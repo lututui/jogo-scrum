@@ -14,7 +14,7 @@ export class CenaEscritorio extends Phaser.Scene {
     }
 
     create() {
-        this.cadeiraAtual = "po";
+        this.cadeiraAtual = this.registry.get("cadeira") || "po";
         this.emDialogo = false;
         this.interativos = [];
 
@@ -141,7 +141,7 @@ export class CenaEscritorio extends Phaser.Scene {
             padding: {x: 6, y: 3}
         }).setOrigin(0.5, 1).setDepth(8000).setVisible(false);
 
-        this.atualizarCadeira("po");
+        this.atualizarCadeira(this.cadeiraAtual);
     }
 
     criarControles() {
@@ -159,23 +159,36 @@ export class CenaEscritorio extends Phaser.Scene {
         this.bloqueioAcaoAte = 0;
         this.events.on("resume", function () {
             this.bloqueioAcaoAte = this.time.now + 250;
+            this.aoRetomar();
         }, this);
 
         this.teclaAcao = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.teclaEspaco = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-        this.input.keyboard.on("keydown-ONE", function () {
-            this.atualizarCadeira("po");
-        }, this);
-        this.input.keyboard.on("keydown-TWO", function () {
-            this.atualizarCadeira("sm");
-        }, this);
-        this.input.keyboard.on("keydown-THREE", function () {
-            this.atualizarCadeira("dev");
+        this.input.keyboard.on("keydown-P", function () {
+            this.abrirSelecaoDePapel();
         }, this);
     }
 
-    // Troca o crachá do avatar; placeholder da seleção de papel do RF01
+    // A troca de cadeira volta para a cena de seleção
+    abrirSelecaoDePapel() {
+        this.rotulo.setVisible(false);
+        this.jogador.setVelocity(0, 0);
+        this.jogador.anims.play("jogador_" + this.cadeiraAtual + "_parado", true);
+
+        this.scene.pause();
+        this.scene.launch("CenaSelecaoDePapel");
+    }
+
+    // O escritório volta da seleção com a cadeira escolhida
+    aoRetomar() {
+        const escolhida = this.registry.get("cadeira") || this.cadeiraAtual;
+
+        if (escolhida !== this.cadeiraAtual) {
+            this.atualizarCadeira(escolhida);
+        }
+    }
+
     atualizarCadeira(cadeira) {
         this.cadeiraAtual = cadeira;
         this.registry.set("cadeira", cadeira);

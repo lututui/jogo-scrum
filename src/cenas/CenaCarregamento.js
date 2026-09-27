@@ -55,7 +55,7 @@ export class CenaCarregamento extends Phaser.Scene {
 
     create() {
         this.criarAnimacoes();
-        this.scene.start("CenaEscritorio");
+        this.scene.start("CenaSelecaoDePapel");
     }
 
     // Cada folha tem três quadros: parado, passo A, passo B

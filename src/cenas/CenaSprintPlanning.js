@@ -20,8 +20,13 @@ export class CenaSprintPlanning extends CenaReuniao {
         this.meta = null;
         this.opcoesDoBacklog = null;
 
+        if (!this.conduzOEvento()) {
+            this.participarDoEvento();
+            return;
+        }
+
         const cena = this;
-        this.falar(this.evento.aberturaQuem, this.evento.abertura, function () {
+        this.falar(this.papel().abertura.quem, this.papel().abertura.texto, function () {
             cena.etapaDaMeta();
         });
     }
@@ -67,7 +72,7 @@ export class CenaSprintPlanning extends CenaReuniao {
             };
         });
 
-        this.falar(this.evento.mentor, this.evento.instrucaoDoBacklog, function () {
+        this.falar(this.chaveDoMentor(), this.evento.instrucaoDoBacklog, function () {
             cena.mostrarBacklog();
         });
     }

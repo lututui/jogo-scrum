@@ -16,10 +16,16 @@ export class CenaDailyScrum extends CenaReuniao {
         this.minutosUsados = 0;
         this.rodadaAtual = 0;
         this.impedimentosTratados = 0;
+
+        if (!this.conduzOEvento()) {
+            this.participarDoEvento();
+            return;
+        }
+
         this.atualizarRelogio();
 
         const cena = this;
-        this.falar(this.evento.aberturaQuem, this.evento.abertura, function () {
+        this.falar(this.papel().abertura.quem, this.papel().abertura.texto, function () {
             cena.abrirRodada();
         });
     }

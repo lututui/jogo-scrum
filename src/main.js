@@ -2,6 +2,7 @@
 
 import {COR} from "./dados/tema.js";
 import {CenaCarregamento} from "./cenas/CenaCarregamento.js";
+import {CenaSelecaoDePapel} from "./cenas/CenaSelecaoDePapel.js";
 import {CenaEscritorio} from "./cenas/CenaEscritorio.js";
 import {CenaKanban} from "./cenas/CenaKanban.js";
 import {CenaAgenda} from "./cenas/CenaAgenda.js";
@@ -30,6 +31,7 @@ const configuracao = {
     },
     scene: [
         CenaCarregamento,
+        CenaSelecaoDePapel,
         CenaEscritorio,
         CenaKanban,
         CenaAgenda,

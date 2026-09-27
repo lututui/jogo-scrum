@@ -6,7 +6,9 @@
 // Em iterações futuras, a agenda deixa de ser um menu e
 // passa a seguir o dia da sprint.
 
+import {CADEIRAS} from "../dados/cadeiras.js";
 import {EVENTOS} from "../dados/eventos.js";
+import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
 
@@ -36,7 +38,11 @@ export class CenaAgenda extends Phaser.Scene {
 
         const estilo = {fontFamily: FONTE, fontSize: "14px", color: COR.texto};
         this.add.text(MARGEM, 13, "AGENDA DA SPRINT", estilo);
-        this.add.text(480, 13, "SPRINT 1 — DIA 1 DE 10", estilo).setOrigin(0.5, 0);
+        this.add.text(480, 13, "COMO " + CADEIRAS[this.cadeira()].nome.toUpperCase(), {
+            fontFamily: FONTE,
+            fontSize: "14px",
+            color: CADEIRAS[this.cadeira()].cor
+        }).setOrigin(0.5, 0);
         this.add.text(940, 13, "ESC PARA VOLTAR", estilo).setOrigin(1, 0);
 
         this.add.text(MARGEM, 72, "Os quatro eventos do Scrum, cada um com sua mecânica.", {
@@ -63,6 +69,7 @@ export class CenaAgenda extends Phaser.Scene {
                     id: evento.chave,
                     titulo: evento.nome,
                     detalhe: evento.resumo,
+                    sufixo: cena.conduz(evento.chave) ? "você conduz" : "você participa",
                     chave: evento.chave
                 };
             }),
@@ -70,6 +77,18 @@ export class CenaAgenda extends Phaser.Scene {
                 cena.abrirEvento(opcao.chave);
             }
         });
+    }
+
+    cadeira() {
+        return this.registry.get("cadeira") || "po";
+    }
+
+    // Marca na lista os eventos que a cadeira atual conduz, porque é isso que
+    // muda a mecânica de cada reunião
+    conduz(chaveDoEvento) {
+        const porPapel = PAPEIS_DOS_EVENTOS[chaveDoEvento] || {};
+
+        return Boolean((porPapel[this.cadeira()] || {}).conduz);
     }
 
     criarControles() {

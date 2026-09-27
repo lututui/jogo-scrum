@@ -22,8 +22,13 @@ export class CenaSprintReview extends CenaReuniao {
         this.formato = null;
         this.opcoesDeItens = null;
 
+        if (!this.conduzOEvento()) {
+            this.participarDoEvento();
+            return;
+        }
+
         const cena = this;
-        this.falar(this.evento.aberturaQuem, this.evento.abertura, function () {
+        this.falar(this.papel().abertura.quem, this.papel().abertura.texto, function () {
             cena.etapaDoFormato();
         });
     }
