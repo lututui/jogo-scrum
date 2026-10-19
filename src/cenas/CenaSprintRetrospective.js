@@ -117,6 +117,7 @@ export class CenaSprintRetrospective extends CenaReuniao {
 
     escolherAcao(acao) {
         const cena = this;
+        this.pontuar(acao);
 
         this.responder(acao.titulo, function () {
             if (!cena.escolheuRelevante) {

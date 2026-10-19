@@ -4,6 +4,7 @@
 
 import {CADEIRAS, ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
 import {ELENCO} from "../dados/elenco.js";
+import {apagarProgresso, cadeirasConcluidas} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 
 const MARGEM = 24;
@@ -72,11 +73,12 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
                 color: COR.textoSecundario
             });
 
-        this.add.text(MARGEM, 508, "setas escolhem, ENTER confirma", {
-            fontFamily: FONTE,
-            fontSize: "12px",
-            color: COR.textoSecundario
-        });
+        this.add.text(MARGEM, 508,
+            "setas escolhem, ENTER confirma, R apaga o progresso salvo", {
+                fontFamily: FONTE,
+                fontSize: "12px",
+                color: COR.textoSecundario
+            });
     }
 
     // ---------------------------------------------------------
@@ -133,7 +135,17 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
             color: COR.textoSecundario
         });
 
-        container.add([fundo, avatar, nome, resumo, conduz, mentor]);
+        const elementos = [fundo, avatar, nome, resumo, conduz, mentor];
+
+        if (cadeirasConcluidas(this.registry).indexOf(chave) >= 0) {
+            elementos.push(this.add.text(LARGURA_DO_CARTAO - 20, 14, "\u2713 vivida", {
+                fontFamily: FONTE,
+                fontSize: "11px",
+                color: COR.destaque
+            }).setOrigin(1, 0));
+        }
+
+        container.add(elementos);
         container.setSize(LARGURA_DO_CARTAO, ALTURA_DO_CARTAO);
 
         container.setInteractive(
@@ -178,7 +190,14 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
     // ---------------------------------------------------------
     // controles
 
+    // O progresso fica gravado no navegador; apagar é explícito, e só aqui
+    reiniciarProgresso() {
+        apagarProgresso(this.registry);
+        this.scene.restart();
+    }
+
     criarControles() {
+        this.teclaReiniciar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
         this.teclas = this.input.keyboard.addKeys({
             esquerda: Phaser.Input.Keyboard.KeyCodes.LEFT,
             direita: Phaser.Input.Keyboard.KeyCodes.RIGHT,
@@ -188,6 +207,11 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
     }
 
     update() {
+        if (Phaser.Input.Keyboard.JustDown(this.teclaReiniciar)) {
+            this.reiniciarProgresso();
+            return;
+        }
+
         if (Phaser.Input.Keyboard.JustDown(this.teclas.esquerda)) {
             this.mover(-1);
         } else if (Phaser.Input.Keyboard.JustDown(this.teclas.direita)) {

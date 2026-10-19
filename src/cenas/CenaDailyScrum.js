@@ -57,6 +57,9 @@ export class CenaDailyScrum extends CenaReuniao {
     }
 
     responderNaRodada(opcao) {
+        this.pontuar(Object.assign({}, opcao, {
+            marca: opcao.registraImpedimento ? "impedimento" : opcao.marca
+        }));
         this.minutosUsados += opcao.custo;
         if (opcao.registraImpedimento) {
             this.impedimentosTratados += 1;

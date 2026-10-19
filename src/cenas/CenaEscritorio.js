@@ -2,6 +2,14 @@
 
 import {ELENCO, MESAS, OBJETOS} from "../dados/elenco.js";
 import {CADEIRAS} from "../dados/cadeiras.js";
+import {EVENTOS} from "../dados/eventos.js";
+import {proximoContextual} from "../dados/eventosContextuais.js";
+import {
+    contextuaisResolvidos,
+    eventosConcluidos,
+    lerProgresso
+} from "../dados/progresso.js";
+import {MedidoresHUD} from "../ui/MedidoresHUD.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {CaixaDialogo} from "../ui/CaixaDialogo.js";
 
@@ -27,6 +35,8 @@ export class CenaEscritorio extends Phaser.Scene {
         this.criarControles();
 
         this.caixa = new CaixaDialogo(this);
+
+        this.seguirASprint();
     }
 
     // Piso, parede e limites do mundo
@@ -122,6 +132,7 @@ export class CenaEscritorio extends Phaser.Scene {
         this.textoSprint = this.add.text(20, 13, "SPRINT 1 DE 6", estilo);
         this.textoDia = this.add.text(480, 13, "DIA 1 DE 10", estilo).setOrigin(0.5, 0);
         this.textoCadeira = this.add.text(940, 13, "", estilo).setOrigin(1, 0);
+        this.medidores = new MedidoresHUD(this, 560, 6);
 
         [this.textoSprint, this.textoDia, this.textoCadeira].forEach(function (texto) {
             texto.setScrollFactor(0).setDepth(9001);
@@ -160,6 +171,7 @@ export class CenaEscritorio extends Phaser.Scene {
         this.events.on("resume", function () {
             this.bloqueioAcaoAte = this.time.now + 250;
             this.aoRetomar();
+            this.seguirASprint();
         }, this);
 
         this.teclaAcao = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
@@ -186,6 +198,73 @@ export class CenaEscritorio extends Phaser.Scene {
         if (escolhida !== this.cadeiraAtual) {
             this.atualizarCadeira(escolhida);
         }
+
+        this.atualizarPainelDaSprint();
+    }
+
+    // ---------------------------------------------------------
+    // andamento da sprint
+
+    // Depois de uma reunião vem o que acontece entre elas; quando não sobra
+    // reunião nem evento contextual, a sprint daquela cadeira fecha
+    seguirASprint() {
+        this.atualizarPainelDaSprint();
+
+        const saiuDeReuniao = this.registry.get("saiuDeReuniao");
+        this.registry.set("saiuDeReuniao", false);
+
+        if (this.sprintTerminou()) {
+            this.abrirSintese();
+            return;
+        }
+
+        if (saiuDeReuniao) {
+            this.abrirContextualPendente();
+        }
+    }
+
+    contextualPendente() {
+        return proximoContextual(
+            this.cadeiraAtual,
+            contextuaisResolvidos(this.registry, this.cadeiraAtual)
+        );
+    }
+
+    sprintTerminou() {
+        const reunioes = eventosConcluidos(this.registry, this.cadeiraAtual);
+
+        return reunioes.length >= EVENTOS.length && !this.contextualPendente();
+    }
+
+    abrirContextualPendente() {
+        const evento = this.contextualPendente();
+
+        if (!evento) {
+            return;
+        }
+
+        this.rotulo.setVisible(false);
+        this.jogador.setVelocity(0, 0);
+        this.jogador.anims.play("jogador_" + this.cadeiraAtual + "_parado", true);
+
+        this.scene.pause();
+        this.scene.launch("CenaEventoContextual", {evento: evento});
+        this.scene.bringToTop("CenaEventoContextual");
+    }
+
+    abrirSintese() {
+        this.scene.stop();
+        this.scene.start("CenaSintese");
+    }
+
+    // O dia avança a cada reunião e a cada evento contextual vivido
+    atualizarPainelDaSprint() {
+        const progresso = lerProgresso(this.registry);
+        const vividos = eventosConcluidos(this.registry, this.cadeiraAtual).length
+            + contextuaisResolvidos(this.registry, this.cadeiraAtual).length;
+
+        this.textoDia.setText("DIA " + Math.min(1 + vividos, 10) + " DE 10");
+        this.medidores.atualizar(progresso.medidores);
     }
 
     atualizarCadeira(cadeira) {

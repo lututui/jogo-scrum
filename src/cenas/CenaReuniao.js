@@ -8,6 +8,7 @@
 // Cada evento herda daqui e implementa a própria mecânica.
 
 import {CADEIRAS} from "../dados/cadeiras.js";
+import {registrarDecisao, registrarEventoConcluido} from "../dados/progresso.js";
 import {ELENCO} from "../dados/elenco.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {ASSENTOS, ASSENTO_DO_JOGADOR, ESCALA, MESA} from "../dados/reuniao.js";
@@ -298,11 +299,22 @@ export class CenaReuniao extends Phaser.Scene {
                 pergunta: decisao.pergunta,
                 opcoes: decisao.opcoes,
                 aoConfirmar: function (opcao) {
+                    cena.pontuar(opcao);
                     cena.responder(opcao.titulo, function () {
                         cena.falarComoMentor(opcao.feedback, opcao.principio, aoTerminar);
                     });
                 }
             });
+        });
+    }
+
+    // Toda escolha com avaliação declarada entra no placar, venha da mecânica
+    // do evento ou da sequência de decisões da cadeira
+    pontuar(opcao) {
+        registrarDecisao(this.registry, {
+            avaliacao: opcao.avaliacao,
+            medidores: opcao.medidores,
+            marca: opcao.marca
         });
     }
 
@@ -460,7 +472,11 @@ export class CenaReuniao extends Phaser.Scene {
         }
     }
 
+    // A marca avisa o escritório de que uma reunião acabou de terminar: é
+    // entre as reuniões que os eventos contextuais acontecem
     sair() {
+        registrarEventoConcluido(this.registry, this.cadeira(), this.evento.chave);
+        this.registry.set("saiuDeReuniao", true);
         this.scene.stop();
         this.scene.resume("CenaEscritorio");
     }

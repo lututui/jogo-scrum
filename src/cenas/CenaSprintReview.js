@@ -46,6 +46,7 @@ export class CenaSprintReview extends CenaReuniao {
 
     escolherFormato(formato) {
         this.formato = formato;
+        this.pontuar(formato);
         const cena = this;
 
         this.responder(formato.titulo, function () {
@@ -122,6 +123,11 @@ export class CenaSprintReview extends CenaReuniao {
         const resultado = houveDemonstracao
             ? this.evento.fechamento.comItens
             : this.evento.fechamento.semItens;
+
+        this.pontuar({
+            avaliacao: houveDemonstracao ? "boa" : "ruim",
+            marca: houveDemonstracao ? "definicao-de-pronto" : null
+        });
 
         if (houveDemonstracao && this.formato.gerarFeedbackDoUsuario) {
             acrescentarItem(this.registry, Object.assign(

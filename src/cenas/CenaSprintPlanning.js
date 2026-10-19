@@ -47,6 +47,7 @@ export class CenaSprintPlanning extends CenaReuniao {
 
     escolherMeta(meta) {
         this.meta = meta;
+        this.pontuar(meta);
         const cena = this;
 
         this.responder(meta.titulo, function () {
@@ -144,6 +145,7 @@ export class CenaSprintPlanning extends CenaReuniao {
         });
 
         const resultado = this.avaliarPlano(marcados);
+        this.pontuar(resultado);
         marcados.forEach(function (opcao) {
             acrescentarItem(this.registry, {
                 id: opcao.item.id,
