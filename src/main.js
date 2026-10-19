@@ -1,5 +1,6 @@
 // Configuração do Phaser
 
+import {carregarDepuracao} from "./dados/depuracao.js";
 import {COR} from "./dados/tema.js";
 import {CenaCarregamento} from "./cenas/CenaCarregamento.js";
 import {CenaSelecaoDePapel} from "./cenas/CenaSelecaoDePapel.js";
@@ -47,5 +48,7 @@ const configuracao = {
         CenaSintese
     ]
 };
+
+await carregarDepuracao();
 
 new Phaser.Game(configuracao);

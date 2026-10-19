@@ -3,6 +3,7 @@
 // Permite troca de cadeira.
 
 import {CADEIRAS, ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
+import {DEPURACAO, marcarDepuracao, opcoesLigadas} from "../dados/depuracao.js";
 import {ELENCO} from "../dados/elenco.js";
 import {apagarProgresso, cadeirasConcluidas} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
@@ -23,6 +24,8 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
     create() {
         this.indice = this.indiceDaCadeiraAtual();
         this.cartoes = [];
+        this.confirmandoApagar = false;
+        this.aviso = null;
 
         this.montarMoldura();
         this.montarCartoes();
@@ -73,12 +76,28 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
                 color: COR.textoSecundario
             });
 
+        marcarDepuracao(this, 936, 46);
+        this.listarDepuracao();
+
         this.add.text(MARGEM, 508,
             "setas escolhem, ENTER confirma, R apaga o progresso salvo", {
                 fontFamily: FONTE,
                 fontSize: "12px",
                 color: COR.textoSecundario
             });
+    }
+
+    listarDepuracao() {
+        if (!DEPURACAO.ativa) {
+            return;
+        }
+
+        this.add.text(MARGEM, 466, "depuração ligada no servidor: " + opcoesLigadas().join(", "), {
+            fontFamily: FONTE,
+            fontSize: "11px",
+            color: COR.alerta,
+            wordWrap: {width: 960 - MARGEM * 2}
+        }).setDepth(900);
     }
 
     // ---------------------------------------------------------
@@ -190,10 +209,38 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
     // ---------------------------------------------------------
     // controles
 
-    // O progresso fica gravado no navegador; apagar é explícito, e só aqui
-    reiniciarProgresso() {
-        apagarProgresso(this.registry);
-        this.scene.restart();
+    pedirParaApagar() {
+        if (this.confirmandoApagar) {
+            apagarProgresso(this.registry);
+            this.scene.restart();
+            return;
+        }
+
+        this.confirmandoApagar = true;
+        this.avisar("R de novo apaga todo o progresso salvo");
+
+        this.time.delayedCall(3000, function () {
+            this.confirmandoApagar = false;
+        }, [], this);
+    }
+
+    avisar(texto) {
+        if (this.aviso) {
+            this.aviso.destroy();
+        }
+
+        this.aviso = this.add.text(MARGEM, 484, texto, {
+            fontFamily: FONTE,
+            fontSize: "12px",
+            color: COR.alerta
+        }).setDepth(900);
+
+        this.time.delayedCall(3000, function () {
+            if (this.aviso) {
+                this.aviso.destroy();
+                this.aviso = null;
+            }
+        }, [], this);
     }
 
     criarControles() {
@@ -208,7 +255,7 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
 
     update() {
         if (Phaser.Input.Keyboard.JustDown(this.teclaReiniciar)) {
-            this.reiniciarProgresso();
+            this.pedirParaApagar();
             return;
         }
 

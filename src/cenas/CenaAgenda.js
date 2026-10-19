@@ -1,12 +1,16 @@
 // Agenda da sprint
 //
 // Aberta pelo calendário da parede do escritório.
-// Lista os eventos do Scrum e abre cada um na sua cena.
 //
-// Em iterações futuras, a agenda deixa de ser um menu e
-// passa a seguir o dia da sprint.
+// A agenda abre a reunião da vez. As outras aparecem como já concluídas
+// ou como ainda não chegadas.
+//
+// Abrir qualquer uma, fora de ordem, é ferramenta de desenvolvimento e
+// depende da depuração ligada no servidor.
 
 import {CADEIRAS} from "../dados/cadeiras.js";
+import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
+import {eventosConcluidos} from "../dados/progresso.js";
 import {EVENTOS} from "../dados/eventos.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
@@ -51,11 +55,44 @@ export class CenaAgenda extends Phaser.Scene {
             color: COR.texto
         });
 
-        this.add.text(MARGEM, 516, "setas escolhem, ENTER abre o evento", {
+        marcarDepuracao(this, 936, 46);
+
+        this.add.text(MARGEM, 516, "setas escolhem, ENTER abre a reunião da vez", {
             fontFamily: FONTE,
             fontSize: "12px",
             color: COR.textoSecundario
         });
+    }
+
+    situacao(chaveDoEvento) {
+        if (eventosConcluidos(this.registry, this.cadeira()).indexOf(chaveDoEvento) >= 0) {
+            return "concluida";
+        }
+
+        return chaveDoEvento === this.proximoEvento() ? "agora" : "depois";
+    }
+
+    proximoEvento() {
+        const feitos = eventosConcluidos(this.registry, this.cadeira());
+        const pendente = EVENTOS.find(function (evento) {
+            return feitos.indexOf(evento.chave) < 0;
+        });
+
+        return pendente ? pendente.chave : null;
+    }
+
+    rotuloDaSituacao(situacao, chaveDoEvento) {
+        const papel = this.conduz(chaveDoEvento) ? "você conduz" : "você participa";
+
+        if (situacao === "concluida") {
+            return "\u2713 concluída";
+        }
+
+        if (situacao === "depois") {
+            return "ainda não é a hora";
+        }
+
+        return papel;
     }
 
     criarLista() {
@@ -65,18 +102,51 @@ export class CenaAgenda extends Phaser.Scene {
             y: TOPO_DA_LISTA,
             largura: 960 - MARGEM * 2,
             opcoes: EVENTOS.map(function (evento) {
+                const situacao = cena.situacao(evento.chave);
+
                 return {
                     id: evento.chave,
                     titulo: evento.nome,
                     detalhe: evento.resumo,
-                    sufixo: cena.conduz(evento.chave) ? "você conduz" : "você participa",
-                    chave: evento.chave
+                    sufixo: cena.rotuloDaSituacao(situacao, evento.chave),
+                    chave: evento.chave,
+                    situacao: situacao
                 };
             }),
             aoConfirmar: function (opcao) {
-                cena.abrirEvento(opcao.chave);
+                cena.escolher(opcao);
             }
         });
+    }
+
+    escolher(opcao) {
+        if (DEPURACAO.eventosLivres || opcao.situacao === "agora") {
+            this.abrirEvento(opcao.chave);
+            return;
+        }
+
+        this.avisar(opcao.situacao === "concluida"
+            ? "esta reunião já aconteceu nesta sprint"
+            : "esta reunião vem depois; a sprint segue a ordem dos eventos");
+    }
+
+    avisar(texto) {
+        if (this.aviso) {
+            this.aviso.destroy();
+        }
+
+        this.aviso = this.add.text(MARGEM, 492, texto, {
+            fontFamily: FONTE,
+            fontSize: "12px",
+            color: COR.alerta
+        }).setDepth(900);
+
+        this.time.delayedCall(2600, function () {
+            if (this.aviso) {
+                this.aviso.destroy();
+                this.aviso = null;
+            }
+        }, [], this);
     }
 
     cadeira() {

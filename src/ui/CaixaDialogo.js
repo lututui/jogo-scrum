@@ -1,5 +1,6 @@
 // Caixa de diálogo do jogo
 
+import {DEPURACAO} from "../dados/depuracao.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 
 const TOTAL_DE_EXPRESSOES = 3;
@@ -112,11 +113,11 @@ export class CaixaDialogo {
     }
 
     // Prepara a revelação gradual da fala atual
-    //
-    // O retrato troca de expressão a cada fala a fim de testar as expressões.
     iniciarFala() {
         if (this.retrato.visible) {
-            this.retrato.setFrame(this.indiceFala % TOTAL_DE_EXPRESSOES);
+            this.retrato.setFrame(
+                DEPURACAO.expressoesEmCiclo ? this.indiceFala % TOTAL_DE_EXPRESSOES : 0
+            );
         }
         this.textoRevelado = "";
         this.acumulador = 0;

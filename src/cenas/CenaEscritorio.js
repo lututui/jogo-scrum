@@ -2,6 +2,7 @@
 
 import {ELENCO, MESAS, OBJETOS} from "../dados/elenco.js";
 import {CADEIRAS} from "../dados/cadeiras.js";
+import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
 import {EVENTOS} from "../dados/eventos.js";
 import {proximoContextual} from "../dados/eventosContextuais.js";
 import {
@@ -76,7 +77,7 @@ export class CenaEscritorio extends Phaser.Scene {
         this.npcs = this.physics.add.staticGroup();
         this.marcarAreaDeTeste();
 
-        ELENCO.forEach(function (npc) {
+        this.elencoDoEscritorio().forEach(function (npc) {
             const sprite = this.npcs.create(npc.x, npc.y, "corpo_" + npc.chave, 0);
             sprite.setDepth(npc.y);
             sprite.body.setSize(18, 12);
@@ -86,8 +87,17 @@ export class CenaEscritorio extends Phaser.Scene {
         }, this);
     }
 
-    // Faixa da direita onde ficam os personagens da escola
+    elencoDoEscritorio() {
+        return ELENCO.filter(function (npc) {
+            return !npc.teste || DEPURACAO.npcsDeTeste;
+        });
+    }
+
     marcarAreaDeTeste() {
+        if (!DEPURACAO.npcsDeTeste) {
+            return;
+        }
+
         const visitantes = ELENCO.filter(function (npc) {
             return npc.teste;
         });
@@ -134,11 +144,17 @@ export class CenaEscritorio extends Phaser.Scene {
         this.textoCadeira = this.add.text(940, 13, "", estilo).setOrigin(1, 0);
         this.medidores = new MedidoresHUD(this, 560, 6);
 
+        this.textoProximoPasso = this.add.text(940, 516, "", {
+            fontFamily: FONTE,
+            fontSize: "12px",
+            color: COR.destaque
+        }).setOrigin(1, 0).setScrollFactor(0).setDepth(9001);
+
         [this.textoSprint, this.textoDia, this.textoCadeira].forEach(function (texto) {
             texto.setScrollFactor(0).setDepth(9001);
         });
 
-        this.textoAjuda = this.add.text(20, 516, "setas ou WASD para andar, ENTER para falar, P para trocar de cadeira", {
+        this.textoAjuda = this.add.text(20, 516, "", {
             fontFamily: FONTE,
             fontSize: "12px",
             color: COR.textoSecundario
@@ -153,6 +169,7 @@ export class CenaEscritorio extends Phaser.Scene {
         }).setOrigin(0.5, 1).setDepth(8000).setVisible(false);
 
         this.atualizarCadeira(this.cadeiraAtual);
+        marcarDepuracao(this, 940, 28);
     }
 
     criarControles() {
@@ -178,9 +195,44 @@ export class CenaEscritorio extends Phaser.Scene {
         this.teclaEspaco = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
         this.teclaPapel = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.teclaSintese = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     }
 
     // A troca de cadeira volta para a cena de seleção
+    pedirTrocaDeCadeira() {
+        if (DEPURACAO.trocaDeCadeiraLivre || !this.sprintComecou()) {
+            this.abrirSelecaoDePapel();
+            return;
+        }
+
+        this.avisar("a sprint já começou nesta cadeira; ela termina na síntese");
+    }
+
+    sprintComecou() {
+        return eventosConcluidos(this.registry, this.cadeiraAtual).length > 0
+            || contextuaisResolvidos(this.registry, this.cadeiraAtual).length > 0;
+    }
+
+    // Recado curto no rodapé, que some sozinho
+    avisar(texto) {
+        if (this.aviso) {
+            this.aviso.destroy();
+        }
+
+        this.aviso = this.add.text(480, 492, texto, {
+            fontFamily: FONTE,
+            fontSize: "12px",
+            color: COR.alerta
+        }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(9001);
+
+        this.time.delayedCall(2600, function () {
+            if (this.aviso) {
+                this.aviso.destroy();
+                this.aviso = null;
+            }
+        }, [], this);
+    }
+
     abrirSelecaoDePapel() {
         this.rotulo.setVisible(false);
         this.jogador.setVelocity(0, 0);
@@ -265,6 +317,36 @@ export class CenaEscritorio extends Phaser.Scene {
 
         this.textoDia.setText("DIA " + Math.min(1 + vividos, 10) + " DE 10");
         this.medidores.atualizar(progresso.medidores);
+        this.textoProximoPasso.setText(this.proximoPasso());
+        this.textoAjuda.setText(this.linhaDeAjuda());
+    }
+
+    proximoPasso() {
+        const pendente = this.reuniaoPendente();
+
+        if (!pendente) {
+            return "sprint encerrada";
+        }
+
+        return "próximo: " + pendente.nome + " (calendário)";
+    }
+
+    reuniaoPendente() {
+        const feitos = eventosConcluidos(this.registry, this.cadeiraAtual);
+
+        return EVENTOS.find(function (evento) {
+            return feitos.indexOf(evento.chave) < 0;
+        }) || null;
+    }
+
+    linhaDeAjuda() {
+        const base = "setas ou WASD para andar, ENTER para interagir";
+
+        if (DEPURACAO.trocaDeCadeiraLivre || !this.sprintComecou()) {
+            return base + ", P para trocar de cadeira";
+        }
+
+        return base;
     }
 
     atualizarCadeira(cadeira) {
@@ -280,7 +362,12 @@ export class CenaEscritorio extends Phaser.Scene {
         this.caixa.atualizar(delta);
 
         if (!this.emDialogo && Phaser.Input.Keyboard.JustDown(this.teclaPapel)) {
-            this.abrirSelecaoDePapel();
+            this.pedirTrocaDeCadeira();
+            return;
+        }
+
+        if (DEPURACAO.atalhoDeSintese && Phaser.Input.Keyboard.JustDown(this.teclaSintese)) {
+            this.abrirSintese();
             return;
         }
 
