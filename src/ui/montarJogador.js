@@ -2,8 +2,12 @@
 //
 // Empilha as folhas de assets/camadas, trocando os marcadores pelas cores da
 // aparência, e grava o resultado nas mesmas texturas que as cenas já usam:
-// corpo_jogador_<cadeira> e retrato_jogador_<cadeira>. As animações
-// jogador_<cadeira>_parado e _andando são refeitas junto.
+// corpo_jogador_<cadeira> e retrato_jogador_<cadeira>.
+//
+// Na primeira vez cria as texturas e as animações. Depois, redesenha por
+// cima das mesmas texturas: os quadros, as animações e os sprites que já
+// estão na tela continuam valendo, então dá para trocar a aparência no meio
+// do jogo sem parar a caminhada.
 //
 // A ordem é a de tools/sprites/personagem.py: corpo, as duas peças, cabelo,
 // óculos, olhos e crachá.
@@ -32,11 +36,14 @@ export function carregarCamadas(cena) {
 // texturas e animações do jogador nas três cadeiras
 export function montarJogador(cena, aparencia) {
     Object.keys(CADEIRAS).forEach(function (cadeira) {
-        substituirTextura(cena, "corpo_jogador_" + cadeira,
+        gravarTextura(cena, "corpo_jogador_" + cadeira,
             folhaDoCorpo(cena, aparencia, cadeira), MEDIDAS.largura, MEDIDAS.altura);
-        substituirTextura(cena, "retrato_jogador_" + cadeira,
+        gravarTextura(cena, "retrato_jogador_" + cadeira,
             folhaDoRetrato(cena, aparencia, cadeira), larguraDoRetrato(), alturaDoRetrato());
-        criarAnimacoesDoCorpo(cena, "jogador_" + cadeira);
+
+        if (!cena.anims.exists("jogador_" + cadeira + "_andando")) {
+            criarAnimacoesDoCorpo(cena, "jogador_" + cadeira);
+        }
     });
 }
 
@@ -204,10 +211,15 @@ function novaTela(largura, altura) {
     return tela;
 }
 
-// troca a textura inteira, com um quadro numerado para cada célula
-function substituirTextura(cena, chave, tela, largura, altura) {
+// redesenha a textura que já existe; remover e recriar deixaria os sprites
+// na tela apontando para quadros destruídos
+function gravarTextura(cena, chave, tela, largura, altura) {
     if (cena.textures.exists(chave)) {
-        cena.textures.remove(chave);
+        const textura = cena.textures.get(chave);
+        textura.context.clearRect(0, 0, textura.width, textura.height);
+        textura.context.drawImage(tela, 0, 0);
+        textura.refresh();
+        return;
     }
 
     const textura = cena.textures.addCanvas(chave, tela);
@@ -217,14 +229,8 @@ function substituirTextura(cena, chave, tela, largura, altura) {
     }
 }
 
-// parado e andando a partir da folha corpo_<chave>; refaz se já existirem
+// parado e andando a partir da folha corpo_<chave>
 export function criarAnimacoesDoCorpo(cena, chave) {
-    [chave + "_parado", chave + "_andando"].forEach(function (animacao) {
-        if (cena.anims.exists(animacao)) {
-            cena.anims.remove(animacao);
-        }
-    });
-
     cena.anims.create({
         key: chave + "_parado",
         frames: [{key: "corpo_" + chave, frame: 0}],
