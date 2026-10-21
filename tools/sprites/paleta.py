@@ -7,10 +7,14 @@ CONTORNO = "#2b3348"
 # ------------------------------------------------------------------
 # personagens
 
+# do mais claro ao mais escuro; os seis são os do editor de personagem.
+# Mais escuro que "escura", os olhos (em CONTORNO) deixam de aparecer
 TOM_DE_PELE = {
     "clara": "#f1d3bb",
+    "dourada": "#e8c09a",
     "media": "#dcab85",
     "parda": "#b07a50",
+    "acobreada": "#96633f",
     "escura": "#7d4f31",
 }
 
@@ -21,7 +25,12 @@ COR_DE_CABELO = {
     "grisalho": "#b6b3ac",
     "loiro": "#d9bb6e",
     "verde_agua": "#49c9bb",
+    "ruivo": "#a8452a",
 }
+
+# as cores de cabelo sugeridas no editor, as mesmas de CORES_PADRAO.cabelo
+# em src/dados/aparencia.js
+CABELOS_DO_EDITOR = ("loiro", "castanho", "grisalho", "preto", "ruivo")
 
 COR_DE_ROUPA = {
     "vermelho": "#c0392b",

@@ -31,7 +31,56 @@ export const ESTILOS_DE_CABELO = [
     "coque_baixo", "topete", "rabo_cavalo"
 ];
 
-// o avatar de antes do editor; oculos é a cor da armação ou null
+// ------------------------------------------------------------------
+// catálogo do editor
+
+// do mais claro ao mais escuro: dois claros, um médio e três escuros. A pele
+// fica só nestes tons, sem seletor livre; mais escuro que o último, os olhos
+// deixam de aparecer
+export const TONS_DE_PELE = [
+    "#f1d3bb",
+    "#e8c09a",
+    "#dcab85",
+    "#b07a50",
+    "#96633f",
+    "#7d4f31"
+];
+
+const CORES_DE_ROUPA = [
+    {nome: "Branco", cor: "#f4f6fa"},
+    {nome: "Cinza-claro", cor: "#aab4c4"},
+    {nome: "Cinza-azulado", cor: "#6b7a90"},
+    {nome: "Azul-petróleo", cor: "#1f6f8b"},
+    {nome: "Verde-escuro", cor: "#3f7a52"},
+    {nome: "Vermelho", cor: "#c0392b"},
+    {nome: "Laranja", cor: "#e08a3c"},
+    {nome: "Bege", cor: "#c9a96a"},
+    {nome: "Roxo", cor: "#7a4bb5"},
+    {nome: "Lilás", cor: "#a87fc4"}
+];
+
+// as cores sugeridas de cada categoria; todas também têm o seletor livre
+export const CORES_PADRAO = {
+    cabelo: [
+        {nome: "Loiro", cor: "#d9bb6e"},
+        {nome: "Castanho", cor: "#5d3a20"},
+        {nome: "Grisalho", cor: "#b6b3ac"},
+        {nome: "Preto", cor: "#171320"},
+        {nome: "Ruivo", cor: "#a8452a"}
+    ],
+    superior: CORES_DE_ROUPA,
+    interna: CORES_DE_ROUPA,
+    inferior: [{nome: "Azul-marinho", cor: "#39465c"}].concat(CORES_DE_ROUPA),
+    oculos: [
+        {nome: "Cinza", cor: "#7b88a5"},
+        {nome: "Preto", cor: "#2b3348"},
+        {nome: "Marrom", cor: "#8a5f3c"},
+        {nome: "Vermelho", cor: "#c0392b"}
+    ]
+};
+
+// o avatar de antes do editor, para onde o RESET volta; oculos é a cor da
+// armação ou null, sem óculos
 export const APARENCIA_PADRAO = {
     pele: "#dcab85",
     estiloDeCabelo: "curto_liso",
