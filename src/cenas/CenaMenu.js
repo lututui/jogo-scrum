@@ -7,6 +7,7 @@
 import {apagarProgresso, temProgresso} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
+import {aplicarPerfil} from "../ui/montarJogador.js";
 import {abrirConfiguracoes} from "./CenaConfiguracoes.js";
 import {abrirGlossario} from "./CenaGlossario.js";
 import {abrirGuia} from "./CenaGuia.js";
@@ -14,10 +15,13 @@ import {abrirGuia} from "./CenaGuia.js";
 const LARGURA_DA_LISTA = 420;
 const TOPO_DA_LISTA = 196;
 
+const ALTURA_DA_LINHA = 34;
+
 const OPCOES = {
     comecar: {id: "comecar", titulo: "COMEÇAR"},
     continuar: {id: "continuar", titulo: "CONTINUAR"},
     novaPartida: {id: "novaPartida", titulo: "NOVA PARTIDA"},
+    personagem: {id: "personagem", titulo: "PERSONAGEM"},
     guia: {id: "guia", titulo: "GUIA"},
     glossario: {id: "glossario", titulo: "GLOSSÁRIO"},
     configuracoes: {id: "configuracoes", titulo: "CONFIGURAÇÕES"}
@@ -73,7 +77,7 @@ export class CenaMenu extends Phaser.Scene {
             ? [OPCOES.continuar, OPCOES.novaPartida]
             : [OPCOES.comecar];
 
-        return inicio.concat([OPCOES.guia, OPCOES.glossario, OPCOES.configuracoes]);
+        return inicio.concat([OPCOES.personagem, OPCOES.guia, OPCOES.glossario, OPCOES.configuracoes]);
     }
 
     montarLista() {
@@ -84,6 +88,7 @@ export class CenaMenu extends Phaser.Scene {
             y: TOPO_DA_LISTA,
             largura: LARGURA_DA_LISTA,
             centralizar: true,
+            alturaDaLinha: ALTURA_DA_LINHA,
             opcoes: this.opcoes(),
             aoConfirmar: function (opcao) {
                 cena.escolher(opcao);
@@ -98,6 +103,8 @@ export class CenaMenu extends Phaser.Scene {
 
         if (opcao.id === "comecar" || opcao.id === "continuar") {
             this.scene.start("CenaSelecaoDePapel");
+        } else if (opcao.id === "personagem") {
+            this.scene.start("CenaEditor", {depois: "CenaMenu", voltar: "CenaMenu"});
         } else if (opcao.id === "novaPartida") {
             this.pedirNovaPartida();
         } else if (opcao.id === "guia") {
@@ -113,6 +120,7 @@ export class CenaMenu extends Phaser.Scene {
     pedirNovaPartida() {
         if (this.confirmandoNovaPartida) {
             apagarProgresso(this.registry);
+            aplicarPerfil(this);
             this.registry.set("cadeira", null);
             this.scene.start("CenaSelecaoDePapel");
             return;

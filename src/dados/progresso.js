@@ -9,7 +9,8 @@
 // para exibição e a cadeira volta ao começo, pronta para ser jogada de novo.
 //
 // O estado vive no registry durante a partida e é gravado no navegador a cada
-// mudança, sem servidor nem cadastro.
+// mudança, sem servidor nem cadastro. O perfil do jogador (dados/perfil.js)
+// também mora aqui, para que Nova partida o apague junto.
 
 import {ORDEM_DAS_CADEIRAS} from "./cadeiras.js";
 import {CONQUISTAS} from "./conquistas.js";
@@ -81,7 +82,8 @@ function progressoVazio() {
             return 0;
         }),
         conquistas: [],
-        guiaVisto: false
+        guiaVisto: false,
+        perfil: null
     };
 }
 

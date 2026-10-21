@@ -28,7 +28,9 @@ export const COR_HEX = {
     alertaSuave: 0xfaeceb,
     destaque: 0x1f6f8b,
     selecao: 0xe8f1f5,
-    sombra: 0xd7dfec
+    sombra: 0xd7dfec,
+    listraClara: 0xe7ebf4,
+    listraEscura: 0xc9d3e6
 };
 
 // Tipos de item do quadro, com a cor que identifica cada um

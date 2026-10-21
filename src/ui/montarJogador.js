@@ -21,6 +21,7 @@ import {
 } from "../dados/aparencia.js";
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {EXPRESSOES} from "../dados/expressoes.js";
+import {aparenciaDoJogador} from "../dados/perfil.js";
 
 const PREFIXO = "camada_";
 
@@ -31,6 +32,11 @@ export function carregarCamadas(cena) {
     folhasDeCamada(EXPRESSOES).forEach(function (nome) {
         cena.load.image(PREFIXO + nome, "assets/camadas/" + nome + ".png");
     });
+}
+
+// o jogador com a aparência do perfil salvo, ou a padrão se não houver
+export function aplicarPerfil(cena) {
+    montarJogador(cena, aparenciaDoJogador(cena.registry));
 }
 
 // texturas e animações do jogador nas três cadeiras
@@ -45,6 +51,13 @@ export function montarJogador(cena, aparencia) {
             criarAnimacoesDoCorpo(cena, "jogador_" + cadeira);
         }
     });
+}
+
+// a prévia do editor: parado, expressão neutra e sem crachá, numa textura
+// própria, para o jogador de verdade só mudar quando o perfil for confirmado
+export function montarPrevia(cena, aparencia) {
+    gravarTextura(cena, "previa",
+        comporQuadro(cena, aparencia, 0, EXPRESSOES[0], null), MEDIDAS.largura, MEDIDAS.altura);
 }
 
 // ------------------------------------------------------------------

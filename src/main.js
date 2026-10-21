@@ -19,6 +19,7 @@ import {CenaMenu} from "./cenas/CenaMenu.js";
 import {CenaConfiguracoes} from "./cenas/CenaConfiguracoes.js";
 import {CenaFPS} from "./cenas/CenaFPS.js";
 import {CenaFim} from "./cenas/CenaFim.js";
+import {CenaEditor} from "./cenas/CenaEditor.js";
 
 const LARGURA = 960;
 const ALTURA = 540;
@@ -30,6 +31,8 @@ const configuracao = {
     height: ALTURA,
     backgroundColor: COR.fundo,
     pixelArt: true,
+    // o editor de personagem põe campos do HTML por cima do canvas
+    dom: {createContainer: true},
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -44,6 +47,7 @@ const configuracao = {
         CenaCarregamento,
         CenaMenu,
         CenaSelecaoDePapel,
+        CenaEditor,
         CenaEscritorio,
         CenaKanban,
         CenaAgenda,

@@ -1,9 +1,8 @@
 // Cena de carregamento
 
-import {APARENCIA_PADRAO} from "../dados/aparencia.js";
 import {ELENCO} from "../dados/elenco.js";
 import {COR, FONTE} from "../dados/tema.js";
-import {carregarCamadas, criarAnimacoesDoCorpo, montarJogador} from "../ui/montarJogador.js";
+import {aplicarPerfil, carregarCamadas, criarAnimacoesDoCorpo} from "../ui/montarJogador.js";
 import {aplicarFps} from "./CenaFPS.js";
 
 const LARGURA_CORPO = 32;
@@ -57,7 +56,7 @@ export class CenaCarregamento extends Phaser.Scene {
 
     create() {
         this.criarAnimacoes();
-        montarJogador(this, APARENCIA_PADRAO);
+        aplicarPerfil(this);
         aplicarFps(this);
         this.scene.start("CenaMenu");
     }
