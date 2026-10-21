@@ -18,7 +18,9 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import gerar_sprites as sprites
+from sprites.elenco import ELENCO, EXPRESSOES
+from sprites.medidas import RECORTE_RETRATO
+from sprites.personagem import montar
 from folhas_comuns import (
     COR_DA_LINHA_GUIA,
     COR_DE_FUNDO,
@@ -44,8 +46,8 @@ ALTURA_DO_CABECALHO = 26
 
 
 def recortar_cabeca(receita, expressao, escala):
-    corpo = sprites.montar(receita, frame=0, expressao=expressao)
-    return ampliar(corpo.crop(sprites.RECORTE_RETRATO), escala)
+    corpo = montar(receita, frame=0, expressao=expressao)
+    return ampliar(corpo.crop(RECORTE_RETRATO), escala)
 
 
 def desenhar_folha(chaves, escala, titulo):
@@ -55,12 +57,12 @@ def desenhar_folha(chaves, escala, titulo):
     fonte_cabecalho = carregar_fonte(13)
     fonte_titulo = carregar_fonte(17)
 
-    amostra = recortar_cabeca(sprites.ELENCO[chaves[0]], sprites.EXPRESSOES[0], escala)
+    amostra = recortar_cabeca(ELENCO[chaves[0]], EXPRESSOES[0], escala)
     largura_da_celula = amostra.width + ESPACO_ENTRE_CELULAS
     altura_da_celula = amostra.height + ESPACO_ENTRE_CELULAS
 
     topo = MARGEM + (30 if titulo else 0) + ALTURA_DO_CABECALHO
-    largura = MARGEM * 2 + LARGURA_DA_COLUNA_DE_NOMES + largura_da_celula * len(sprites.EXPRESSOES)
+    largura = MARGEM * 2 + LARGURA_DA_COLUNA_DE_NOMES + largura_da_celula * len(EXPRESSOES)
     altura = topo + altura_da_celula * len(chaves) + MARGEM
 
     folha = Image.new("RGB", (largura, altura), COR_DE_FUNDO)
@@ -71,7 +73,7 @@ def desenhar_folha(chaves, escala, titulo):
 
     origem_x = MARGEM + LARGURA_DA_COLUNA_DE_NOMES
 
-    for coluna, expressao in enumerate(sprites.EXPRESSOES):
+    for coluna, expressao in enumerate(EXPRESSOES):
         centro = origem_x + coluna * largura_da_celula + largura_da_celula / 2
         escrever_centralizado(
             d, centro, topo - ALTURA_DO_CABECALHO + 4, rotular_expressao(expressao),
@@ -79,7 +81,7 @@ def desenhar_folha(chaves, escala, titulo):
         )
 
     for linha, chave in enumerate(chaves):
-        receita = sprites.ELENCO[chave]
+        receita = ELENCO[chave]
         nome, papel = descrever(chave, catalogo)
         y = topo + linha * altura_da_celula
 
@@ -93,7 +95,7 @@ def desenhar_folha(chaves, escala, titulo):
                 fill=COR_DO_TEXTO_SECUNDARIO,
             )
 
-        for coluna, expressao in enumerate(sprites.EXPRESSOES):
+        for coluna, expressao in enumerate(EXPRESSOES):
             cabeca = recortar_cabeca(receita, expressao, escala)
             x = origem_x + coluna * largura_da_celula + ESPACO_ENTRE_CELULAS / 2
             destino = (int(x), int(y + ESPACO_ENTRE_CELULAS / 2))
@@ -120,11 +122,11 @@ def main():
     parser.add_argument("--titulo", default="", help="título; vazio para omitir")
     argumentos = parser.parse_args()
 
-    desconhecidos = [c for c in argumentos.personagens if c not in sprites.ELENCO]
+    desconhecidos = [c for c in argumentos.personagens if c not in ELENCO]
     if desconhecidos:
         parser.error(
             "personagem não encontrado: %s. Disponíveis: %s"
-            % (", ".join(desconhecidos), ", ".join(sprites.ELENCO))
+            % (", ".join(desconhecidos), ", ".join(ELENCO))
         )
 
     folha = desenhar_folha(argumentos.personagens, argumentos.escala, argumentos.titulo)

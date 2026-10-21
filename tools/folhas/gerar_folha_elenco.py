@@ -13,7 +13,8 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import gerar_sprites as sprites
+from sprites.elenco import ELENCO
+from sprites.personagem import montar
 from folhas_comuns import (
     COR_DA_LINHA_GUIA,
     COR_DE_FUNDO,
@@ -37,10 +38,10 @@ def montar_cartoes(escala):
     catalogo = nomes_do_elenco()
     cartoes = []
 
-    for chave, receita in sprites.ELENCO.items():
+    for chave, receita in ELENCO.items():
         nome, papel = descrever(chave, catalogo)
         cartoes.append({
-            "imagem": ampliar(sprites.montar(receita), escala),
+            "imagem": ampliar(montar(receita), escala),
             "nome": nome,
             "papel": papel,
         })

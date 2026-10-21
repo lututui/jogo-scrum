@@ -1,7 +1,7 @@
 // Expressões dos retratos
 //
-// O quadro de cada expressão segue a ordem em que tools/gerar_sprites.py
-// monta as folhas de retrato.
+// O quadro de cada expressão segue a ordem de EXPRESSOES em
+// tools/sprites/elenco.py, a mesma das folhas de retrato.
 //
 // O mentor reage à decisão que comenta: aprova o que segue o princípio, fica
 // neutro diante do que tem custo e tenso diante do que vai contra.
