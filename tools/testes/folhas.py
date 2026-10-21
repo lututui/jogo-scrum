@@ -4,7 +4,7 @@ import os
 
 from PIL import Image
 
-from sprites.camadas import MARCADOR, folhas_de_camada
+from sprites.camadas import MARCADORES, folhas_de_camada
 from sprites.medidas import ALTURA_SPRITE, LARGURA_SPRITE
 
 
@@ -12,7 +12,7 @@ def para_rgba(cor):
     return Image.new("RGBA", (1, 1), cor).getpixel((0, 0))
 
 
-MARCADOR_RGBA = para_rgba(MARCADOR)
+MARCADORES_RGBA = [para_rgba(marcador) for marcador in MARCADORES]
 
 
 def carregar_folhas(pasta):
@@ -22,15 +22,16 @@ def carregar_folhas(pasta):
     return folhas
 
 
-# troca só os pixels exatamente magenta
-def recolorir(imagem, cor):
+# troca só os pixels exatamente no marcador; a primeira cor vai para o
+# primeiro marcador, a segunda para o segundo
+def recolorir(imagem, cores):
+    trocas = {MARCADORES_RGBA[i]: para_rgba(cor) for i, cor in enumerate(cores)}
     nova = imagem.copy()
     pixels = nova.load()
-    destino = para_rgba(cor)
     for y in range(nova.height):
         for x in range(nova.width):
-            if pixels[x, y] == MARCADOR_RGBA:
-                pixels[x, y] = destino
+            if pixels[x, y] in trocas:
+                pixels[x, y] = trocas[pixels[x, y]]
     return nova
 
 
@@ -40,5 +41,5 @@ def quadro(folha, frame):
 
 
 # põe o quadro da folha, já recolorido, por cima da base
-def empilhar(base, folha, frame, cor):
-    base.alpha_composite(recolorir(quadro(folha, frame), cor))
+def empilhar(base, folha, frame, *cores):
+    base.alpha_composite(recolorir(quadro(folha, frame), cores))

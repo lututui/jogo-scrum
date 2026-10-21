@@ -1,5 +1,7 @@
 # Elenco
 
+from .paleta import COR_DE_CABELO, COR_DE_CALCA, COR_DE_ROUPA, TOM_DE_PELE
+
 # cada personagem é uma combinação: cabelo, cor do cabelo, roupa, acessório, pele
 ELENCO = {
     "marcia": ("franja_reta", "preto", "vermelho", "oculos", "clara"),
@@ -14,6 +16,20 @@ ELENCO = {
 }
 
 AVATAR_DO_JOGADOR = ("curto_liso", "castanho", "branco", None, "media")
+
+# o mesmo avatar como o editor de personagem vai guardar: peças por nome,
+# cores em #rrggbb com a chave da categoria; oculos é a cor da armação ou None
+APARENCIA_PADRAO = {
+    "pele": TOM_DE_PELE["media"],
+    "estilo_de_cabelo": "curto_liso",
+    "cabelo": COR_DE_CABELO["castanho"],
+    "peca_de_cima": "camiseta",
+    "superior": COR_DE_ROUPA["branco"],
+    "interna": COR_DE_ROUPA["cinza_claro"],
+    "peca_de_baixo": "calca",
+    "inferior": COR_DE_CALCA,
+    "oculos": None,
+}
 
 # as três expressões de retrato, na ordem em que entram nas folhas
 EXPRESSOES = ("neutro", "tenso", "aprovacao")

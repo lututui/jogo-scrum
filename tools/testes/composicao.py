@@ -1,10 +1,12 @@
 # Composição por camadas
 #
-# Mesma ordem de sprites.personagem.montar, mas a partir das folhas.
+# Mesma ordem de sprites.personagem, mas a partir das folhas.
 
 from PIL import Image, ImageDraw
 
 from sprites.acessorios import ACESSORIOS, desenhar_acessorio
+from sprites.camadas import folhas_de_camada
+from sprites.corpo import ordem_das_pecas
 from sprites.elenco import EXPRESSOES
 from sprites.medidas import (
     ALTURA_RETRATO,
@@ -49,6 +51,35 @@ def compor(folhas, spec, frame=0, expressao="neutro", cadeira=None):
     # fone e objetos na mão são só dos NPCs e não viraram camada
     if acessorio in ACESSORIOS:
         desenhar_acessorio(ImageDraw.Draw(img), acessorio)
+
+    if cadeira:
+        empilhar(img, folhas["cracha"], frame, COR_DE_CRACHA[cadeira])
+
+    return img
+
+
+# a folha da peça com as cores que ela pede, tiradas da aparência
+def empilhar_peca(img, folhas, nome, frame, aparencia):
+    _, categorias = folhas_de_camada()[nome]
+    empilhar(img, folhas[nome], frame, *[aparencia[c] for c in categorias])
+
+
+# o jogador a partir da aparência do editor, como o jogo fará
+def compor_jogador(folhas, aparencia, frame=0, expressao="neutro", cadeira=None):
+    pele = aparencia["pele"]
+    cabelo = aparencia["cabelo"]
+
+    img = Image.new("RGBA", (LARGURA_SPRITE, ALTURA_SPRITE), TRANSPARENTE)
+    empilhar(img, folhas["corpo"], frame, pele)
+    for nome in ordem_das_pecas(aparencia):
+        empilhar_peca(img, folhas, nome, frame, aparencia)
+    empilhar(img, folhas["cabelo_" + aparencia["estilo_de_cabelo"]], frame, cabelo)
+
+    if aparencia["oculos"]:
+        empilhar(img, folhas["oculos"], frame, aparencia["oculos"])
+
+    fundo = fundo_da_sobrancelha(img, pele)
+    empilhar(img, folhas["olhos_" + expressao], frame, cor_da_sobrancelha(cabelo, fundo))
 
     if cadeira:
         empilhar(img, folhas["cracha"], frame, COR_DE_CRACHA[cadeira])
