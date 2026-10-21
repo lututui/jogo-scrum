@@ -42,11 +42,10 @@ export class CenaFim extends Phaser.Scene {
         });
 
         this.add.text(MARGEM, 62,
-            "Você viveu a mesma sprint pelas três cadeiras do time. Como Product "
-            + "Owner, decidiu o que valia a pena; como Scrum Master, cuidou para "
-            + "que o processo funcionasse; como Desenvolvedor, respondeu pelo que "
-            + "foi construído. O que mudou entre elas foi o lugar de onde cada "
-            + "decisão é vista.", {
+            "Você viveu a mesma sprint pelas três cadeiras do time: no lugar de "
+            + "quem decide o que vale a pena construir, de quem cuida do processo "
+            + "e de quem responde pelo que é construído. A tabela mostra como foi "
+            + "a última sprint em cada uma.", {
                 fontFamily: FONTE,
                 fontSize: "13px",
                 color: COR.texto,

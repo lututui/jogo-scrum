@@ -133,9 +133,20 @@ export class CenaSprintReview extends CenaReuniao {
         const mostrouPlanejado = demonstrados.some(function (opcao) {
             return opcao.item.planejado;
         });
-        const resultado = houveDemonstracao
-            ? this.evento.fechamento.comItens
-            : this.evento.fechamento.semItens;
+        // Mostrar só o que está pronto respeita a Definition of Done e pontua
+        // como boa; o texto e a reação do mentor também olham o formato, porque
+        // sem uso pela escola a inspeção fica pela metade
+        const comUso = houveDemonstracao && this.formato.gerarFeedbackDoUsuario;
+        let resultado = this.evento.fechamento.semItens;
+        let reacao = "ruim";
+
+        if (comUso) {
+            resultado = this.evento.fechamento.comItens;
+            reacao = "boa";
+        } else if (houveDemonstracao) {
+            resultado = this.evento.fechamento.comItensSemUso;
+            reacao = "media";
+        }
 
         this.pontuar({
             avaliacao: houveDemonstracao ? "boa" : "ruim",
@@ -143,14 +154,14 @@ export class CenaSprintReview extends CenaReuniao {
             conceito: houveDemonstracao ? null : this.evento.fechamento.semItens.conceito
         });
 
-        if (houveDemonstracao && this.formato.gerarFeedbackDoUsuario) {
+        if (comUso) {
             acrescentarItem(this.registry, this.cadeira(), Object.assign(
                 {id: ID_DO_FEEDBACK}, this.evento.feedbackDoUsuario
             ), "afazer");
         }
 
         const cena = this;
-        this.comentarDecisao(houveDemonstracao ? "boa" : "ruim", resultado.feedback, resultado.principio, function () {
+        this.comentarDecisao(reacao, resultado.feedback, resultado.principio, function () {
             cena.sair();
         });
     }

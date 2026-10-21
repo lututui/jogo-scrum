@@ -46,6 +46,7 @@ export class CenaReuniao extends Phaser.Scene {
         this.pergunta = null;
         this.aviso = null;
         this.emAndamento = false;
+        this.avaliacoesDaReuniao = [];
 
         this.montarSala();
         this.montarBarra();
@@ -368,7 +369,26 @@ export class CenaReuniao extends Phaser.Scene {
             marca: opcao.marca,
             conceito: opcao.conceito
         });
+
+        if (opcao.avaliacao) {
+            this.avaliacoesDaReuniao.push(opcao.avaliacao);
+        }
         this.travarSaida();
+    }
+
+    // Todas as decisões desta reunião seguiram o princípio, só parte delas ou
+    // nenhuma
+    resultadoDaReuniao() {
+        const avaliacoes = this.avaliacoesDaReuniao;
+        const boas = avaliacoes.filter(function (avaliacao) {
+            return avaliacao === "boa";
+        }).length;
+
+        if (avaliacoes.length > 0 && boas === avaliacoes.length) {
+            return "boa";
+        }
+
+        return boas === 0 ? "ruim" : "media";
     }
 
     // Depois da primeira decisão a reunião vai até o fim.
@@ -401,7 +421,14 @@ export class CenaReuniao extends Phaser.Scene {
             return;
         }
 
-        this.falarComoMentor(fechamento.texto, fechamento.principio, function () {
+        const resultado = this.resultadoDaReuniao();
+        const texto = {
+            boa: fechamento.texto,
+            media: fechamento.textoComCusto,
+            ruim: fechamento.textoContra
+        }[resultado] || fechamento.texto;
+
+        this.comentarDecisao(resultado, texto, fechamento.principio, function () {
             cena.sair();
         });
     }

@@ -11,6 +11,10 @@
 // desenvolvedores e o Scrum Master a facilita; no Planning o Product Owner
 // propõe a meta, que o time define junto; a Review é do time com a escola, e
 // o Product Owner é quem recebe a escola.
+//
+// O fechamento de quem participa tem três textos: "texto" quando todas as
+// decisões seguiram o princípio, "textoComCusto" quando só parte delas, e
+// "textoContra" quando nenhuma.
 
 export const PAPEIS_DOS_EVENTOS = {
 
@@ -111,6 +115,8 @@ export const PAPEIS_DOS_EVENTOS = {
             fechamento: {
                 texto: "A meta saiu do time, e não da sala ao lado. Foi isso que "
                     + "você facilitou hoje.",
+                textoComCusto: "A meta saiu, mas não inteira do time: numa das conversas a resposta veio de você, e não deles.",
+                textoContra: "O plano saiu com compromissos que o time não fez. Quando a sprint apertar, vão cobrar de quem não prometeu.",
                 principio: "O Sprint Planning é do time; o facilitador cuida das condições, não do conteúdo."
             }
         },
@@ -196,6 +202,8 @@ export const PAPEIS_DOS_EVENTOS = {
             fechamento: {
                 texto: "O plano saiu com o tamanho que a gente acredita e com a "
                     + "ordem que funciona. Dá para começar segunda sem susto.",
+                textoComCusto: "O plano fechou com uma ponta solta. Ela vai aparecer no meio da semana, quando custa mais.",
+                textoContra: "O plano tem o tamanho que agradou, e não o que a gente acredita. A conta chega antes da Review.",
                 principio: "O time decide quanto cabe na sprint e como o trabalho se organiza."
             }
         }
@@ -297,6 +305,8 @@ export const PAPEIS_DOS_EVENTOS = {
             fechamento: {
                 texto: "Foi uma Daily de time: o que você disse mudou o que as "
                     + "outras pessoas fizeram no mesmo dia.",
+                textoComCusto: "Parte do que travava apareceu; a outra parte ficou com você. Amanhã ela volta maior.",
+                textoContra: "A Daily passou e ninguém soube o que estava travado. O time saiu dela do mesmo jeito que entrou.",
                 principio: "Inspeção diária só funciona com transparência sobre o que está travado."
             }
         },
@@ -381,6 +391,8 @@ export const PAPEIS_DOS_EVENTOS = {
             fechamento: {
                 texto: "Você falou duas vezes em quinze minutos, e as duas "
                     + "destravaram alguém. É mais ou menos essa a medida.",
+                textoComCusto: "Uma das suas falas destravou alguém; a outra atrapalhou. A medida é falar só quando destrava.",
+                textoContra: "A Daily girou em torno de você, e o que travava o time continuou travado.",
                 principio: "O Product Owner serve à Daily sem conduzi-la."
             }
         }
@@ -479,6 +491,8 @@ export const PAPEIS_DOS_EVENTOS = {
             fechamento: {
                 texto: "A escola viu funcionando e apontou o que incomoda. É "
                     + "disso que a próxima sprint precisa.",
+                textoComCusto: "A escola usou o sistema, mas parte do que ela disse não chegou ao Product Backlog.",
+                textoContra: "A escola saiu sem ter usado o sistema de verdade, e com uma promessa que não está em lugar nenhum.",
                 principio: "O incremento existe para ser inspecionado em uso."
             }
         },
@@ -564,6 +578,8 @@ export const PAPEIS_DOS_EVENTOS = {
             fechamento: {
                 texto: "A reunião fez o que devia: mostrou o que existe e trouxe "
                     + "o que a escola precisa. Sem discurso.",
+                textoComCusto: "A reunião mostrou o que existe, mas não sem tropeço: numa das horas o propósito dela escapou.",
+                textoContra: "A Review virou apresentação: o time não se organizou para mostrar, e a conversa saiu do que existe.",
                 principio: "O facilitador cuida do propósito do evento, e não do seu conteúdo."
             }
         }
@@ -663,6 +679,8 @@ export const PAPEIS_DOS_EVENTOS = {
             ],
             fechamento: {
                 texto: "Saiu uma ação com dono, e você é parte do que a sustenta.",
+                textoComCusto: "A ação saiu, mas a sua parte nela ficou pela metade. O time vai notar na próxima retrospectiva.",
+                textoContra: "A retrospectiva virou defesa e condição. A ação existe no papel; sem você, ela não se sustenta.",
                 principio: "Inspeção e adaptação fecham o ciclo com compromisso, não com lista."
             }
         },
@@ -746,6 +764,8 @@ export const PAPEIS_DOS_EVENTOS = {
             fechamento: {
                 texto: "O que você trouxe virou uma ação do tamanho de uma "
                     + "sprint. É assim que o processo muda.",
+                textoComCusto: "Ficou pela metade: ou o problema não chegou à mesa, ou a ação não cabe numa sprint.",
+                textoContra: "A próxima sprint começa igual: o problema que custou retrabalho não virou ação que caiba nela.",
                 principio: "Inspeção e adaptação fecham o ciclo: a sprint seguinte começa diferente."
             }
         }

@@ -292,10 +292,10 @@ export class CenaSintese extends Phaser.Scene {
                 + "faltam mostram o outro lado das decisões que você tomou aqui.";
         }
 
-        return "Você viveu a mesma sprint das três cadeiras: negociou o escopo, "
-            + "protegeu o acordo do time e recebeu a pressão direta de quem "
-            + "executa. O pedido de última hora, o dado que não veio e o atalho "
-            + "técnico foram os mesmos; o que mudou foi de onde você os enxergou.";
+        return "Você viveu a mesma sprint das três cadeiras: o escopo a negociar, "
+            + "o acordo do time a proteger e a pressão de quem executa. O pedido de "
+            + "última hora, o dado que não veio e o atalho técnico foram os mesmos; "
+            + "o que mudou foi de onde você os enxergou.";
     }
 
     tituloDoBloco(x, y, texto) {

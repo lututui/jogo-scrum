@@ -112,6 +112,14 @@ export const SPRINT_PLANNING = {
                 + "serve ao mesmo resultado.",
             principio: "O Sprint Backlog é o plano dos desenvolvedores para alcançar a meta."
         },
+        // Itens coerentes entre si, mas a meta dita não é a que os une
+        semMeta: {
+            conceito: "Meta da sprint",
+            feedback: "Os itens escolhidos servem a um resultado só, mas a meta "
+                + "dita na sala não é esse resultado. O time vai seguir a lista, "
+                + "e não a meta.",
+            principio: "A meta é o que dá sentido ao Sprint Backlog; sem ela, o plano é só uma lista."
+        },
         disperso: {
             conceito: "Sprint Backlog",
             feedback: "Entraram itens que não servem à meta. Eles competem por "
@@ -306,6 +314,12 @@ export const SPRINT_REVIEW = {
             feedback: "A escola viu funcionando o que a sprint prometeu, e o que "
                 + "ela pediu agora entra no Product Backlog para ser ordenado.",
             principio: "A Review termina com o Product Backlog adaptado ao que se aprendeu."
+        },
+        // Itens prontos mostrados por slides ou relatório, sem uso pela escola
+        comItensSemUso: {
+            feedback: "Os itens prontos foram mostrados, mas ninguém da escola usou "
+                + "o sistema. O que não apareceu hoje vai aparecer depois, já em uso.",
+            principio: "A Review é inspeção do incremento com quem vai usá-lo."
         },
         semItens: {
             conceito: "Incremento",

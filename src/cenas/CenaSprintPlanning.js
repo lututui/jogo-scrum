@@ -179,6 +179,13 @@ export class CenaSprintPlanning extends CenaReuniao {
         if (fora.length > 0) {
             return Object.assign({avaliacao: "media"}, this.evento.fechamento.disperso);
         }
+
+        // Os itens alinhados servem à meta boa; com outra meta, eles não são
+        // coerentes com o que foi dito na sala
+        if (!this.meta || this.meta.avaliacao !== "boa") {
+            return Object.assign({avaliacao: "media"}, this.evento.fechamento.semMeta);
+        }
+
         return Object.assign({avaliacao: "boa"}, this.evento.fechamento.alinhado);
     }
 }
