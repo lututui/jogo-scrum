@@ -1,34 +1,24 @@
 // Estado do quadro Kanban
 //
-// O quadro é escrito pela sua cena e lido pelas cenas de evento. A
-// chave do registry e as operações vivem aqui e não em uma cena.
+// O quadro é escrito pela sua cena e lido pelas cenas de evento. Cada cadeira
+// tem o seu, guardado na sprint dela: é salvo no navegador com o progresso e
+// volta ao estado inicial quando a sprint fecha.
 
-import {ITENS_INICIAIS} from "./quadro.js";
+import {quadroDaCadeira, salvarQuadroDaCadeira} from "./progresso.js";
 
-export const CHAVE_DO_ESTADO = "itensDoQuadro";
-
-export function lerItensDoQuadro(registry) {
-    const salvos = registry.get(CHAVE_DO_ESTADO);
-    if (salvos) {
-        return salvos;
-    }
-
-    const copia = ITENS_INICIAIS.map(function(item) {
-        return Object.assign({}, item);
-    });
-    registry.set(CHAVE_DO_ESTADO, copia);
-    return copia;
+export function lerItensDoQuadro(registry, cadeira) {
+    return quadroDaCadeira(registry, cadeira);
 }
 
-export function salvarItensDoQuadro(registry, itens) {
-    registry.set(CHAVE_DO_ESTADO, itens);
+export function salvarItensDoQuadro(registry, cadeira, itens) {
+    salvarQuadroDaCadeira(registry, cadeira, itens);
 }
 
 // Usado pelo Planning, que enche a coluna A FAZER, e pela Review, que devolve
 // ao quadro o que a escola pediu
-export function acrescentarItem(registry, item, coluna) {
-    const itens = lerItensDoQuadro(registry);
-    const jaExiste = itens.some(function(existente) {
+export function acrescentarItem(registry, cadeira, item, coluna) {
+    const itens = lerItensDoQuadro(registry, cadeira);
+    const jaExiste = itens.some(function (existente) {
         return existente.id === item.id;
     });
 
@@ -37,12 +27,12 @@ export function acrescentarItem(registry, item, coluna) {
     }
 
     itens.push(Object.assign({}, item, {coluna: coluna}));
-    salvarItensDoQuadro(registry, itens);
+    salvarItensDoQuadro(registry, cadeira, itens);
     return itens;
 }
 
-export function itensDaColuna(registry, coluna) {
-    return lerItensDoQuadro(registry).filter(function(item) {
+export function itensDaColuna(registry, cadeira, coluna) {
+    return lerItensDoQuadro(registry, cadeira).filter(function (item) {
         return item.coluna === coluna;
     });
 }

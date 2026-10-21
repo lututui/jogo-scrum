@@ -13,6 +13,7 @@
 
 import {ORDEM_DAS_CADEIRAS} from "./cadeiras.js";
 import {CONQUISTAS} from "./conquistas.js";
+import {ITENS_INICIAIS} from "./quadro.js";
 
 export const CHAVE_DO_PROGRESSO = "progresso";
 const CHAVE_NO_NAVEGADOR = "jogo-scrum:progresso";
@@ -33,6 +34,8 @@ const PESO_DA_AVALIACAO = {
     ruim: {pontos: 0, medidores: -8}
 };
 
+export const DIAS_DA_SPRINT = 10;
+
 const MEDIDOR_INICIAL = 50;
 const MEDIDOR_MINIMO = 0;
 const MEDIDOR_MAXIMO = 100;
@@ -46,8 +49,17 @@ function sprintVazia() {
         eventosConcluidos: [],
         contextuaisResolvidos: [],
         marcas: {},
-        conquistas: []
+        conquistas: [],
+        quadro: quadroInicial(),
+        movimentosNoQuadro: 0
     };
+}
+
+// Cada sprint começa com uma cópia do quadro inicial
+function quadroInicial() {
+    return ITENS_INICIAIS.map(function (item) {
+        return Object.assign({}, item, {etiquetas: item.etiquetas.slice()});
+    });
 }
 
 function porCadeira(criar) {
@@ -150,6 +162,50 @@ export function marcarGuiaVisto(registry) {
 // Sprint em andamento na cadeira
 function sprintDaCadeira(registry, cadeira) {
     return lerProgresso(registry).sprints[cadeira];
+}
+
+// O dia avança a cada reunião e a cada evento contextual vivido
+export function diaDaSprint(registry, cadeira) {
+    const sprint = sprintDaCadeira(registry, cadeira);
+    const vividos = sprint.eventosConcluidos.length + sprint.contextuaisResolvidos.length;
+
+    return Math.min(1 + vividos, DIAS_DA_SPRINT);
+}
+
+// ---------------------------------------------------------
+// quadro
+
+// Salvamentos anteriores ao quadro por cadeira não têm o campo
+export function quadroDaCadeira(registry, cadeira) {
+    const progresso = lerProgresso(registry);
+    const sprint = progresso.sprints[cadeira];
+
+    if (!sprint.quadro) {
+        sprint.quadro = quadroInicial();
+        salvarProgresso(registry, progresso);
+    }
+
+    return sprint.quadro;
+}
+
+export function salvarQuadroDaCadeira(registry, cadeira, itens) {
+    const progresso = lerProgresso(registry);
+    progresso.sprints[cadeira].quadro = itens;
+
+    return salvarProgresso(registry, progresso);
+}
+
+// Conta só a troca de coluna; reordenar dentro dela não é movimento
+export function registrarMovimentoNoQuadro(registry, cadeira) {
+    const progresso = lerProgresso(registry);
+    const sprint = progresso.sprints[cadeira];
+    sprint.movimentosNoQuadro = (sprint.movimentosNoQuadro || 0) + 1;
+
+    return salvarProgresso(registry, progresso);
+}
+
+export function moveuNoQuadro(registry, cadeira) {
+    return (sprintDaCadeira(registry, cadeira).movimentosNoQuadro || 0) > 0;
 }
 
 // ---------------------------------------------------------

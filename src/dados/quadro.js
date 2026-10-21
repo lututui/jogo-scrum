@@ -7,6 +7,8 @@ export const COLUNAS = [
     {id: "concluido", titulo: "CONCLUÍDO"}
 ];
 
+// Itens com sprintAnterior já estavam prontos antes desta sprint: ficam no
+// quadro como histórico, mas não podem ser mostrados na Review
 export const ITENS_INICIAIS = [
     {
         id: "it02",
@@ -61,14 +63,16 @@ export const ITENS_INICIAIS = [
         id: "it10",
         tipo: "feature",
         titulo: "Cadastro de turmas",
-        etiquetas: [],
-        coluna: "concluido"
+        etiquetas: ["SPRINT ANTERIOR"],
+        coluna: "concluido",
+        sprintAnterior: true
     },
     {
         id: "it11",
         tipo: "chore",
         titulo: "Padronizar mensagens de erro",
-        etiquetas: [],
-        coluna: "concluido"
+        etiquetas: ["SPRINT ANTERIOR"],
+        coluna: "concluido",
+        sprintAnterior: true
     }
 ];

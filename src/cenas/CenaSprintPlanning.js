@@ -148,12 +148,15 @@ export class CenaSprintPlanning extends CenaReuniao {
 
         const resultado = this.avaliarPlano(marcados);
         this.pontuar(resultado);
+
+        // A marca de planejado é o que a Review procura para a conquista
         marcados.forEach(function (opcao) {
-            acrescentarItem(this.registry, {
+            acrescentarItem(this.registry, this.cadeira(), {
                 id: opcao.item.id,
                 tipo: opcao.item.tipo,
                 titulo: opcao.item.titulo,
-                etiquetas: []
+                etiquetas: [],
+                planejado: true
             }, "afazer");
         }, this);
 

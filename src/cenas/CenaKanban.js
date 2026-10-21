@@ -1,9 +1,18 @@
 // Cena do quadro Kanban
 //
 // O quadro é aberto pelo quadro da parede do escritório.
+//
+// Mostra o quadro da cadeira atual.
+// Coluna com mais cartões do que cabem rola.
 
 import {COLUNAS} from "../dados/quadro.js";
 import {lerItensDoQuadro, salvarItensDoQuadro} from "../dados/estadoDoQuadro.js";
+import {
+    DIAS_DA_SPRINT,
+    diaDaSprint,
+    registrarMovimentoNoQuadro,
+    sprintsConcluidas
+} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ALTURA_CARTAO, CartaoKanban, LARGURA_CARTAO} from "../ui/CartaoKanban.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
@@ -31,6 +40,8 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     create() {
+        this.cadeira = this.registry.get("cadeira") || "po";
+        this.deslocamentos = {};
         this.itens = this.carregarItens();
         this.cartoes = [];
         this.selecao = {coluna: 0, indice: 0};
@@ -47,7 +58,7 @@ export class CenaKanban extends Phaser.Scene {
 
     // O estado vem do registry quando o jogador já esteve no quadro antes
     carregarItens() {
-        return lerItensDoQuadro(this.registry);
+        return lerItensDoQuadro(this.registry, this.cadeira);
     }
 
     criarFundo() {
@@ -63,7 +74,7 @@ export class CenaKanban extends Phaser.Scene {
 
         const estilo = {fontFamily: FONTE, fontSize: "14px", color: COR.texto};
         this.add.text(MARGEM, 13, "QUADRO KANBAN", estilo);
-        this.add.text(480, 13, "SPRINT 1 — DIA 1 DE 10", estilo).setOrigin(0.5, 0);
+        this.add.text(480, 13, this.textoDaSprint(), estilo).setOrigin(0.5, 0);
         this.add.text(940, 13, "ESC PARA VOLTAR", estilo).setOrigin(1, 0);
 
         this.add.text(
@@ -73,6 +84,14 @@ export class CenaKanban extends Phaser.Scene {
             + "ou arraste com o mouse; G abre o glossário",
             {fontFamily: FONTE, fontSize: "12px", color: COR.textoSecundario}
         );
+    }
+
+    // Os mesmos números da barra do escritório
+    textoDaSprint() {
+        const sprint = sprintsConcluidas(this.registry, this.cadeira) + 1;
+        const dia = diaDaSprint(this.registry, this.cadeira);
+
+        return "SPRINT " + sprint + " — DIA " + dia + " DE " + DIAS_DA_SPRINT;
     }
 
     // Cada coluna guarda seus elementos para o contador e o alerta de limite
@@ -115,6 +134,7 @@ export class CenaKanban extends Phaser.Scene {
         }, this);
     }
 
+    // A dica fica no rodapé da coluna selecionada, onde não cobre cartão
     criarDicaDeMover() {
         this.dica = this.add.text(0, 0, "SHIFT + setas move", {
             fontFamily: FONTE,
@@ -122,7 +142,7 @@ export class CenaKanban extends Phaser.Scene {
             color: COR.textoInvertido,
             backgroundColor: COR.destaque,
             padding: {x: 5, y: 2}
-        }).setOrigin(0.5, 0).setDepth(600).setVisible(false);
+        }).setOrigin(1, 0).setDepth(600).setVisible(false);
     }
 
     criarAviso() {
@@ -144,6 +164,7 @@ export class CenaKanban extends Phaser.Scene {
             glossario: TECLA_DO_GLOSSARIO
         });
 
+        this.input.on("wheel", this.aoRolar, this);
         this.input.on("dragstart", this.aoComecarArrasto, this);
         this.input.on("drag", this.aoArrastar, this);
         this.input.on("dragend", this.aoSoltarArrasto, this);
@@ -166,42 +187,79 @@ export class CenaKanban extends Phaser.Scene {
 
         const capacidade = capacidadeDaColuna();
 
+        this.ajustarSelecao();
+        this.manterSelecaoVisivel();
+
         this.colunas.forEach(function (coluna) {
             const itens = this.itensDaColuna(coluna.dados.id);
+            const inicio = this.deslocamentoDa(coluna.dados.id);
             let y = TOPO_DA_COLUNA + ALTURA_DO_CABECALHO + ESPACO_ENTRE_CARTOES;
 
-            itens.slice(0, capacidade).forEach(function (item) {
+            itens.slice(inicio, inicio + capacidade).forEach(function (item) {
                 const cartao = new CartaoKanban(this, item);
                 cartao.posicionar(coluna.x + (LARGURA_DA_COLUNA - LARGURA_CARTAO) / 2, y);
                 this.cartoes.push(cartao);
                 y += ALTURA_CARTAO + ESPACO_ENTRE_CARTOES;
             }, this);
 
-            this.marcarOcultos(coluna, itens.length - capacidade, y);
+            this.marcarOcultos(coluna, inicio, itens.length - inicio - capacidade);
         }, this);
 
-        this.ajustarSelecao();
         this.atualizarColunas();
         this.atualizarEstadoDosCartoes();
     }
 
-    // excesso de cards em uma coluna
-    marcarOcultos(coluna, quantidade, y) {
+    // Primeiro cartão visível da coluna, sempre dentro do que existe
+    deslocamentoDa(idColuna) {
+        const maximo = Math.max(this.itensDaColuna(idColuna).length - capacidadeDaColuna(), 0);
+        const deslocamento = Phaser.Math.Clamp(this.deslocamentos[idColuna] || 0, 0, maximo);
+        this.deslocamentos[idColuna] = deslocamento;
+
+        return deslocamento;
+    }
+
+    // A coluna selecionada rola até o cartão do cursor
+    manterSelecaoVisivel() {
+        const idColuna = this.colunas[this.selecao.coluna].dados.id;
+        const capacidade = capacidadeDaColuna();
+        let deslocamento = this.deslocamentos[idColuna] || 0;
+
+        if (this.selecao.indice < deslocamento) {
+            deslocamento = this.selecao.indice;
+        } else if (this.selecao.indice >= deslocamento + capacidade) {
+            deslocamento = this.selecao.indice - capacidade + 1;
+        }
+
+        this.deslocamentos[idColuna] = deslocamento;
+    }
+
+    // Cartões fora da vista, acima e abaixo, no rodapé da coluna
+    marcarOcultos(coluna, acima, abaixo) {
         if (coluna.rotuloOcultos) {
             coluna.rotuloOcultos.destroy();
             coluna.rotuloOcultos = null;
         }
 
-        if (quantidade <= 0) {
+        const partes = [];
+
+        if (acima > 0) {
+            partes.push("\u25b2 " + acima);
+        }
+
+        if (abaixo > 0) {
+            partes.push("\u25bc " + abaixo);
+        }
+
+        if (partes.length === 0) {
             return;
         }
 
         coluna.rotuloOcultos = this.add.text(
-            coluna.x + LARGURA_DA_COLUNA / 2,
-            y + 4,
-            "+" + quantidade + " sem espaço na tela",
-            {fontFamily: FONTE, fontSize: "11px", color: COR.textoSecundario}
-        ).setOrigin(0.5, 0);
+            coluna.x + 8,
+            TOPO_DA_COLUNA + ALTURA_DA_COLUNA - ALTURA_DO_RODAPE_DA_COLUNA + 5,
+            partes.join("  "),
+            {fontFamily: FONTE, fontSize: "11px", color: COR.destaque}
+        );
     }
 
     atualizarColunas() {
@@ -242,9 +300,10 @@ export class CenaKanban extends Phaser.Scene {
             return;
         }
 
+        const coluna = this.colunas[this.selecao.coluna];
         this.dica.setPosition(
-            cartao.container.x + LARGURA_CARTAO / 2,
-            cartao.container.y + ALTURA_CARTAO + 3
+            coluna.x + LARGURA_DA_COLUNA - 8,
+            TOPO_DA_COLUNA + ALTURA_DA_COLUNA - ALTURA_DO_RODAPE_DA_COLUNA + 4
         );
         this.dica.setVisible(true);
     }
@@ -278,10 +337,7 @@ export class CenaKanban extends Phaser.Scene {
 
     // Mantém o cursor dentro de uma posição válida depois de cada mudança
     ajustarSelecao() {
-        const total = Math.min(
-            this.itensDaColuna(this.colunas[this.selecao.coluna].dados.id).length,
-            capacidadeDaColuna()
-        );
+        const total = this.itensDaColuna(this.colunas[this.selecao.coluna].dados.id).length;
         if (total === 0) {
             this.selecao.indice = 0;
             return;
@@ -330,7 +386,7 @@ export class CenaKanban extends Phaser.Scene {
 
         item.coluna = idColuna;
         this.reordenar(item, posicao);
-        this.salvar();
+        registrarMovimentoNoQuadro(this.registry, this.cadeira);
         return true;
     }
 
@@ -352,7 +408,7 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     salvar() {
-        salvarItensDoQuadro(this.registry, this.itens);
+        salvarItensDoQuadro(this.registry, this.cadeira, this.itens);
     }
 
     // ------------------------------------------------------------
@@ -391,8 +447,7 @@ export class CenaKanban extends Phaser.Scene {
 
         if (!levandoCartao) {
             this.selecao.coluna = destino;
-            this.ajustarSelecao();
-            this.atualizarEstadoDosCartoes();
+            this.desenharCartoes();
             return;
         }
 
@@ -414,9 +469,9 @@ export class CenaKanban extends Phaser.Scene {
         }
 
         if (!levandoCartao) {
-            const total = Math.min(this.itensDaColuna(item.coluna).length, capacidadeDaColuna());
+            const total = this.itensDaColuna(item.coluna).length;
             this.selecao.indice = Phaser.Math.Clamp(this.selecao.indice + passo, 0, total - 1);
-            this.atualizarEstadoDosCartoes();
+            this.desenharCartoes();
             return;
         }
 
@@ -432,6 +487,27 @@ export class CenaKanban extends Phaser.Scene {
 
     // ------------------------------------------------------------
     // ponteiro
+
+    // A roda rola a coluna sob o ponteiro; se for a selecionada, o cursor
+    // acompanha para não sair da vista
+    aoRolar(ponteiro, objetos, dx, dy) {
+        const coluna = this.colunaSobOPonteiro(ponteiro.x);
+        if (!coluna || this.arrastando || dy === 0) {
+            return;
+        }
+
+        const idColuna = coluna.dados.id;
+        this.deslocamentos[idColuna] = (this.deslocamentos[idColuna] || 0) + Math.sign(dy);
+        const inicio = this.deslocamentoDa(idColuna);
+
+        if (coluna === this.colunas[this.selecao.coluna]) {
+            this.selecao.indice = Phaser.Math.Clamp(
+                this.selecao.indice, inicio, inicio + capacidadeDaColuna() - 1
+            );
+        }
+
+        this.desenharCartoes();
+    }
 
     aoComecarArrasto(ponteiro, container) {
         const cartao = container.getData("cartao");
@@ -517,7 +593,8 @@ export class CenaKanban extends Phaser.Scene {
         const total = this.itensDaColuna(idColuna).filter(function (outro) {
             return outro.id !== item.id;
         }).length;
+        const inicio = this.deslocamentoDa(idColuna);
 
-        return Phaser.Math.Clamp(Math.round((y - topo) / passo), 0, total);
+        return Phaser.Math.Clamp(Math.round((y - topo) / passo) + inicio, 0, total);
     }
 }

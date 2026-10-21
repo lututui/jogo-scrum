@@ -3,12 +3,16 @@
 import {ELENCO, MESAS, OBJETOS} from "../dados/elenco.js";
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
-import {EVENTOS} from "../dados/eventos.js";
+import {EVENTOS, SPRINT_REVIEW} from "../dados/eventos.js";
+import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {proximoContextual} from "../dados/eventosContextuais.js";
 import {
+    DIAS_DA_SPRINT,
     contextuaisResolvidos,
+    diaDaSprint,
     eventosConcluidos,
     medidoresDaCadeira,
+    moveuNoQuadro,
     sprintsConcluidas
 } from "../dados/progresso.js";
 import {MedidoresHUD} from "../ui/MedidoresHUD.js";
@@ -152,6 +156,12 @@ export class CenaEscritorio extends Phaser.Scene {
         this.textoProximoPasso = this.add.text(940, 516, "", {
             fontFamily: FONTE,
             fontSize: "12px",
+            color: COR.destaque
+        }).setOrigin(1, 0).setScrollFactor(0).setDepth(9001);
+
+        this.textoDicaDoQuadro = this.add.text(940, 46, "", {
+            fontFamily: FONTE,
+            fontSize: "11px",
             color: COR.destaque
         }).setOrigin(1, 0).setScrollFactor(0).setDepth(9001);
 
@@ -323,16 +333,29 @@ export class CenaEscritorio extends Phaser.Scene {
         this.scene.start("CenaSintese");
     }
 
-    // O dia avança a cada reunião e a cada evento contextual vivido
     atualizarPainelDaSprint() {
-        const vividos = eventosConcluidos(this.registry, this.cadeiraAtual).length
-            + contextuaisResolvidos(this.registry, this.cadeiraAtual).length;
+        const dia = diaDaSprint(this.registry, this.cadeiraAtual);
 
         this.textoSprint.setText("SPRINT " + (sprintsConcluidas(this.registry, this.cadeiraAtual) + 1));
-        this.textoDia.setText("DIA " + Math.min(1 + vividos, 10) + " DE 10");
+        this.textoDia.setText("DIA " + dia + " DE " + DIAS_DA_SPRINT);
         this.medidores.atualizar(medidoresDaCadeira(this.registry, this.cadeiraAtual));
         this.textoProximoPasso.setText(this.proximoPasso());
+        this.textoDicaDoQuadro.setText(this.dicaDoQuadro());
         this.textoAjuda.setText(this.linhaDeAjuda());
+    }
+
+    dicaDoQuadro() {
+        const pendente = this.reuniaoPendente();
+        const conduzReview = Boolean(
+            (PAPEIS_DOS_EVENTOS[SPRINT_REVIEW.chave][this.cadeiraAtual] || {}).conduz
+        );
+
+        if (!conduzReview || pendente !== SPRINT_REVIEW
+            || moveuNoQuadro(this.registry, this.cadeiraAtual)) {
+            return "";
+        }
+
+        return "dica: antes da Review, leve ao CONCLUÍDO o que ficou pronto no quadro da parede";
     }
 
     proximoPasso() {

@@ -38,7 +38,7 @@ export const CONQUISTAS = [
     {
         id: "pronto-quer-dizer-pronto",
         nome: "Pronto quer dizer pronto",
-        descricao: "Respeitou a Definition of Done sob pressão de prazo.",
+        descricao: "Levou um item do Sprint Backlog até CONCLUÍDO e o mostrou na Review.",
         condicao: function (sprint) {
             return (sprint.marcas["definicao-de-pronto"] || 0) > 0;
         }

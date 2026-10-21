@@ -57,10 +57,13 @@ export class CenaSprintReview extends CenaReuniao {
         });
     }
 
-    // Os candidatos incluem o que está em revisão, que ainda não está pronto
+    // Os candidatos incluem o que está em revisão, que ainda não está pronto.
+    // O que já estava pronto antes da sprint não entra; sem candidatos, a
+    // reunião fecha sem nada para mostrar
     abrirItens() {
-        const itens = lerItensDoQuadro(this.registry).filter(function (item) {
-            return item.coluna === COLUNA_CONCLUIDO || item.coluna === COLUNA_EM_REVISAO;
+        const itens = lerItensDoQuadro(this.registry, this.cadeira()).filter(function (item) {
+            const naColuna = item.coluna === COLUNA_CONCLUIDO || item.coluna === COLUNA_EM_REVISAO;
+            return naColuna && !item.sprintAnterior;
         });
 
         this.opcoesDeItens = itens.map(function (item) {
@@ -74,6 +77,11 @@ export class CenaSprintReview extends CenaReuniao {
                 item: item
             };
         });
+
+        if (this.opcoesDeItens.length === 0) {
+            this.encerrarReuniao();
+            return;
+        }
 
         this.mostrarItens();
     }
@@ -121,17 +129,20 @@ export class CenaSprintReview extends CenaReuniao {
         });
 
         const houveDemonstracao = demonstrados.length > 0;
+        const mostrouPlanejado = demonstrados.some(function (opcao) {
+            return opcao.item.planejado;
+        });
         const resultado = houveDemonstracao
             ? this.evento.fechamento.comItens
             : this.evento.fechamento.semItens;
 
         this.pontuar({
             avaliacao: houveDemonstracao ? "boa" : "ruim",
-            marca: houveDemonstracao ? "definicao-de-pronto" : null
+            marca: mostrouPlanejado ? "definicao-de-pronto" : null
         });
 
         if (houveDemonstracao && this.formato.gerarFeedbackDoUsuario) {
-            acrescentarItem(this.registry, Object.assign(
+            acrescentarItem(this.registry, this.cadeira(), Object.assign(
                 {id: ID_DO_FEEDBACK}, this.evento.feedbackDoUsuario
             ), "afazer");
         }
