@@ -1,12 +1,13 @@
 // Seleção de papel
 //
-// Permite troca de cadeira.
+// Permite troca de cadeira. Na primeira partida, abre o guia por cima.
 
 import {CADEIRAS, ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
 import {DEPURACAO, marcarDepuracao, opcoesLigadas} from "../dados/depuracao.js";
 import {ELENCO} from "../dados/elenco.js";
-import {apagarProgresso, cadeirasConcluidas} from "../dados/progresso.js";
+import {apagarProgresso, cadeirasConcluidas, guiaJaVisto} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {abrirGuia} from "./CenaGuia.js";
 
 const MARGEM = 24;
 const TOPO_DOS_CARTOES = 150;
@@ -31,6 +32,17 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
         this.montarCartoes();
         this.criarControles();
         this.destacarEscolhido();
+        this.abrirGuiaNaPrimeiraVez();
+    }
+
+    abrirGuiaNaPrimeiraVez() {
+        if (guiaJaVisto(this.registry)) {
+            return;
+        }
+
+        this.events.once(Phaser.Scenes.Events.CREATE, function () {
+            abrirGuia(this);
+        }, this);
     }
 
     indiceDaCadeiraAtual() {
@@ -80,7 +92,7 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
         this.listarDepuracao();
 
         this.add.text(MARGEM, 508,
-            "setas escolhem, ENTER confirma, R apaga o progresso salvo", {
+            "setas escolhem, ENTER confirma, H abre o guia, R apaga o progresso salvo", {
                 fontFamily: FONTE,
                 fontSize: "12px",
                 color: COR.textoSecundario
@@ -245,6 +257,7 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
 
     criarControles() {
         this.teclaReiniciar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+        this.teclaGuia = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H);
         this.teclas = this.input.keyboard.addKeys({
             esquerda: Phaser.Input.Keyboard.KeyCodes.LEFT,
             direita: Phaser.Input.Keyboard.KeyCodes.RIGHT,
@@ -256,6 +269,11 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
     update() {
         if (Phaser.Input.Keyboard.JustDown(this.teclaReiniciar)) {
             this.pedirParaApagar();
+            return;
+        }
+
+        if (Phaser.Input.Keyboard.JustDown(this.teclaGuia)) {
+            abrirGuia(this);
             return;
         }
 

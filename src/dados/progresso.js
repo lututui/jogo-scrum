@@ -67,7 +67,8 @@ function progressoVazio() {
         sprintsConcluidas: porCadeira(function () {
             return 0;
         }),
-        conquistas: []
+        conquistas: [],
+        guiaVisto: false
     };
 }
 
@@ -131,6 +132,19 @@ export function apagarProgresso(registry) {
     }
 
     return limpo;
+}
+
+// O guia abre sozinho até ser visto uma vez; apagar o progresso o traz de
+// volta, para o próximo jogador da mesma máquina
+export function guiaJaVisto(registry) {
+    return Boolean(lerProgresso(registry).guiaVisto);
+}
+
+export function marcarGuiaVisto(registry) {
+    const progresso = lerProgresso(registry);
+    progresso.guiaVisto = true;
+
+    return salvarProgresso(registry, progresso);
 }
 
 // Sprint em andamento na cadeira

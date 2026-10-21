@@ -14,6 +14,7 @@ import {CenaSprintRetrospective} from "./cenas/CenaSprintRetrospective.js";
 import {CenaEventoContextual} from "./cenas/CenaEventoContextual.js";
 import {CenaSintese} from "./cenas/CenaSintese.js";
 import {CenaGlossario} from "./cenas/CenaGlossario.js";
+import {CenaGuia} from "./cenas/CenaGuia.js";
 
 const LARGURA = 960;
 const ALTURA = 540;
@@ -47,7 +48,8 @@ const configuracao = {
         CenaSprintRetrospective,
         CenaEventoContextual,
         CenaSintese,
-        CenaGlossario
+        CenaGlossario,
+        CenaGuia
     ]
 };
 
