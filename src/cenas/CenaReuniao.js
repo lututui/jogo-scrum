@@ -10,6 +10,7 @@
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {registrarDecisao, registrarEventoConcluido} from "../dados/progresso.js";
 import {ELENCO} from "../dados/elenco.js";
+import {expressaoDaAvaliacao} from "../dados/expressoes.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {ASSENTOS, ASSENTO_DO_JOGADOR, ESCALA, MESA} from "../dados/reuniao.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
@@ -244,22 +245,34 @@ export class CenaReuniao extends Phaser.Scene {
     // -----------------------------------------------------------
     // falas
 
-    falar(chave, texto, aoTerminar) {
+    // A expressão vem dos dados da fala; sem ela, o retrato fica neutro
+    falar(chave, texto, aoTerminar, expressao) {
         this.fecharLista();
         this.esperandoFala = true;
         this.aoTerminarFala = aoTerminar || null;
         this.definirAjuda("ENTER continua");
-        this.painel.mostrar(this.personagem(chave), texto);
+        this.painel.mostrar(this.personagem(chave), texto, null, expressao);
+    }
+
+    // Abertura da cadeira, com a expressão declarada nela
+    falarAbertura(aoTerminar) {
+        const abertura = this.papel().abertura;
+        this.falar(abertura.quem, abertura.texto, aoTerminar, abertura.expressao);
     }
 
     // Retorno do mentor
     // Fala em cena, princípio registrado embaixo (RF10)
-    falarComoMentor(texto, principio, aoTerminar) {
+    falarComoMentor(texto, principio, aoTerminar, expressao) {
         this.fecharLista();
         this.esperandoFala = true;
         this.aoTerminarFala = aoTerminar || null;
         this.definirAjuda("ENTER continua");
-        this.painel.mostrar(this.personagem(this.chaveDoMentor()), texto, principio);
+        this.painel.mostrar(this.personagem(this.chaveDoMentor()), texto, principio, expressao);
+    }
+
+    // O mentor reage à decisão que comenta: aprova, fica neutro ou tenso
+    comentarDecisao(avaliacao, texto, principio, aoTerminar) {
+        this.falarComoMentor(texto, principio, aoTerminar, expressaoDaAvaliacao(avaliacao));
     }
 
     // Encadeia falas de pessoas diferentes
@@ -276,7 +289,7 @@ export class CenaReuniao extends Phaser.Scene {
             }
             const fala = falas[indice];
             indice += 1;
-            cena.falar(fala.quem, fala.texto, proxima);
+            cena.falar(fala.quem, fala.texto, proxima, fala.expressao);
         }
 
         proxima();
@@ -338,11 +351,11 @@ export class CenaReuniao extends Phaser.Scene {
                 aoConfirmar: function (opcao) {
                     cena.pontuar(opcao);
                     cena.responder(opcao.titulo, function () {
-                        cena.falarComoMentor(opcao.feedback, opcao.principio, aoTerminar);
+                        cena.comentarDecisao(opcao.avaliacao, opcao.feedback, opcao.principio, aoTerminar);
                     });
                 }
             });
-        });
+        }, decisao.expressao);
     }
 
     // Toda escolha com avaliação declarada entra no placar, venha da mecânica
@@ -376,7 +389,7 @@ export class CenaReuniao extends Phaser.Scene {
             return;
         }
 
-        this.falar(abertura.quem, abertura.texto, aoTerminar);
+        this.falar(abertura.quem, abertura.texto, aoTerminar, abertura.expressao);
     }
 
     encerrarComoParticipante() {

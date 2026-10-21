@@ -172,6 +172,7 @@ export const DAILY_SCRUM = {
         },
         {
             quem: "bia",
+            expressao: "tenso",
             fala: "Continuo bloqueada desde ontem. É isso.",
             opcoes: [
                 {
@@ -205,6 +206,7 @@ export const DAILY_SCRUM = {
         },
         {
             quem: "lu",
+            expressao: "tenso",
             fala: "Bom... acho que é com você que eu falo, né? Ontem eu fiz as "
                 + "telas e hoje pretendo continuar. Pode ser?",
             opcoes: [
@@ -327,24 +329,28 @@ export const SPRINT_RETROSPECTIVE = {
         {
             id: "obs-bloqueio",
             quem: "bia",
+            expressao: "tenso",
             titulo: "Fiquei dois dias parada esperando acesso à base",
             relevante: true
         },
         {
             id: "obs-wip",
             quem: "caio",
+            expressao: "tenso",
             titulo: "Comecei quatro coisas e não terminei nenhuma",
             relevante: true
         },
         {
             id: "obs-clima",
             quem: "lu",
+            expressao: "aprovacao",
             titulo: "A sprint foi corrida, mas a equipe é legal",
             relevante: false
         },
         {
             id: "obs-cafe",
             quem: "caio",
+            expressao: "tenso",
             titulo: "A cafeteira do andar quebrou de novo",
             relevante: false
         }

@@ -11,6 +11,7 @@ export const EVENTOS_CONTEXTUAIS = [
         dia: 3,
         cadeiras: ["po"],
         quem: "estela",
+        expressao: "tenso",
         fala: "Alô? É a Estela. Preciso de um relatório de boletim para a "
             + "reunião de pais da semana que vem. Dá para fazer nesta sprint?",
         pergunta: "O que você responde?",
@@ -53,6 +54,7 @@ export const EVENTOS_CONTEXTUAIS = [
         dia: 5,
         cadeiras: ["po", "sm"],
         quem: "gustavo",
+        expressao: "aprovacao",
         fala: "Passei aqui rapidinho. Promete as duas telas extras para a "
             + "diretora na Review, que a renovação fica garantida.",
         pergunta: "O que você faz?",
@@ -95,6 +97,7 @@ export const EVENTOS_CONTEXTUAIS = [
         dia: 4,
         cadeiras: ["sm"],
         quem: "bia",
+        expressao: "tenso",
         fala: "Segue sem acesso à base de matrículas. Mandei e-mail para a "
             + "secretaria ontem e hoje. Nada.",
         pergunta: "O que você faz?",
@@ -137,6 +140,7 @@ export const EVENTOS_CONTEXTUAIS = [
         dia: 6,
         cadeiras: ["dev"],
         quem: "helio",
+        expressao: "tenso",
         fala: "A presença que eu lancei na segunda sumiu. Lancei de novo e "
             + "sumiu outra vez quando troquei de turma.",
         pergunta: "O que você faz?",
@@ -179,6 +183,7 @@ export const EVENTOS_CONTEXTUAIS = [
         dia: 7,
         cadeiras: ["dev"],
         quem: "caio",
+        expressao: "aprovacao",
         fala: "Achei um jeito de economizar dois dias no boletim. É meio "
             + "gambiarra, mas ninguém vai mexer ali tão cedo.",
         pergunta: "O que você responde?",
@@ -221,6 +226,7 @@ export const EVENTOS_CONTEXTUAIS = [
         dia: 8,
         cadeiras: ["po", "sm", "dev"],
         quem: "lu",
+        expressao: "tenso",
         fala: "Estou parada esperando uma parte do código de vocês. Pego "
             + "outra coisa ou espero?",
         pergunta: "O que você faz?",

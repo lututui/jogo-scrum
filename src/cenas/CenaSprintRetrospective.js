@@ -24,7 +24,7 @@ export class CenaSprintRetrospective extends CenaReuniao {
         }
 
         const cena = this;
-        this.falar(this.papel().abertura.quem, this.papel().abertura.texto, function () {
+        this.falarAbertura(function () {
             cena.ouvirOTime();
         });
     }
@@ -34,7 +34,7 @@ export class CenaSprintRetrospective extends CenaReuniao {
         const cena = this;
         this.observacoes = embaralhar(this.evento.observacoes);
         const falas = this.observacoes.map(function (observacao) {
-            return {quem: observacao.quem, texto: observacao.titulo};
+            return {quem: observacao.quem, texto: observacao.titulo, expressao: observacao.expressao};
         });
 
         this.falarEmSequencia(falas, function () {
@@ -132,7 +132,8 @@ export class CenaSprintRetrospective extends CenaReuniao {
 
         this.responder(acao.titulo, function () {
             if (!cena.escolheuRelevante) {
-                cena.falarComoMentor(
+                cena.comentarDecisao(
+                    "ruim",
                     cena.evento.semObservacaoRelevante.feedback,
                     cena.evento.semObservacaoRelevante.principio,
                     function () {
@@ -147,7 +148,7 @@ export class CenaSprintRetrospective extends CenaReuniao {
 
     fecharComAcao(acao) {
         const cena = this;
-        this.falarComoMentor(acao.feedback, acao.principio, function () {
+        this.comentarDecisao(acao.avaliacao, acao.feedback, acao.principio, function () {
             cena.sair();
         });
     }

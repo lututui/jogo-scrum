@@ -1,4 +1,7 @@
 // Dados do elenco presente na cena do escritório
+//
+// "expressoes" acompanha "falas" na mesma ordem: uma expressão de retrato
+// por fala (neutro, tenso ou aprovacao).
 
 export const ELENCO = [
     {
@@ -8,6 +11,7 @@ export const ELENCO = [
         cor: "#c0392b",
         x: 180,
         y: 252,
+        expressoes: ["aprovacao", "tenso", "neutro"],
         falas: [
             "Chegou cedo. Boa.",
             "Anotei quatorze pedidos na reunião com a diretora. Estão todos na mesma folha, fora de ordem, e dois são a mesma coisa escrita diferente.",
@@ -21,6 +25,7 @@ export const ELENCO = [
         cor: "#1f6f8b",
         x: 380,
         y: 252,
+        expressoes: ["aprovacao", "neutro", "neutro"],
         falas: [
             "Bom te ver por aqui.",
             "A sprint começa amanhã e dura duas semanas. Dez dias úteis, uma meta só.",
@@ -34,6 +39,7 @@ export const ELENCO = [
         cor: "#7a4bb5",
         x: 580,
         y: 252,
+        expressoes: ["neutro", "neutro", "tenso"],
         falas: [
             "Você é o aprendiz, né?",
             "Vou te dizer uma coisa agora para economizar discussão depois: aqui, item entregue é item que funciona do começo ao fim.",
@@ -47,6 +53,7 @@ export const ELENCO = [
         cor: "#e08a3c",
         x: 780,
         y: 252,
+        expressoes: ["aprovacao", "aprovacao", "aprovacao"],
         falas: [
             "Opa! Bem-vindo.",
             "Tô montando o lançamento de presença. Já tá quase pronto, só falta juntar as partes.",
@@ -60,6 +67,7 @@ export const ELENCO = [
         cor: "#8795a8",
         x: 180,
         y: 432,
+        expressoes: ["aprovacao", "neutro", "tenso"],
         falas: [
             "Oi! Desculpa a bagunça da mesa.",
             "Eu fico só meio período neste contrato. O resto do tempo estou no outro cliente.",
@@ -73,6 +81,7 @@ export const ELENCO = [
         cor: "#6b7a90",
         x: 380,
         y: 432,
+        expressoes: ["aprovacao", "neutro", "aprovacao"],
         falas: [
             "Ah, o pessoal do programa de aprendizagem. Que bom.",
             "Olha, esse contrato da escola é importante para a casa. Se a diretora ficar satisfeita, tem renovação.",
@@ -87,6 +96,7 @@ export const ELENCO = [
         teste: true,
         x: 900,
         y: 180,
+        expressoes: ["neutro", "tenso"],
         falas: [
             "Então é aqui que o sistema está sendo feito.",
             "Vim conhecer o lugar e repetir uma data: em fevereiro as aulas começam, com ou sem sistema pronto."
@@ -100,6 +110,7 @@ export const ELENCO = [
         teste: true,
         x: 900,
         y: 300,
+        expressoes: ["neutro", "tenso"],
         falas: [
             "Vim junto com a diretora, mas quero falar de outra coisa.",
             "Para marcar uma falta hoje eu preciso de seis cliques. Seis. Multiplica por trinta e duas turmas na semana."
@@ -113,6 +124,7 @@ export const ELENCO = [
         teste: true,
         x: 900,
         y: 420,
+        expressoes: ["neutro", "tenso"],
         falas: [
             "Sei que estão esperando a base de matrículas.",
             "Não é má vontade minha. São dados de criança, e quem assina embaixo se algo vazar sou eu."

@@ -39,6 +39,7 @@ export const PAPEIS_DOS_EVENTOS = {
             decisoes: [
                 {
                     quem: "gustavo",
+                    expressao: "aprovacao",
                     fala: "Pessoal, a diretora anda ansiosa. Dá para prometer o "
                         + "boletim junto nesta sprint? Fica bem para a renovação.",
                     pergunta: "O que você faz?",
@@ -73,6 +74,7 @@ export const PAPEIS_DOS_EVENTOS = {
                 },
                 {
                     quem: "caio",
+                    expressao: "aprovacao",
                     fala: "Pra mim tanto faz, dá pra tentar. Se virar a noite na "
                         + "última semana, sai.",
                     pergunta: "O que você faz?",
@@ -122,6 +124,7 @@ export const PAPEIS_DOS_EVENTOS = {
             decisoes: [
                 {
                     quem: "marcia",
+                    expressao: "tenso",
                     fala: "O lançamento de presença dá para fechar nesta sprint? "
                         + "Eu prometi olhar isso com a diretora na sexta.",
                     pergunta: "O que você responde?",
@@ -156,6 +159,7 @@ export const PAPEIS_DOS_EVENTOS = {
                 },
                 {
                     quem: "lu",
+                    expressao: "tenso",
                     fala: "Ah, uma coisa: a tela de presença depende do login ficar "
                         + "pronto antes. Ninguém falou disso ainda.",
                     pergunta: "O que você faz?",
@@ -256,6 +260,7 @@ export const PAPEIS_DOS_EVENTOS = {
                 },
                 {
                     quem: "caio",
+                    expressao: "aprovacao",
                     fala: "Eu tô com quatro coisas abertas, acho que consigo "
                         + "fechar tudo até sexta.",
                     pergunta: "O que você faz?",
@@ -339,6 +344,7 @@ export const PAPEIS_DOS_EVENTOS = {
                 },
                 {
                     quem: "bia",
+                    expressao: "tenso",
                     fala: "Continuo esperando o acesso à base de matrículas. É o "
                         + "segundo dia.",
                     pergunta: "O que você faz?",
@@ -402,6 +408,7 @@ export const PAPEIS_DOS_EVENTOS = {
             decisoes: [
                 {
                     quem: "helio",
+                    expressao: "tenso",
                     fala: "Espera... eu clico onde para marcar a falta? Ah, achei. "
                         + "Não, isso apagou a chamada toda.",
                     pergunta: "O que você faz?",
@@ -485,6 +492,7 @@ export const PAPEIS_DOS_EVENTOS = {
             decisoes: [
                 {
                     quem: "caio",
+                    expressao: "tenso",
                     fala: "Ninguém combinou quem mostra o quê. Alguém abre o "
                         + "sistema aí?",
                     pergunta: "O que você faz?",
@@ -519,6 +527,7 @@ export const PAPEIS_DOS_EVENTOS = {
                 },
                 {
                     quem: "gustavo",
+                    expressao: "aprovacao",
                     fala: "Depois eu falo do próximo contrato com a diretora. "
                         + "Aproveita e já mostra o que vem na próxima sprint.",
                     pergunta: "O que você faz?",
@@ -584,6 +593,7 @@ export const PAPEIS_DOS_EVENTOS = {
             decisoes: [
                 {
                     quem: "bia",
+                    expressao: "tenso",
                     fala: "Metade da sprint a gente trabalhou com dado inventado "
                         + "porque a base não veio. Isso é decisão de produto.",
                     pergunta: "O que você responde?",
@@ -699,6 +709,7 @@ export const PAPEIS_DOS_EVENTOS = {
                 },
                 {
                     quem: "caio",
+                    expressao: "aprovacao",
                     fala: "Então bora pagar todo o débito na próxima sprint, "
                         + "reescrever aquilo inteiro.",
                     pergunta: "O que você responde?",

@@ -8,6 +8,7 @@
 
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {ELENCO} from "../dados/elenco.js";
+import {expressaoDaAvaliacao} from "../dados/expressoes.js";
 import {registrarContextualResolvido, registrarDecisao} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
@@ -44,7 +45,7 @@ export class CenaEventoContextual extends Phaser.Scene {
         const cena = this;
         this.falar(this.evento.quem, this.evento.fala, function () {
             cena.perguntar();
-        });
+        }, null, this.evento.expressao);
     }
 
     // ---------------------------------------------------------
@@ -119,12 +120,12 @@ export class CenaEventoContextual extends Phaser.Scene {
     // ---------------------------------------------------------
     // falas e resposta
 
-    falar(chave, texto, aoTerminar, principio) {
+    falar(chave, texto, aoTerminar, principio, expressao) {
         this.fecharLista();
         this.esperandoFala = true;
         this.aoTerminarFala = aoTerminar || null;
         this.ajuda.setText("ENTER continua  ·  G abre o glossário");
-        this.painel.mostrar(this.personagem(chave), texto, principio);
+        this.painel.mostrar(this.personagem(chave), texto, principio, expressao);
     }
 
     perguntar() {
@@ -173,7 +174,7 @@ export class CenaEventoContextual extends Phaser.Scene {
         this.falar("jogador", opcao.titulo, function () {
             cena.falar(cena.mentor(), opcao.feedback, function () {
                 cena.encerrar();
-            }, opcao.principio);
+            }, opcao.principio, expressaoDaAvaliacao(opcao.avaliacao));
         });
     }
 

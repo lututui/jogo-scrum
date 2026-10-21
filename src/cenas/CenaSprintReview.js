@@ -29,7 +29,7 @@ export class CenaSprintReview extends CenaReuniao {
         }
 
         const cena = this;
-        this.falar(this.papel().abertura.quem, this.papel().abertura.texto, function () {
+        this.falarAbertura(function () {
             cena.etapaDoFormato();
         });
     }
@@ -51,7 +51,7 @@ export class CenaSprintReview extends CenaReuniao {
         const cena = this;
 
         this.responder(formato.titulo, function () {
-            cena.falarComoMentor(formato.feedback, formato.principio, function () {
+            cena.comentarDecisao(formato.avaliacao, formato.feedback, formato.principio, function () {
                 cena.abrirItens();
             });
         });
@@ -102,7 +102,8 @@ export class CenaSprintReview extends CenaReuniao {
     alternarItem(opcao) {
         if (!opcao.concluido) {
             const cena = this;
-            this.falarComoMentor(
+            this.comentarDecisao(
+                "ruim",
                 this.evento.itemNaoConcluido.feedback,
                 this.evento.itemNaoConcluido.principio,
                 function () {
@@ -149,7 +150,7 @@ export class CenaSprintReview extends CenaReuniao {
         }
 
         const cena = this;
-        this.falarComoMentor(resultado.feedback, resultado.principio, function () {
+        this.comentarDecisao(houveDemonstracao ? "boa" : "ruim", resultado.feedback, resultado.principio, function () {
             cena.sair();
         });
     }

@@ -1,9 +1,9 @@
 // Caixa de diálogo do jogo
 
 import {DEPURACAO} from "../dados/depuracao.js";
+import {TOTAL_DE_EXPRESSOES, quadroDaExpressao} from "../dados/expressoes.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 
-const TOTAL_DE_EXPRESSOES = 3;
 
 export class CaixaDialogo {
 
@@ -80,6 +80,7 @@ export class CaixaDialogo {
     abrir(interlocutor, aoFechar) {
         this.aberta = true;
         this.falas = interlocutor.falas;
+        this.expressoes = interlocutor.expressoes || [];
         this.indiceFala = 0;
         this.aoFechar = aoFechar || null;
 
@@ -116,7 +117,9 @@ export class CaixaDialogo {
     iniciarFala() {
         if (this.retrato.visible) {
             this.retrato.setFrame(
-                DEPURACAO.expressoesEmCiclo ? this.indiceFala % TOTAL_DE_EXPRESSOES : 0
+                DEPURACAO.expressoesEmCiclo
+                    ? this.indiceFala % TOTAL_DE_EXPRESSOES
+                    : quadroDaExpressao(this.expressoes[this.indiceFala])
             );
         }
         this.textoRevelado = "";

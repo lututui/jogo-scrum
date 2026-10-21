@@ -25,7 +25,7 @@ export class CenaDailyScrum extends CenaReuniao {
         this.atualizarRelogio();
 
         const cena = this;
-        this.falar(this.papel().abertura.quem, this.papel().abertura.texto, function () {
+        this.falarAbertura(function () {
             cena.abrirRodada();
         });
     }
@@ -53,7 +53,7 @@ export class CenaDailyScrum extends CenaReuniao {
                     cena.responderNaRodada(opcao);
                 }
             });
-        });
+        }, rodada.expressao);
     }
 
     responderNaRodada(opcao) {
@@ -68,7 +68,7 @@ export class CenaDailyScrum extends CenaReuniao {
 
         const cena = this;
         this.responder(opcao.titulo, function () {
-            cena.falarComoMentor(opcao.feedback, opcao.principio, function () {
+            cena.comentarDecisao(opcao.avaliacao, opcao.feedback, opcao.principio, function () {
                 cena.rodadaAtual += 1;
                 cena.abrirRodada();
             });
@@ -90,8 +90,11 @@ export class CenaDailyScrum extends CenaReuniao {
             + " A reunião levou " + this.minutosUsados + " minutos. "
             + (this.impedimentosTratados > 0 ? fechamento.comImpedimento : fechamento.semImpedimento);
 
+        const acertos = (dentroDoTempo ? 1 : 0) + (this.impedimentosTratados > 0 ? 1 : 0);
+        const avaliacao = ["ruim", "media", "boa"][acertos];
+
         const cena = this;
-        this.falarComoMentor(texto, fechamento.principio, function () {
+        this.comentarDecisao(avaliacao, texto, fechamento.principio, function () {
             cena.sair();
         });
     }

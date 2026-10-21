@@ -2,6 +2,7 @@
 //
 // A faixa do princípio ágil aparece só quando o mentor comenta uma decisão
 
+import {quadroDaExpressao} from "../dados/expressoes.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 
 export const PAINEL = {
@@ -87,10 +88,11 @@ export class PainelDeFala {
         this.esconder();
     }
 
-    mostrar(personagem, texto, principio) {
+    // Sem expressão declarada, o retrato fica neutro
+    mostrar(personagem, texto, principio, expressao) {
         const chaveDoRetrato = "retrato_" + personagem.chaveDoRetrato;
         if (this.cena.textures.exists(chaveDoRetrato)) {
-            this.retrato.setTexture(chaveDoRetrato, 0);
+            this.retrato.setTexture(chaveDoRetrato, quadroDaExpressao(expressao));
             this.retrato.setVisible(true);
             this.molduraDoRetrato.setVisible(true);
         } else {
