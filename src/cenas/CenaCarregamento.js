@@ -1,8 +1,9 @@
 // Cena de carregamento
 
+import {APARENCIA_PADRAO} from "../dados/aparencia.js";
 import {ELENCO} from "../dados/elenco.js";
-import {CADEIRAS} from "../dados/cadeiras.js";
 import {COR, FONTE} from "../dados/tema.js";
+import {carregarCamadas, criarAnimacoesDoCorpo, montarJogador} from "../ui/montarJogador.js";
 import {aplicarFps} from "./CenaFPS.js";
 
 const LARGURA_CORPO = 32;
@@ -21,9 +22,7 @@ export class CenaCarregamento extends Phaser.Scene {
 
         const personagens = ELENCO.map(function (npc) {
             return npc.chave;
-        }).concat(Object.keys(CADEIRAS).map(function (cadeira) {
-            return "jogador_" + cadeira;
-        }));
+        });
 
         personagens.forEach(function (chave) {
             this.load.spritesheet("corpo_" + chave, "assets/corpo_" + chave + ".png", {
@@ -35,6 +34,8 @@ export class CenaCarregamento extends Phaser.Scene {
                 frameHeight: ALTURA_RETRATO
             });
         }, this);
+
+        carregarCamadas(this);
 
         this.load.image("chao", "assets/chao.png");
         this.load.image("parede", "assets/parede.png");
@@ -56,6 +57,7 @@ export class CenaCarregamento extends Phaser.Scene {
 
     create() {
         this.criarAnimacoes();
+        montarJogador(this, APARENCIA_PADRAO);
         aplicarFps(this);
         this.scene.start("CenaMenu");
     }
@@ -63,17 +65,7 @@ export class CenaCarregamento extends Phaser.Scene {
     // Cada folha tem três quadros: parado, passo A, passo B
     criarAnimacoes() {
         this.personagens.forEach(function (chave) {
-            this.anims.create({
-                key: chave + "_parado",
-                frames: [{key: "corpo_" + chave, frame: 0}],
-                frameRate: 1
-            });
-            this.anims.create({
-                key: chave + "_andando",
-                frames: this.anims.generateFrameNumbers("corpo_" + chave, {frames: [1, 0, 2, 0]}),
-                frameRate: 8,
-                repeat: -1
-            });
+            criarAnimacoesDoCorpo(this, chave);
         }, this);
     }
 }

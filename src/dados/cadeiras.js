@@ -1,7 +1,8 @@
 // As três cadeiras jogáveis
 //
 // A chave monta o nome das texturas do avatar (corpo_jogador_po,
-// corpo_jogador_sm, corpo_jogador_dev).
+// corpo_jogador_sm, corpo_jogador_dev), montadas em ui/montarJogador.js com
+// a cor da cadeira no crachá.
 //
 // O titular é quem ocupa aquela cadeira no time e acompanha o aprendiz como
 // mentor.

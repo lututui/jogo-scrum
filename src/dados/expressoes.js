@@ -27,3 +27,6 @@ export function expressaoDaAvaliacao(avaliacao) {
 }
 
 export const TOTAL_DE_EXPRESSOES = Object.keys(QUADRO_DA_EXPRESSAO).length;
+
+// na ordem dos quadros
+export const EXPRESSOES = Object.keys(QUADRO_DA_EXPRESSAO);
