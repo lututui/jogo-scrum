@@ -9,24 +9,10 @@ export const COLUNAS = [
 
 export const ITENS_INICIAIS = [
     {
-        id: "it01",
-        tipo: "feature",
-        titulo: "Tela de login do professor",
-        etiquetas: ["AUTH"],
-        coluna: "afazer"
-    },
-    {
         id: "it02",
         tipo: "feature",
         titulo: "Listar turmas do professor",
         etiquetas: ["API"],
-        coluna: "afazer"
-    },
-    {
-        id: "it03",
-        tipo: "bug",
-        titulo: "Acento quebrado no nome do aluno",
-        etiquetas: ["UI"],
         coluna: "afazer"
     },
     {

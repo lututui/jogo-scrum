@@ -46,7 +46,7 @@ export const PRODUTO_BACKLOG = [
     {
         id: "pb06",
         tipo: "chore",
-        titulo: "Padronizar mensagens de erro",
+        titulo: "Atualizar as dependências do projeto",
         esforco: 2,
         alinhado: false
     }
@@ -73,7 +73,7 @@ export const SPRINT_PLANNING = {
         },
         {
             id: "meta-lista",
-            titulo: "Entregar os sete itens do topo da lista",
+            titulo: "Entregar os itens do topo da lista, na ordem em que estão",
             detalhe: "Sem meta comum, só uma relação de tarefas",
             avaliacao: "ruim",
             feedback: "Uma lista de itens não é uma meta. Sem um resultado comum, "
@@ -243,7 +243,7 @@ export const SPRINT_REVIEW = {
     objetivo: "Apresentar o incremento como inspeção, e não como venda, e sair "
         + "da reunião com feedback aproveitável.",
     participantes: ["marcia", "estela", "helio", "bia", "renan"],
-    perguntaDoFormato: "Como você conduz a Review?",
+    perguntaDoFormato: "Como você propõe mostrar o incremento à escola?",
     formatos: [
         {
             id: "demonstrar",

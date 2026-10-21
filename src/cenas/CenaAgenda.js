@@ -117,6 +117,17 @@ export class CenaAgenda extends Phaser.Scene {
                 cena.escolher(opcao);
             }
         });
+
+        this.lista.selecionar(this.indiceDaVez());
+    }
+
+    // O cursor abre na reunião da vez; com a sprint encerrada, na primeira
+    indiceDaVez() {
+        const indice = this.lista.opcoes.findIndex(function (opcao) {
+            return opcao.situacao === "agora";
+        });
+
+        return indice < 0 ? 0 : indice;
     }
 
     escolher(opcao) {

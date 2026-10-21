@@ -84,6 +84,8 @@ export class CenaSprintRetrospective extends CenaReuniao {
         }
 
         if (this.marcadas().length >= this.evento.limiteDeObservacoes) {
+            this.avisar("até " + this.evento.limiteDeObservacoes
+                + " observações: desmarque uma para trocar");
             return;
         }
 
@@ -96,6 +98,7 @@ export class CenaSprintRetrospective extends CenaReuniao {
             return;
         }
         if (this.marcadas().length === 0) {
+            this.avisar("marque ao menos uma observação antes de seguir");
             return;
         }
         this.etapaDaAcao();

@@ -9,7 +9,8 @@
 // "conduz" é só a chave da mecânica. O que o jogador lê na agenda é o
 // "rotulo", escrito conforme o Scrum Guide 2020: a Daily é dos
 // desenvolvedores e o Scrum Master a facilita; no Planning o Product Owner
-// propõe a meta, que o time define junto.
+// propõe a meta, que o time define junto; a Review é do time com a escola, e
+// o Product Owner é quem recebe a escola.
 
 export const PAPEIS_DOS_EVENTOS = {
 
@@ -369,6 +370,7 @@ export const PAPEIS_DOS_EVENTOS = {
 
         po: {
             conduz: true,
+            rotulo: "você recebe a escola",
             abertura: {
                 quem: "estela",
                 texto: "Então, o que vocês conseguiram fazer nessas duas semanas?"

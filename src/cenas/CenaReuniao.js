@@ -40,6 +40,7 @@ export class CenaReuniao extends Phaser.Scene {
         this.aoTerminarFala = null;
         this.esperandoFala = false;
         this.pergunta = null;
+        this.aviso = null;
         this.emAndamento = false;
 
         this.montarSala();
@@ -102,14 +103,24 @@ export class CenaReuniao extends Phaser.Scene {
         ).setOrigin(0.5, atrasDaMesa ? 1 : 0).setDepth(690);
     }
 
-    // Quem senta à mesa: os participantes do evento e o mentor da cadeira
+    // Quem senta à mesa: os participantes do evento, o mentor da cadeira e
+    // quem fala na abertura ou nas decisões dela.
     participantes() {
         const lista = (this.evento.participantes || []).slice();
-        const mentor = this.chaveDoMentor();
+        const papel = this.papel();
+        const falantes = (papel.decisoes || []).map(function (decisao) {
+            return decisao.quem;
+        });
 
-        if (lista.indexOf(mentor) < 0) {
-            lista.push(mentor);
+        if (papel.abertura) {
+            falantes.unshift(papel.abertura.quem);
         }
+
+        [this.chaveDoMentor()].concat(falantes).forEach(function (chave) {
+            if (chave !== "jogador" && lista.indexOf(chave) < 0) {
+                lista.push(chave);
+            }
+        });
 
         return lista;
     }
@@ -153,6 +164,26 @@ export class CenaReuniao extends Phaser.Scene {
 
     definirAjuda(texto) {
         this.textoDeAjuda.setText(texto);
+    }
+
+    // Recado curto no rodapé, à direita da ajuda, que some sozinho
+    avisar(texto) {
+        if (this.aviso) {
+            this.aviso.destroy();
+        }
+
+        this.aviso = this.add.text(936, 522, texto, {
+            fontFamily: FONTE,
+            fontSize: "11px",
+            color: COR.alerta
+        }).setOrigin(1, 0).setDepth(701);
+
+        this.time.delayedCall(2600, function () {
+            if (this.aviso) {
+                this.aviso.destroy();
+                this.aviso = null;
+            }
+        }, [], this);
     }
 
     // ----------------------------------------------------------
@@ -378,9 +409,8 @@ export class CenaReuniao extends Phaser.Scene {
         this.painel.mostrarApenasFundo();
         this.definirAjuda(config.ajuda || "setas escolhem, ENTER responde");
 
-        if (this.pergunta) {
-            this.pergunta.destroy();
-        }
+        // Fecha a lista anterior antes de escrever a pergunta
+        this.fecharLista();
         this.pergunta = this.add.text(PAINEL.x + 16, PAINEL.y + 10, config.pergunta || "", {
             fontFamily: FONTE,
             fontSize: "12px",
@@ -388,7 +418,6 @@ export class CenaReuniao extends Phaser.Scene {
             wordWrap: {width: PAINEL.largura - 32}
         }).setDepth(806);
 
-        this.fecharLista();
         this.lista = new ListaDeOpcoes(this, {
             x: PAINEL.x + 16,
             y: PAINEL.y + TOPO_DAS_OPCOES,

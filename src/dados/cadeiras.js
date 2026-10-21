@@ -12,7 +12,7 @@ export const CADEIRAS = {
         cor: "#c0392b",
         titular: "marcia",
         resumo: "Ordena o Product Backlog e propõe o que entra na sprint",
-        nosEventos: "propõe a meta no Planning e conduz a Review"
+        nosEventos: "propõe a meta no Planning e recebe a escola na Review"
     },
     sm: {
         nome: "Scrum Master",

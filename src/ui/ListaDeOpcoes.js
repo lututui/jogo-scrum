@@ -242,6 +242,20 @@ export class ListaDeOpcoes {
         this.atualizarDestaque();
     }
 
+    // Põe o cursor numa linha, rolando a janela se ela estiver fora da vista
+    selecionar(indice) {
+        if (this.opcoes.length === 0) {
+            return;
+        }
+
+        this.indice = Phaser.Math.Clamp(indice, 0, this.opcoes.length - 1);
+        if (this.ajustarDeslocamento()) {
+            this.desenhar();
+            return;
+        }
+        this.atualizarDestaque();
+    }
+
     selecionada() {
         return this.opcoes[this.indice] || null;
     }

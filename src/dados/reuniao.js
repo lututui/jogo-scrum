@@ -14,7 +14,11 @@ export const ASSENTOS = [
     {x: 318, y: 240},
     {x: 642, y: 240, espelhado: true},
     {x: 392, y: 296},
-    {x: 568, y: 296, espelhado: true}
+    {x: 568, y: 296, espelhado: true},
+
+    // Pontas
+    {x: 252, y: 300},
+    {x: 708, y: 300, espelhado: true}
 ];
 
 export const ASSENTO_DO_JOGADOR = {x: 480, y: 306};

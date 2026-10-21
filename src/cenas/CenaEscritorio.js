@@ -8,7 +8,8 @@ import {proximoContextual} from "../dados/eventosContextuais.js";
 import {
     contextuaisResolvidos,
     eventosConcluidos,
-    medidoresDaCadeira
+    medidoresDaCadeira,
+    sprintsConcluidas
 } from "../dados/progresso.js";
 import {MedidoresHUD} from "../ui/MedidoresHUD.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
@@ -106,14 +107,14 @@ export class CenaEscritorio extends Phaser.Scene {
             return;
         }
 
-        const faixa = this.add.rectangle(900, 322, 88, 420, 0xffffff, 0.35);
+        const faixa = this.add.rectangle(900, 322, 88, 420, COR_HEX.painel, 0.35);
         faixa.setDepth(1);
-        faixa.setStrokeStyle(1, 0x9fb0cf);
+        faixa.setStrokeStyle(1, COR_HEX.contornoSuave);
 
         this.add.text(900, 120, "área de teste", {
-            fontFamily: "monospace",
+            fontFamily: FONTE,
             fontSize: "11px",
-            color: "#6d7b95"
+            color: COR.textoSecundario
         }).setOrigin(0.5).setDepth(2);
     }
 
@@ -139,10 +140,13 @@ export class CenaEscritorio extends Phaser.Scene {
 
         const estilo = {fontFamily: FONTE, fontSize: "14px", color: COR.texto};
 
-        this.textoSprint = this.add.text(20, 13, "SPRINT 1 DE 6", estilo);
+        // Da esquerda para a direita: sprint, medidores, dia e cadeira. Os
+        // medidores ficam entre a sprint e o dia porque o nome da cadeira, à
+        // direita, chega a ocupar um quinto da barra
+        this.textoSprint = this.add.text(20, 13, "", estilo);
+        this.medidores = new MedidoresHUD(this, 150, 6);
         this.textoDia = this.add.text(480, 13, "DIA 1 DE 10", estilo).setOrigin(0.5, 0);
         this.textoCadeira = this.add.text(940, 13, "", estilo).setOrigin(1, 0);
-        this.medidores = new MedidoresHUD(this, 560, 6);
 
         this.textoProximoPasso = this.add.text(940, 516, "", {
             fontFamily: FONTE,
@@ -314,6 +318,7 @@ export class CenaEscritorio extends Phaser.Scene {
         const vividos = eventosConcluidos(this.registry, this.cadeiraAtual).length
             + contextuaisResolvidos(this.registry, this.cadeiraAtual).length;
 
+        this.textoSprint.setText("SPRINT " + (sprintsConcluidas(this.registry, this.cadeiraAtual) + 1));
         this.textoDia.setText("DIA " + Math.min(1 + vividos, 10) + " DE 10");
         this.medidores.atualizar(medidoresDaCadeira(this.registry, this.cadeiraAtual));
         this.textoProximoPasso.setText(this.proximoPasso());

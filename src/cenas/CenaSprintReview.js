@@ -1,6 +1,7 @@
 // Sprint Review
 //
-// Mecânica: escolher como conduzir e o que mostrar.
+// Mecânica: propor como o incremento é mostrado à escola e escolher o que
+// mostrar.
 //
 // O que a escola pede volta ao quadro como item novo.
 
