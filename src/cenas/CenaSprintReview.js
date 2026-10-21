@@ -138,7 +138,8 @@ export class CenaSprintReview extends CenaReuniao {
 
         this.pontuar({
             avaliacao: houveDemonstracao ? "boa" : "ruim",
-            marca: mostrouPlanejado ? "definicao-de-pronto" : null
+            marca: mostrouPlanejado ? "definicao-de-pronto" : null,
+            conceito: houveDemonstracao ? null : this.evento.fechamento.semItens.conceito
         });
 
         if (houveDemonstracao && this.formato.gerarFeedbackDoUsuario) {

@@ -83,7 +83,7 @@ export class CenaDailyScrum extends CenaReuniao {
 
         // Passar do tempo é uma decisão com custo, somada às das rodadas
         if (!dentroDoTempo) {
-            this.pontuar({avaliacao: "media"});
+            this.pontuar({avaliacao: "media", conceito: fechamento.conceitoAcimaDoTempo});
         }
 
         const texto = (dentroDoTempo ? fechamento.dentroDoTempo : fechamento.acimaDoTempo)

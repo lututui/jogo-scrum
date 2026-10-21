@@ -20,8 +20,10 @@ const RECUO = 16;
 
 export const TECLA_DO_GLOSSARIO = Phaser.Input.Keyboard.KeyCodes.G;
 
-export function abrirGlossario(cena) {
-    abrirPorCima(cena, "CenaGlossario");
+// Com termos, o glossário mostra só eles, como a síntese faz com o que
+// vale revisar
+export function abrirGlossario(cena, termos) {
+    abrirPorCima(cena, "CenaGlossario", {termos: termos || null});
 }
 
 export class CenaGlossario extends Phaser.Scene {
@@ -32,6 +34,19 @@ export class CenaGlossario extends Phaser.Scene {
 
     init(dados) {
         this.retorno = dados.retorno;
+        this.termos = dados.termos || null;
+    }
+
+    entradas() {
+        const termos = this.termos;
+
+        if (!termos) {
+            return GLOSSARIO;
+        }
+
+        return GLOSSARIO.filter(function (entrada) {
+            return termos.indexOf(entrada.termo) >= 0;
+        });
     }
 
     create() {
@@ -52,7 +67,7 @@ export class CenaGlossario extends Phaser.Scene {
         barra.lineBetween(0, 40, 960, 40);
 
         const estilo = {fontFamily: FONTE, fontSize: "14px", color: COR.texto};
-        this.add.text(MARGEM, 13, "GLOSSÁRIO", estilo);
+        this.add.text(MARGEM, 13, this.termos ? "GLOSSÁRIO — PARA REVISAR" : "GLOSSÁRIO", estilo);
         this.add.text(936, 13, "ESC OU G PARA VOLTAR", estilo).setOrigin(1, 0);
 
         this.add.text(MARGEM, 516, "setas escolhem o termo, ou clique nele", {
@@ -111,7 +126,7 @@ export class CenaGlossario extends Phaser.Scene {
             alturaDaLinha: ALTURA_DA_LINHA,
             espaco: ESPACO_ENTRE_LINHAS,
             visiveis: LINHAS_VISIVEIS,
-            opcoes: GLOSSARIO.map(function (entrada) {
+            opcoes: this.entradas().map(function (entrada) {
                 return {
                     titulo: entrada.termo,
                     detalhe: GRUPOS[entrada.grupo],

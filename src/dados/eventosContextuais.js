@@ -30,6 +30,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Mandar o time parar e fazer o relatório",
                 detalhe: "O cliente pediu",
                 avaliacao: "ruim",
+                conceito: "Sprint Backlog",
                 medidores: ["valor", "saude"],
                 feedback: "O time trocou de assunto no meio da semana e a meta "
                     + "ficou sem dono. O relatório saiu; a chamada, não.",
@@ -39,6 +40,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Dizer que não dá e encerrar a ligação",
                 detalhe: "Recusa seca",
                 avaliacao: "media",
+                conceito: "Transparência",
                 medidores: ["confianca"],
                 feedback: "A meta ficou protegida e a diretora ficou sem "
                     + "entender por quê. A conversa volta na Review, mais difícil.",
@@ -70,6 +72,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Prometer e avisar o time depois",
                 detalhe: "Compromisso assumido por fora",
                 avaliacao: "ruim",
+                conceito: "Autogestão",
                 medidores: ["saude"],
                 feedback: "O time descobriu o próprio compromisso pronto. Duas "
                     + "pessoas já falaram em virar a noite.",
@@ -79,6 +82,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Prometer e não contar a ninguém",
                 detalhe: "Problema guardado para a Review",
                 avaliacao: "ruim",
+                conceito: "Transparência",
                 medidores: ["saude", "confianca", "valor"],
                 feedback: "Na Review a diretora vai cobrar algo que ninguém "
                     + "começou. O silêncio custou as duas coisas.",
@@ -110,6 +114,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Escalar para a diretora por cima da secretaria",
                 detalhe: "Resolve hoje, custa depois",
                 avaliacao: "media",
+                conceito: "Impedimento",
                 medidores: ["valor", "confianca"],
                 feedback: "O acesso saiu em um dia e a secretaria passou a "
                     + "responder por obrigação. Vocês ainda dependem dela.",
@@ -119,6 +124,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Pedir que ela trabalhe com dados inventados",
                 detalhe: "Contornar em vez de remover",
                 avaliacao: "ruim",
+                conceito: "Impedimento",
                 medidores: ["valor"],
                 feedback: "O contorno virou retrabalho: o caso do aluno "
                     + "transferido só aparece com dado real.",
@@ -150,6 +156,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Corrigir em silêncio no fim do dia",
                 detalhe: "Ninguém precisa saber",
                 avaliacao: "media",
+                conceito: "Transparência",
                 medidores: ["saude"],
                 feedback: "O bug sumiu e o tempo gasto também. O plano da sprint "
                     + "não bate com o que aconteceu de verdade.",
@@ -159,6 +166,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Deixar para a próxima sprint",
                 detalhe: "Está no backlog, um dia sai",
                 avaliacao: "ruim",
+                conceito: "Incremento",
                 medidores: ["confianca", "valor"],
                 feedback: "Três turmas seguem perdendo chamada. A escola deixou "
                     + "de usar o piloto na quarta-feira.",
@@ -190,6 +198,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Fazer e não contar",
                 detalhe: "Dois dias agora, surpresa depois",
                 avaliacao: "ruim",
+                conceito: "Débito técnico",
                 medidores: ["saude", "valor"],
                 feedback: "Na sprint seguinte alguém vai mexer ali sem saber o "
                     + "que encontrou, e vai achar que é azar.",
@@ -199,6 +208,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Recusar e fazer do jeito certo, furando a meta",
                 detalhe: "Qualidade sem negociação",
                 avaliacao: "media",
+                conceito: "Meta da sprint",
                 medidores: ["valor"],
                 feedback: "O código ficou melhor e a meta não fechou. A escolha "
                     + "entre os dois era do time, e foi sua.",
@@ -229,6 +239,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Pedir que ela comece outra coisa",
                 detalhe: "Mais itens em progresso",
                 avaliacao: "media",
+                conceito: "Limite de WIP",
                 medidores: ["valor"],
                 feedback: "Ninguém ficou parado e nada foi concluído. O quadro "
                     + "cresceu para os lados.",
@@ -238,6 +249,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 titulo: "Dizer que ela espera, seu item é mais importante",
                 detalhe: "Prioridade pessoal",
                 avaliacao: "ruim",
+                conceito: "Meta da sprint",
                 medidores: ["saude", "valor"],
                 feedback: "Dois dias de trabalho dela ficaram parados por uma "
                     + "hora do seu.",

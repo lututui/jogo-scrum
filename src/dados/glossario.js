@@ -8,10 +8,13 @@
 
 const GUIA = "Schwaber e Sutherland (2020)";
 const KANBAN = "Anderson (2010)";
+const MANIFESTO = "Beck et al. (2001)";
 const PRATICA = "uso corrente em times de software; não definido no Scrum Guide";
 
 export const GRUPOS = {
     framework: "FRAMEWORK",
+    pilar: "PILAR",
+    principio: "PRINCÍPIO ÁGIL",
     papel: "PAPEL",
     evento: "EVENTO",
     artefato: "ARTEFATO",
@@ -28,6 +31,30 @@ export const GLOSSARIO = [
             + "meio de soluções adaptativas. O trabalho é feito em sprints, "
             + "inspecionado com frequência e ajustado conforme o que se aprende.",
         fonte: GUIA
+    },
+    {
+        termo: "Transparência",
+        grupo: "pilar",
+        definicao: "Um dos três pilares do Scrum, ao lado da inspeção e da "
+            + "adaptação. O trabalho e os problemas precisam estar visíveis para "
+            + "quem decide; sem isso, a inspeção engana e a adaptação erra o alvo.",
+        fonte: GUIA
+    },
+    {
+        termo: "Autogestão",
+        grupo: "framework",
+        definicao: "O time decide internamente quem faz o quê, quando e como. "
+            + "Ninguém de fora, nem o Scrum Master, decide por ele; compromisso "
+            + "assumido no lugar do time enfraquece essa capacidade.",
+        fonte: GUIA
+    },
+    {
+        termo: "Ritmo sustentável",
+        grupo: "principio",
+        definicao: "Princípio do Manifesto Ágil: quem patrocina, desenvolve e "
+            + "usa deve conseguir manter um ritmo constante indefinidamente. "
+            + "Hora extra como plano esconde que o trabalho não cabe na sprint.",
+        fonte: MANIFESTO
     },
     {
         termo: "Sprint",

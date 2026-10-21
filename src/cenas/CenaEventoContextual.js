@@ -166,6 +166,7 @@ export class CenaEventoContextual extends Phaser.Scene {
             avaliacao: opcao.avaliacao,
             medidores: opcao.medidores,
             marca: opcao.marca,
+            conceito: opcao.conceito,
             semMentor: Boolean(this.evento.semMentor)
         });
 

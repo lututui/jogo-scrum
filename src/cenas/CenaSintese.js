@@ -17,6 +17,7 @@ import {
     sprintsConcluidas
 } from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
 const MARGEM = 24;
 const LARGURA_DA_COLUNA = 440;
@@ -42,6 +43,7 @@ export class CenaSintese extends Phaser.Scene {
         this.montarDecisoes();
         this.montarMedidores();
         this.montarConquistas();
+        this.montarParaRevisar();
         this.montarRodape();
         this.criarControles();
     }
@@ -172,8 +174,9 @@ export class CenaSintese extends Phaser.Scene {
             return;
         }
 
+        // Nome e descrição em duas linhas, para caber na coluna da esquerda
         obtidas.slice(0, 6).forEach(function (conquista, posicao) {
-            const linha = y + 28 + posicao * 30;
+            const linha = y + 28 + posicao * 28;
 
             this.add.text(MARGEM, linha, conquista.nome, {
                 fontFamily: FONTE,
@@ -181,12 +184,69 @@ export class CenaSintese extends Phaser.Scene {
                 color: COR.destaque
             });
 
-            this.add.text(MARGEM + 240, linha, conquista.descricao, {
+            this.add.text(MARGEM, linha + 14, conquista.descricao, {
+                fontFamily: FONTE,
+                fontSize: "10px",
+                color: COR.textoSecundario
+            });
+        }, this);
+    }
+
+    // Os conceitos das decisões com custo ou contra o princípio (RF11), dos
+    // mais frequentes para os menos
+    conceitosParaRevisar() {
+        const contagem = this.sprint.paraRevisar || {};
+
+        return Object.keys(contagem).sort(function (um, outro) {
+            return contagem[outro] - contagem[um] || um.localeCompare(outro);
+        });
+    }
+
+    montarParaRevisar() {
+        const x = MARGEM + LARGURA_DA_COLUNA + 32;
+        const y = TOPO + 132;
+        const contagem = this.sprint.paraRevisar || {};
+        const conceitos = this.conceitosParaRevisar();
+
+        this.tituloDoBloco(x, y, "PARA REVISAR");
+
+        if (conceitos.length === 0) {
+            this.add.text(x, y + 28, "Nenhuma decisão com custo ou contra o princípio.", {
                 fontFamily: FONTE,
                 fontSize: "11px",
                 color: COR.textoSecundario
             });
+
+            return;
+        }
+
+        conceitos.slice(0, 6).forEach(function (conceito, posicao) {
+            const linha = y + 28 + posicao * 22;
+            const vezes = contagem[conceito];
+
+            this.add.text(x, linha, conceito, {
+                fontFamily: FONTE,
+                fontSize: "12px",
+                color: COR.texto
+            });
+
+            this.add.text(x + LARGURA_DA_COLUNA - 20, linha,
+                vezes + (vezes === 1 ? " decisão" : " decisões"), {
+                    fontFamily: FONTE,
+                    fontSize: "11px",
+                    color: COR.textoSecundario
+                }).setOrigin(1, 0);
         }, this);
+
+        const fora = conceitos.length - 6;
+        this.add.text(x, y + 34 + Math.min(conceitos.length, 6) * 22,
+            fora > 0
+                ? "G abre o glossário com estes e mais " + fora + (fora === 1 ? " termo" : " termos")
+                : "G abre o glossário só com esses termos", {
+                fontFamily: FONTE,
+                fontSize: "11px",
+                color: COR.destaque
+            });
     }
 
     // As cadeiras já vividas, com quantas sprints cada uma fechou, e o convite
@@ -255,11 +315,18 @@ export class CenaSintese extends Phaser.Scene {
     criarControles() {
         this.teclas = this.input.keyboard.addKeys({
             acao: Phaser.Input.Keyboard.KeyCodes.ENTER,
-            espaco: Phaser.Input.Keyboard.KeyCodes.SPACE
+            espaco: Phaser.Input.Keyboard.KeyCodes.SPACE,
+            glossario: TECLA_DO_GLOSSARIO
         });
     }
 
     update() {
+        if (Phaser.Input.Keyboard.JustDown(this.teclas.glossario)) {
+            const conceitos = this.conceitosParaRevisar();
+            abrirGlossario(this, conceitos.length > 0 ? conceitos : null);
+            return;
+        }
+
         const confirmou = Phaser.Input.Keyboard.JustDown(this.teclas.acao)
             || Phaser.Input.Keyboard.JustDown(this.teclas.espaco);
 

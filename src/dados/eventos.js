@@ -76,6 +76,7 @@ export const SPRINT_PLANNING = {
             titulo: "Entregar os itens do topo da lista, na ordem em que estão",
             detalhe: "Sem meta comum, só uma relação de tarefas",
             avaliacao: "ruim",
+            conceito: "Meta da sprint",
             feedback: "Uma lista de itens não é uma meta. Sem um resultado comum, "
                 + "cada item avança um pouco e nada funciona ponta a ponta na Review.",
             principio: "Sprint sem meta vira fila de tarefas, e o incremento não fecha."
@@ -85,6 +86,7 @@ export const SPRINT_PLANNING = {
             titulo: "Impressionar a diretora com o máximo de telas possível",
             detalhe: "Meta voltada à plateia, não ao uso",
             avaliacao: "ruim",
+            conceito: "Incremento",
             feedback: "Tela pronta não é incremento utilizável. A meta passa a "
                 + "servir à apresentação, e o time perde o critério para decidir "
                 + "o que fica de fora.",
@@ -111,11 +113,13 @@ export const SPRINT_PLANNING = {
             principio: "O Sprint Backlog é o plano dos desenvolvedores para alcançar a meta."
         },
         disperso: {
+            conceito: "Sprint Backlog",
             feedback: "Entraram itens que não servem à meta. Eles competem por "
                 + "tempo com o que a sprint prometeu entregar.",
             principio: "Item sem relação com a meta é escopo emprestado da próxima sprint."
         },
         vazio: {
+            conceito: "Sprint Planning",
             feedback: "Sem itens selecionados não há plano. O time sai da reunião "
                 + "sem saber por onde começar.",
             principio: "O Sprint Planning termina com um plano, não com uma intenção."
@@ -150,6 +154,7 @@ export const DAILY_SCRUM = {
                     titulo: "Deixar ele terminar o raciocínio",
                     custo: 6,
                     avaliacao: "media",
+                    conceito: "Daily Scrum",
                     feedback: "Seis minutos foram para um assunto de duas pessoas. "
                         + "Sobrou pouco tempo para o resto do time.",
                     principio: "Tempo fixo é o que mantém a Daily viável todos os dias."
@@ -158,6 +163,7 @@ export const DAILY_SCRUM = {
                     titulo: "Resolver o problema dele ali mesmo",
                     custo: 7,
                     avaliacao: "ruim",
+                    conceito: "Autogestão",
                     feedback: "Você assumiu a tarefa em vez de facilitar. O time "
                         + "aprende a trazer problemas para você resolver.",
                     principio: "Facilitar não é decidir pelo time; autogestão se sustenta com espaço."
@@ -181,6 +187,7 @@ export const DAILY_SCRUM = {
                     titulo: "Anotar e seguir para o próximo",
                     custo: 1,
                     avaliacao: "ruim",
+                    conceito: "Impedimento",
                     feedback: "A anotação não diz o que travou. Amanhã a frase se "
                         + "repete e o segundo dia também se perde.",
                     principio: "Transparência exige informação acionável, não registro genérico."
@@ -189,6 +196,7 @@ export const DAILY_SCRUM = {
                     titulo: "Sugerir que ela tente por outro caminho",
                     custo: 4,
                     avaliacao: "media",
+                    conceito: "Impedimento",
                     feedback: "Você propôs solução sem conhecer a causa. Pode ser "
                         + "que o caminho alternativo esbarre no mesmo bloqueio.",
                     principio: "Remover impedimento começa por entender do que ele é feito."
@@ -212,6 +220,7 @@ export const DAILY_SCRUM = {
                     titulo: "Aceitar o relato e anotar",
                     custo: 2,
                     avaliacao: "media",
+                    conceito: "Daily Scrum",
                     feedback: "Funciona hoje e ensina o padrão errado: o time passa "
                         + "a se reportar a você todos os dias.",
                     principio: "O formato que você aceita é o formato que o time repete."
@@ -220,6 +229,7 @@ export const DAILY_SCRUM = {
                     titulo: "Cobrar prazo para as telas",
                     custo: 5,
                     avaliacao: "ruim",
+                    conceito: "Transparência",
                     feedback: "A cobrança transforma a reunião em prestação de "
                         + "contas. O time passa a relatar o que soa bem.",
                     principio: "Cobrança individual corrói a transparência que a Daily depende."
@@ -230,6 +240,7 @@ export const DAILY_SCRUM = {
     fechamento: {
         dentroDoTempo: "Quinze minutos bastaram.",
         acimaDoTempo: "A reunião passou do tempo combinado.",
+        conceitoAcimaDoTempo: "Daily Scrum",
         comImpedimento: "Um impedimento saiu da reunião com nome e dono.",
         semImpedimento: "Nenhum impedimento saiu da reunião em condição de ser tratado.",
         principio: "A Daily serve para inspecionar o progresso rumo à meta e adaptar o plano do dia."
@@ -260,6 +271,7 @@ export const SPRINT_REVIEW = {
             titulo: "Apresentar slides com o que foi feito",
             detalhe: "Relato sem uso",
             avaliacao: "ruim",
+            conceito: "Sprint Review",
             feedback: "Elogio fácil, nenhum problema descoberto. O que não apareceu "
                 + "hoje aparece na próxima sprint, mais caro.",
             principio: "Incremento que não é usado na Review não foi inspecionado."
@@ -269,6 +281,7 @@ export const SPRINT_REVIEW = {
             titulo: "Enviar um relatório e discutir prazos",
             detalhe: "Reunião de status",
             avaliacao: "ruim",
+            conceito: "Sprint Review",
             feedback: "A conversa virou cronograma. O Product Backlog sai da "
                 + "reunião igual ao que entrou.",
             principio: "A Review adapta o Product Backlog; sem isso ela perde a função."
@@ -293,6 +306,7 @@ export const SPRINT_REVIEW = {
             principio: "A Review termina com o Product Backlog adaptado ao que se aprendeu."
         },
         semItens: {
+            conceito: "Incremento",
             feedback: "Sem nada para mostrar, a reunião vira promessa. A escola "
                 + "fica sem base para confiar no próximo prazo.",
             principio: "Confiança se constrói com incremento em uso, não com relato."
@@ -351,6 +365,7 @@ export const SPRINT_RETROSPECTIVE = {
             titulo: "Melhorar a comunicação do time",
             detalhe: "Sem dono e sem como medir",
             avaliacao: "ruim",
+            conceito: "Sprint Retrospective",
             feedback: "Ninguém sabe o que fazer amanhã de manhã por causa disso. "
                 + "A frase reaparece intacta na próxima retrospectiva.",
             principio: "Ação sem responsável e sem critério não é melhoria, é intenção."
@@ -360,12 +375,14 @@ export const SPRINT_RETROSPECTIVE = {
             titulo: "Anotar as dez melhorias levantadas e tentar todas",
             detalhe: "Volume em vez de escolha",
             avaliacao: "ruim",
+            conceito: "Sprint Retrospective",
             feedback: "Dez ações competem entre si e nenhuma recebe atenção. O time "
                 + "termina a sprint seguinte sem ter feito nenhuma.",
             principio: "Poucas melhorias por ciclo é o que torna a adaptação real."
         }
     ],
     semObservacaoRelevante: {
+        conceito: "Sprint Retrospective",
         feedback: "As observações escolhidas não tocam no que travou a sprint. A "
             + "conversa foi agradável e o problema continua de pé.",
         principio: "A retrospectiva inspeciona o processo, e não o humor do time."

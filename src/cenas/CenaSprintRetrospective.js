@@ -127,7 +127,7 @@ export class CenaSprintRetrospective extends CenaReuniao {
         this.pontuar(acao);
 
         if (!this.escolheuRelevante) {
-            this.pontuar({avaliacao: "ruim"});
+            this.pontuar({avaliacao: "ruim", conceito: this.evento.semObservacaoRelevante.conceito});
         }
 
         this.responder(acao.titulo, function () {

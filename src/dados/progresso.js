@@ -50,6 +50,7 @@ function sprintVazia() {
         contextuaisResolvidos: [],
         marcas: {},
         conquistas: [],
+        paraRevisar: {},
         quadro: quadroInicial(),
         movimentosNoQuadro: 0
     };
@@ -242,6 +243,12 @@ export function registrarDecisao(registry, decisao) {
 
     if (decisao.marca) {
         sprint.marcas[decisao.marca] = (sprint.marcas[decisao.marca] || 0) + 1;
+    }
+
+    // Conceito de decisão com custo ou contra o princípio, contado por termo
+    if (decisao.conceito && decisao.avaliacao !== "boa") {
+        sprint.paraRevisar = sprint.paraRevisar || {};
+        sprint.paraRevisar[decisao.conceito] = (sprint.paraRevisar[decisao.conceito] || 0) + 1;
     }
 
     atualizarConquistas(progresso, decisao.cadeira, false);

@@ -352,7 +352,8 @@ export class CenaReuniao extends Phaser.Scene {
             cadeira: this.cadeira(),
             avaliacao: opcao.avaliacao,
             medidores: opcao.medidores,
-            marca: opcao.marca
+            marca: opcao.marca,
+            conceito: opcao.conceito
         });
         this.travarSaida();
     }
