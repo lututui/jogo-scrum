@@ -6,6 +6,7 @@ import {COLUNAS} from "../dados/quadro.js";
 import {lerItensDoQuadro, salvarItensDoQuadro} from "../dados/estadoDoQuadro.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ALTURA_CARTAO, CartaoKanban, LARGURA_CARTAO} from "../ui/CartaoKanban.js";
+import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
 const MARGEM = 20;
 const LARGURA_DA_COLUNA = 218;
@@ -69,7 +70,7 @@ export class CenaKanban extends Phaser.Scene {
             MARGEM,
             516,
             "setas escolhem o cartão, SHIFT com as setas move o cartão, "
-            + "ou arraste com o mouse",
+            + "ou arraste com o mouse; G abre o glossário",
             {fontFamily: FONTE, fontSize: "12px", color: COR.textoSecundario}
         );
     }
@@ -139,7 +140,8 @@ export class CenaKanban extends Phaser.Scene {
             esquerda: Phaser.Input.Keyboard.KeyCodes.LEFT,
             direita: Phaser.Input.Keyboard.KeyCodes.RIGHT,
             mover: Phaser.Input.Keyboard.KeyCodes.SHIFT,
-            sair: Phaser.Input.Keyboard.KeyCodes.ESC
+            sair: Phaser.Input.Keyboard.KeyCodes.ESC,
+            glossario: TECLA_DO_GLOSSARIO
         });
 
         this.input.on("dragstart", this.aoComecarArrasto, this);
@@ -359,6 +361,12 @@ export class CenaKanban extends Phaser.Scene {
     update() {
         if (Phaser.Input.Keyboard.JustDown(this.teclas.sair)) {
             this.voltarAoEscritorio();
+            return;
+        }
+
+        // Com um cartão sendo arrastado pelo mouse, o glossário espera
+        if (Phaser.Input.Keyboard.JustDown(this.teclas.glossario) && !this.arrastando) {
+            abrirGlossario(this);
             return;
         }
 

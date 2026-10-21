@@ -12,6 +12,7 @@ import {registrarContextualResolvido, registrarDecisao} from "../dados/progresso
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
+import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
 const TOPO_DAS_OPCOES = 32;
 const ALTURA_DA_LINHA = 34;
@@ -122,7 +123,7 @@ export class CenaEventoContextual extends Phaser.Scene {
         this.fecharLista();
         this.esperandoFala = true;
         this.aoTerminarFala = aoTerminar || null;
-        this.ajuda.setText("ENTER continua");
+        this.ajuda.setText("ENTER continua  ·  G abre o glossário");
         this.painel.mostrar(this.personagem(chave), texto, principio);
     }
 
@@ -130,7 +131,7 @@ export class CenaEventoContextual extends Phaser.Scene {
         const cena = this;
         this.esperandoFala = false;
         this.painel.mostrarApenasFundo();
-        this.ajuda.setText("setas escolhem, ENTER responde");
+        this.ajuda.setText("setas escolhem, ENTER responde  ·  G abre o glossário");
 
         this.pergunta = this.add.text(
             PAINEL.x + 16, PAINEL.y + 10, this.evento.pergunta, {
@@ -205,12 +206,18 @@ export class CenaEventoContextual extends Phaser.Scene {
             cima: Phaser.Input.Keyboard.KeyCodes.UP,
             baixo: Phaser.Input.Keyboard.KeyCodes.DOWN,
             acao: Phaser.Input.Keyboard.KeyCodes.ENTER,
-            espaco: Phaser.Input.Keyboard.KeyCodes.SPACE
+            espaco: Phaser.Input.Keyboard.KeyCodes.SPACE,
+            glossario: TECLA_DO_GLOSSARIO
         });
     }
 
     update(tempo, delta) {
         this.painel.atualizar(delta);
+
+        if (Phaser.Input.Keyboard.JustDown(this.teclas.glossario)) {
+            abrirGlossario(this);
+            return;
+        }
 
         if (this.esperandoFala) {
             if (this.confirmou()) {

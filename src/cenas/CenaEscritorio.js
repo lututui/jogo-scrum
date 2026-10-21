@@ -14,6 +14,7 @@ import {
 import {MedidoresHUD} from "../ui/MedidoresHUD.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {CaixaDialogo} from "../ui/CaixaDialogo.js";
+import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
 export class CenaEscritorio extends Phaser.Scene {
 
@@ -200,6 +201,15 @@ export class CenaEscritorio extends Phaser.Scene {
 
         this.teclaPapel = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
         this.teclaSintese = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+        this.teclaGlossario = this.input.keyboard.addKey(TECLA_DO_GLOSSARIO);
+    }
+
+    // O jogador para antes da pausa
+    consultarGlossario() {
+        this.rotulo.setVisible(false);
+        this.jogador.setVelocity(0, 0);
+        this.jogador.anims.play("jogador_" + this.cadeiraAtual + "_parado", true);
+        abrirGlossario(this);
     }
 
     // A troca de cadeira volta para a cena de seleção
@@ -344,10 +354,10 @@ export class CenaEscritorio extends Phaser.Scene {
     }
 
     linhaDeAjuda() {
-        const base = "setas ou WASD para andar, ENTER para interagir";
+        const base = "setas ou WASD andam, ENTER interage, G abre o glossário";
 
         if (DEPURACAO.trocaDeCadeiraLivre || !this.sprintComecou()) {
-            return base + ", P para trocar de cadeira";
+            return base + ", P troca de cadeira";
         }
 
         return base;
@@ -364,6 +374,11 @@ export class CenaEscritorio extends Phaser.Scene {
 
     update(tempo, delta) {
         this.caixa.atualizar(delta);
+
+        if (Phaser.Input.Keyboard.JustDown(this.teclaGlossario)) {
+            this.consultarGlossario();
+            return;
+        }
 
         if (!this.emDialogo && Phaser.Input.Keyboard.JustDown(this.teclaPapel)) {
             this.pedirTrocaDeCadeira();

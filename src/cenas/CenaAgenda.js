@@ -15,6 +15,7 @@ import {EVENTOS} from "../dados/eventos.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
+import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
 const MARGEM = 24;
 const TOPO_DA_LISTA = 116;
@@ -57,7 +58,7 @@ export class CenaAgenda extends Phaser.Scene {
 
         marcarDepuracao(this, 936, 46);
 
-        this.add.text(MARGEM, 516, "setas escolhem, ENTER abre a reunião da vez", {
+        this.add.text(MARGEM, 516, "setas escolhem, ENTER abre a reunião da vez, G abre o glossário", {
             fontFamily: FONTE,
             fontSize: "12px",
             color: COR.textoSecundario
@@ -182,13 +183,16 @@ export class CenaAgenda extends Phaser.Scene {
             baixo: Phaser.Input.Keyboard.KeyCodes.DOWN,
             acao: Phaser.Input.Keyboard.KeyCodes.ENTER,
             espaco: Phaser.Input.Keyboard.KeyCodes.SPACE,
-            sair: Phaser.Input.Keyboard.KeyCodes.ESC
+            sair: Phaser.Input.Keyboard.KeyCodes.ESC,
+            glossario: TECLA_DO_GLOSSARIO
         });
     }
 
     update() {
         if (Phaser.Input.Keyboard.JustDown(this.teclas.sair)) {
             this.voltarAoEscritorio();
+        } else if (Phaser.Input.Keyboard.JustDown(this.teclas.glossario)) {
+            abrirGlossario(this);
         } else if (Phaser.Input.Keyboard.JustDown(this.teclas.cima)) {
             this.lista.mover(-1);
         } else if (Phaser.Input.Keyboard.JustDown(this.teclas.baixo)) {

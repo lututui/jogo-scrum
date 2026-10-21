@@ -15,6 +15,9 @@ import {ASSENTOS, ASSENTO_DO_JOGADOR, ESCALA, MESA} from "../dados/reuniao.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
+import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
+
+const LEMBRETE_DO_GLOSSARIO = "  ·  G abre o glossário";
 
 const ALTURA_DA_BARRA = 40;
 const ALTURA_DO_OBJETIVO = 36;
@@ -162,8 +165,9 @@ export class CenaReuniao extends Phaser.Scene {
         this.textoDaBarra.setText(texto);
     }
 
+    // Toda linha de ajuda lembra o glossário
     definirAjuda(texto) {
-        this.textoDeAjuda.setText(texto);
+        this.textoDeAjuda.setText(texto + LEMBRETE_DO_GLOSSARIO);
     }
 
     // Recado curto no rodapé, à direita da ajuda, que some sozinho
@@ -468,12 +472,18 @@ export class CenaReuniao extends Phaser.Scene {
             acao: Phaser.Input.Keyboard.KeyCodes.ENTER,
             espaco: Phaser.Input.Keyboard.KeyCodes.SPACE,
             concluir: Phaser.Input.Keyboard.KeyCodes.C,
-            sair: Phaser.Input.Keyboard.KeyCodes.ESC
+            sair: Phaser.Input.Keyboard.KeyCodes.ESC,
+            glossario: TECLA_DO_GLOSSARIO
         });
     }
 
     update(tempo, delta) {
         this.painel.atualizar(delta);
+
+        if (Phaser.Input.Keyboard.JustDown(this.teclas.glossario)) {
+            abrirGlossario(this);
+            return;
+        }
 
         if (Phaser.Input.Keyboard.JustDown(this.teclas.sair) && !this.emAndamento) {
             this.desistir();
