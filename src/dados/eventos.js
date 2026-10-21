@@ -56,10 +56,10 @@ export const SPRINT_PLANNING = {
     chave: "CenaSprintPlanning",
     nome: "SPRINT PLANNING",
     resumo: "Definir a meta e montar o Sprint Backlog",
-    objetivo: "Formular uma meta que restrinja o escopo e montar o Sprint "
-        + "Backlog dentro da capacidade do time.",
+    objetivo: "Definir com o time uma meta que restrinja o escopo e um Sprint "
+        + "Backlog que caiba na capacidade dos desenvolvedores.",
     participantes: ["marcia", "renan", "bia", "caio", "lu"],
-    perguntaDaMeta: "Qual é a meta desta sprint?",
+    perguntaDaMeta: "Que meta você propõe ao time?",
     metas: [
         {
             id: "meta-foco",
@@ -91,11 +91,16 @@ export const SPRINT_PLANNING = {
             principio: "O incremento precisa ser usável, não apenas demonstrável."
         }
     ],
-    instrucaoDoBacklog: "Escolha os itens do Sprint Backlog. Capacidade do time: "
-        + CAPACIDADE_DA_SPRINT + " pontos.",
+    // Quem anuncia a capacidade e confirma o que cabe: no Scrum Guide 2020, os
+    // itens do Sprint Backlog são selecionados pelos desenvolvedores, em
+    // conversa com o Product Owner
+    vozDosDesenvolvedores: "bia",
+    instrucaoDoBacklog: "Proponha os itens. Quem confirma o que cabe somos nós, "
+        + "os desenvolvedores: estimamos " + CAPACIDADE_DA_SPRINT
+        + " pontos de capacidade para esta sprint.",
     capacidadeExcedida: {
-        feedback: "O time estimou a capacidade da sprint e esse item não cabe "
-            + "nela. Forçar a entrada não cria tempo; só transfere a decisão de "
+        feedback: "Os desenvolvedores estimaram a capacidade da sprint e esse "
+            + "item não cabe nela. Forçar a entrada não cria tempo; só transfere a decisão de "
             + "corte para o meio da sprint, quando ela custa mais.",
         principio: "Quem estima é quem faz, e a capacidade é o limite do plano."
     },
@@ -103,7 +108,7 @@ export const SPRINT_PLANNING = {
         alinhado: {
             feedback: "O Sprint Backlog ficou coerente com a meta: o que entrou "
                 + "serve ao mesmo resultado.",
-            principio: "O Sprint Backlog é o plano do time para alcançar a meta."
+            principio: "O Sprint Backlog é o plano dos desenvolvedores para alcançar a meta."
         },
         disperso: {
             feedback: "Entraram itens que não servem à meta. Eles competem por "
@@ -122,8 +127,8 @@ export const DAILY_SCRUM = {
     chave: "CenaDailyScrum",
     nome: "DAILY SCRUM",
     resumo: "Quinze minutos para sincronizar o time",
-    objetivo: "Conduzir a Daily em quinze minutos, mantendo o time voltado à "
-        + "meta e fazendo impedimento declarado virar impedimento tratado.",
+    objetivo: "Fazer a Daily servir aos desenvolvedores em quinze minutos e "
+        + "transformar impedimento declarado em impedimento tratado.",
     participantes: ["renan", "bia", "caio", "lu"],
     duracaoEmMinutos: 15,
     rodadas: [

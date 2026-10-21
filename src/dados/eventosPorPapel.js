@@ -1,9 +1,15 @@
 // O que muda em cada evento conforme a cadeira
 //
-// A cadeira do jogador decide quem conduz e quem participa.
+// A cadeira do jogador decide quem tem a mecânica própria do evento e quem
+// participa.
 //
-// Quem conduz recebe a mecânica própria do evento, implementada na cena;
-// Quem participa recebe uma sequência de decisões, declarada aqui.
+// Quem tem a mecânica ("conduz") recebe a implementada na cena; quem
+// participa recebe uma sequência de decisões, declarada aqui.
+//
+// "conduz" é só a chave da mecânica. O que o jogador lê na agenda é o
+// "rotulo", escrito conforme o Scrum Guide 2020: a Daily é dos
+// desenvolvedores e o Scrum Master a facilita; no Planning o Product Owner
+// propõe a meta, que o time define junto.
 
 export const PAPEIS_DOS_EVENTOS = {
 
@@ -13,11 +19,13 @@ export const PAPEIS_DOS_EVENTOS = {
 
         po: {
             conduz: true,
+            rotulo: "você propõe a meta",
             abertura: {
                 quem: "marcia",
-                texto: "A lista da diretora tem quatorze pedidos. O time cabe "
-                    + "em oito pontos nesta sprint. Você senta na minha cadeira "
-                    + "hoje: a meta é sua."
+                texto: "A lista da diretora tem quatorze pedidos. Hoje você "
+                    + "senta na minha cadeira: propõe a meta e o que entra. "
+                    + "Quem diz o que cabe são os desenvolvedores, e a meta "
+                    + "sai da conversa com o time."
             }
         },
 
@@ -186,9 +194,12 @@ export const PAPEIS_DOS_EVENTOS = {
 
         sm: {
             conduz: true,
+            rotulo: "você facilita",
             abertura: {
                 quem: "renan",
-                texto: "Quinze minutos, de pé. Hoje quem conduz é você; eu fico "
+                texto: "Quinze minutos, de pé. A Daily é dos desenvolvedores; "
+                    + "o nosso trabalho é garantir que ela aconteça, caiba no "
+                    + "tempo e sirva à meta. Hoje quem faz isso é você, eu fico "
                     + "só olhando. O relógio no canto mostra quanto sobrou."
             }
         },
@@ -201,15 +212,16 @@ export const PAPEIS_DOS_EVENTOS = {
             },
             decisoes: [
                 {
-                    quem: "renan",
-                    fala: "Como está o boletim do bimestre?",
+                    quem: "lu",
+                    fala: "E o boletim do bimestre? Preciso saber se as telas "
+                        + "dele entram esta semana.",
                     pergunta: "O que você diz?",
                     opcoes: [
                         {
                             titulo: "Dizer que está parado há dois dias esperando a regra de arredondamento",
                             detalhe: "Nomeia o que trava",
                             avaliacao: "boa",
-                            feedback: "A PO ouviu, e a regra chegou no fim da manhã. "
+                            feedback: "O time ouviu, e a regra chegou no fim da manhã. "
                                 + "Dois dias parados viraram duas horas.",
                             principio: "Impedimento dito na Daily é impedimento que o time pode remover."
                         },
@@ -528,9 +540,10 @@ export const PAPEIS_DOS_EVENTOS = {
 
         sm: {
             conduz: true,
+            rotulo: "você facilita",
             abertura: {
                 quem: "renan",
-                texto: "Vinte minutos, e hoje quem conduz é você. Vale mais sair "
+                texto: "Vinte minutos, e hoje quem facilita é você. Vale mais sair "
                     + "daqui com uma coisa que a gente consiga fazer do que com "
                     + "uma lista bonita."
             }

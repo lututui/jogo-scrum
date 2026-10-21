@@ -10,7 +10,7 @@ import {CADEIRAS} from "../dados/cadeiras.js";
 import {ELENCO} from "../dados/elenco.js";
 import {registrarContextualResolvido, registrarDecisao} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
-import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
+import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
 
 const TOPO_DAS_OPCOES = 32;
@@ -148,7 +148,7 @@ export class CenaEventoContextual extends Phaser.Scene {
             alturaDaLinha: ALTURA_DA_LINHA,
             espaco: ESPACO_ENTRE_OPCOES,
             visiveis: OPCOES_VISIVEIS,
-            opcoes: this.evento.opcoes,
+            opcoes: embaralhar(this.evento.opcoes),
             aoConfirmar: function (opcao) {
                 cena.responder(opcao);
             }
@@ -161,6 +161,7 @@ export class CenaEventoContextual extends Phaser.Scene {
         const cena = this;
 
         registrarDecisao(this.registry, {
+            cadeira: this.cadeira(),
             avaliacao: opcao.avaliacao,
             medidores: opcao.medidores,
             marca: opcao.marca,

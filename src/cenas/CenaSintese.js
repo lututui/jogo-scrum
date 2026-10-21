@@ -2,20 +2,26 @@
 //
 // Fecha a sprint de uma cadeira. O que foi decidido, como ficaram os três
 // medidores, as conquistas obtidas e os conceitos que valem revisar.
+//
+// Tudo o que aparece aqui é da sprint que acabou de fechar, e não do jogo
+// inteiro; a cadeira já volta ao começo quando a cena abre.
 
 import {CADEIRAS, ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
+import {CONQUISTAS} from "../dados/conquistas.js";
 import {
     MEDIDORES,
     cadeirasConcluidas,
-    conquistasObtidas,
+    conquistasPorId,
+    fecharSprint,
     lerProgresso,
-    registrarSprintConcluida
+    sprintsConcluidas
 } from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 
 const MARGEM = 24;
 const LARGURA_DA_COLUNA = 440;
 const TOPO = 108;
+const LARGURA_DO_MEDIDOR = 170;
 
 export class CenaSintese extends Phaser.Scene {
 
@@ -25,7 +31,8 @@ export class CenaSintese extends Phaser.Scene {
 
     create() {
         this.cadeira = this.registry.get("cadeira") || "po";
-        this.progresso = registrarSprintConcluida(this.registry, this.cadeira);
+        this.sprint = fecharSprint(this.registry, this.cadeira);
+        this.progresso = lerProgresso(this.registry);
         this.fechouTodas = cadeirasConcluidas(this.registry).length === ORDEM_DAS_CADEIRAS.length;
 
         this.montarMoldura();
@@ -70,11 +77,11 @@ export class CenaSintese extends Phaser.Scene {
     }
 
     resumoDaSprint() {
-        const decisoes = this.progresso.decisoes;
+        const decisoes = this.sprint.decisoes;
         const total = decisoes.boa + decisoes.media + decisoes.ruim;
 
-        return "Você tomou " + total + " decisões nesta cadeira e somou "
-            + this.progresso.pontos + " pontos.";
+        return "Você tomou " + total + " decisões nesta sprint e somou "
+            + this.sprint.pontos + " pontos.";
     }
 
     // ---------------------------------------------------------
@@ -83,12 +90,12 @@ export class CenaSintese extends Phaser.Scene {
     montarDecisoes() {
         this.tituloDoBloco(MARGEM, TOPO, "DECISÕES");
 
-        const decisoes = this.progresso.decisoes;
+        const decisoes = this.sprint.decisoes;
         const linhas = [
             ["alinhadas ao princípio", decisoes.boa],
             ["com custo", decisoes.media],
             ["contra o princípio", decisoes.ruim],
-            ["tomadas sem mentor", this.progresso.decisoesSozinho]
+            ["tomadas sem mentor", this.sprint.decisoesSozinho]
         ];
 
         linhas.forEach(function (linha, posicao) {
@@ -114,7 +121,7 @@ export class CenaSintese extends Phaser.Scene {
 
         Object.keys(MEDIDORES).forEach(function (chave, posicao) {
             const y = TOPO + 28 + posicao * 26;
-            const valor = this.progresso.medidores[chave];
+            const valor = this.sprint.medidores[chave];
 
             this.add.text(x, y, MEDIDORES[chave].nome, {
                 fontFamily: FONTE,
@@ -122,11 +129,13 @@ export class CenaSintese extends Phaser.Scene {
                 color: COR.texto
             });
 
-            const fundo = this.add.rectangle(x + 210, y + 2, 180, 10, COR_HEX.painelSuave)
-                .setOrigin(0, 0);
+            const fundo = this.add.rectangle(
+                x + 210, y + 2, LARGURA_DO_MEDIDOR, 10, COR_HEX.painelSuave
+            ).setOrigin(0, 0);
             fundo.setStrokeStyle(1, COR_HEX.contornoSuave);
 
-            this.add.rectangle(x + 211, y + 3, Math.max(178 * valor / 100, 1), 8,
+            this.add.rectangle(x + 211, y + 3,
+                Math.max((LARGURA_DO_MEDIDOR - 2) * valor / 100, 1), 8,
                 valor < 35 ? COR_HEX.alerta : COR_HEX.destaque).setOrigin(0, 0);
 
             this.add.text(x + 400, y, String(valor), {
@@ -139,12 +148,19 @@ export class CenaSintese extends Phaser.Scene {
 
     montarConquistas() {
         const y = TOPO + 132;
-        this.tituloDoBloco(MARGEM, y, "CONQUISTAS");
+        this.tituloDoBloco(MARGEM, y, "CONQUISTAS DESTA SPRINT");
 
-        const obtidas = conquistasObtidas(this.progresso);
+        this.add.text(MARGEM + LARGURA_DA_COLUNA, y,
+            this.progresso.conquistas.length + " de " + CONQUISTAS.length + " no jogo", {
+                fontFamily: FONTE,
+                fontSize: "11px",
+                color: COR.textoSecundario
+            }).setOrigin(1, 0);
+
+        const obtidas = conquistasPorId(this.sprint.conquistas);
 
         if (obtidas.length === 0) {
-            this.add.text(MARGEM, y + 28, "Nenhuma ainda. Elas marcam conduta, não quantidade.", {
+            this.add.text(MARGEM, y + 28, "Nenhuma nesta sprint. Elas marcam conduta, não quantidade.", {
                 fontFamily: FONTE,
                 fontSize: "12px",
                 color: COR.textoSecundario
@@ -170,15 +186,18 @@ export class CenaSintese extends Phaser.Scene {
         }, this);
     }
 
-    // As cadeiras já vividas, e o convite para as que faltam
+    // As cadeiras já vividas, com quantas sprints cada uma fechou, e o convite
+    // para as que faltam
     montarRodape() {
         const y = 446;
-        const cumpridas = cadeirasConcluidas(this.registry);
+        const registry = this.registry;
 
         const marcadas = ORDEM_DAS_CADEIRAS.map(function (cadeira) {
-            const feita = cumpridas.indexOf(cadeira) >= 0;
+            const vezes = sprintsConcluidas(registry, cadeira);
+            const feita = vezes > 0;
+            const contagem = feita ? " (" + vezes + ")" : "";
 
-            return (feita ? "\u2713 " : "\u25cb ") + CADEIRAS[cadeira].nome;
+            return (feita ? "\u2713 " : "\u25cb ") + CADEIRAS[cadeira].nome + contagem;
         }).join("     ");
 
         this.add.text(MARGEM, y, marcadas, {

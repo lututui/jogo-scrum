@@ -8,7 +8,7 @@ import {proximoContextual} from "../dados/eventosContextuais.js";
 import {
     contextuaisResolvidos,
     eventosConcluidos,
-    lerProgresso
+    medidoresDaCadeira
 } from "../dados/progresso.js";
 import {MedidoresHUD} from "../ui/MedidoresHUD.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
@@ -311,12 +311,11 @@ export class CenaEscritorio extends Phaser.Scene {
 
     // O dia avança a cada reunião e a cada evento contextual vivido
     atualizarPainelDaSprint() {
-        const progresso = lerProgresso(this.registry);
         const vividos = eventosConcluidos(this.registry, this.cadeiraAtual).length
             + contextuaisResolvidos(this.registry, this.cadeiraAtual).length;
 
         this.textoDia.setText("DIA " + Math.min(1 + vividos, 10) + " DE 10");
-        this.medidores.atualizar(progresso.medidores);
+        this.medidores.atualizar(medidoresDaCadeira(this.registry, this.cadeiraAtual));
         this.textoProximoPasso.setText(this.proximoPasso());
         this.textoAjuda.setText(this.linhaDeAjuda());
     }

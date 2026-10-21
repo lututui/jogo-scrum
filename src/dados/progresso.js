@@ -1,15 +1,24 @@
 // Progresso do jogador
 //
-// Guarda pontos, os três medidores, eventos concluídos por cadeira e
-// conquistas obtidas.
+// Cada cadeira tem a sua sprint em andamento, com pontos, os três medidores,
+// decisões, eventos vividos, marcas e conquistas próprios. Fora delas fica o
+// que atravessa as cadeiras: quantas sprints cada uma já fechou e as
+// conquistas obtidas no jogo inteiro.
+//
+// Quando a síntese fecha a sprint de uma cadeira, o retrato dela é entregue
+// para exibição e a cadeira volta ao começo, pronta para ser jogada de novo.
 //
 // O estado vive no registry durante a partida e é gravado no navegador a cada
 // mudança, sem servidor nem cadastro.
 
+import {ORDEM_DAS_CADEIRAS} from "./cadeiras.js";
 import {CONQUISTAS} from "./conquistas.js";
 
 export const CHAVE_DO_PROGRESSO = "progresso";
 const CHAVE_NO_NAVEGADOR = "jogo-scrum:progresso";
+
+// Muda quando o formato salvo muda; salvamento de outra versão é descartado
+const VERSAO_DO_PROGRESSO = 2;
 
 export const MEDIDORES = {
     valor: {nome: "Valor entregue"},
@@ -28,17 +37,37 @@ const MEDIDOR_INICIAL = 50;
 const MEDIDOR_MINIMO = 0;
 const MEDIDOR_MAXIMO = 100;
 
-function progressoVazio() {
+function sprintVazia() {
     return {
         pontos: 0,
         medidores: {valor: MEDIDOR_INICIAL, confianca: MEDIDOR_INICIAL, saude: MEDIDOR_INICIAL},
         decisoes: {boa: 0, media: 0, ruim: 0},
         decisoesSozinho: 0,
-        eventosConcluidos: {po: [], sm: [], dev: []},
-        contextuaisResolvidos: {po: [], sm: [], dev: []},
-        sprintsConcluidas: {po: 0, sm: 0, dev: 0},
-        conquistas: [],
-        marcas: {}
+        eventosConcluidos: [],
+        contextuaisResolvidos: [],
+        marcas: {},
+        conquistas: []
+    };
+}
+
+function porCadeira(criar) {
+    const resultado = {};
+
+    ORDEM_DAS_CADEIRAS.forEach(function (cadeira) {
+        resultado[cadeira] = criar();
+    });
+
+    return resultado;
+}
+
+function progressoVazio() {
+    return {
+        versao: VERSAO_DO_PROGRESSO,
+        sprints: porCadeira(sprintVazia),
+        sprintsConcluidas: porCadeira(function () {
+            return 0;
+        }),
+        conquistas: []
     };
 }
 
@@ -69,8 +98,13 @@ export function salvarProgresso(registry, progresso) {
 function lerDoNavegador() {
     try {
         const texto = window.localStorage.getItem(CHAVE_NO_NAVEGADOR);
+        const salvo = texto ? JSON.parse(texto) : null;
 
-        return texto ? Object.assign(progressoVazio(), JSON.parse(texto)) : null;
+        if (!salvo || salvo.versao !== VERSAO_DO_PROGRESSO) {
+            return null;
+        }
+
+        return salvo;
     } catch (erro) {
         return null;
     }
@@ -99,6 +133,11 @@ export function apagarProgresso(registry) {
     return limpo;
 }
 
+// Sprint em andamento na cadeira
+function sprintDaCadeira(registry, cadeira) {
+    return lerProgresso(registry).sprints[cadeira];
+}
+
 // ---------------------------------------------------------
 // registro das decisões
 
@@ -106,34 +145,42 @@ function limitar(valor) {
     return Math.min(Math.max(valor, MEDIDOR_MINIMO), MEDIDOR_MAXIMO);
 }
 
-// Cada decisão soma pontos e move os medidores que ela toca. Uma decisão sem
-// avaliação declarada não pontua: o placar mede escolha, não clique
+// Cada decisão soma pontos e move os medidores que ela toca, na sprint da
+// cadeira em que foi tomada. Uma decisão sem avaliação declarada não pontua:
+// o placar mede escolha, não clique
 export function registrarDecisao(registry, decisao) {
     const progresso = lerProgresso(registry);
+    const sprint = progresso.sprints[decisao.cadeira];
     const peso = PESO_DA_AVALIACAO[decisao.avaliacao];
 
-    if (!peso) {
+    if (!sprint || !peso) {
         return progresso;
     }
 
     const multiplicador = decisao.semMentor ? 2 : 1;
-    progresso.pontos += peso.pontos * multiplicador;
-    progresso.decisoes[decisao.avaliacao] += 1;
+    sprint.pontos += peso.pontos * multiplicador;
+    sprint.decisoes[decisao.avaliacao] += 1;
 
     if (decisao.semMentor && decisao.avaliacao === "boa") {
-        progresso.decisoesSozinho += 1;
+        sprint.decisoesSozinho += 1;
     }
 
     const alvos = decisao.medidores || Object.keys(MEDIDORES);
     alvos.forEach(function (chave) {
-        progresso.medidores[chave] = limitar(progresso.medidores[chave] + peso.medidores);
+        sprint.medidores[chave] = limitar(sprint.medidores[chave] + peso.medidores);
     });
 
     if (decisao.marca) {
-        progresso.marcas[decisao.marca] = (progresso.marcas[decisao.marca] || 0) + 1;
+        sprint.marcas[decisao.marca] = (sprint.marcas[decisao.marca] || 0) + 1;
     }
 
-    return salvarProgresso(registry, atualizarConquistas(progresso));
+    atualizarConquistas(progresso, decisao.cadeira, false);
+
+    return salvarProgresso(registry, progresso);
+}
+
+export function medidoresDaCadeira(registry, cadeira) {
+    return sprintDaCadeira(registry, cadeira).medidores;
 }
 
 // ---------------------------------------------------------
@@ -141,40 +188,53 @@ export function registrarDecisao(registry, decisao) {
 
 export function registrarEventoConcluido(registry, cadeira, chaveDoEvento) {
     const progresso = lerProgresso(registry);
-    const lista = progresso.eventosConcluidos[cadeira];
+    const lista = progresso.sprints[cadeira].eventosConcluidos;
 
     if (lista.indexOf(chaveDoEvento) < 0) {
         lista.push(chaveDoEvento);
     }
 
-    return salvarProgresso(registry, atualizarConquistas(progresso));
+    atualizarConquistas(progresso, cadeira, false);
+
+    return salvarProgresso(registry, progresso);
 }
 
 export function eventosConcluidos(registry, cadeira) {
-    return lerProgresso(registry).eventosConcluidos[cadeira] || [];
+    return sprintDaCadeira(registry, cadeira).eventosConcluidos;
 }
 
 // Eventos contextuais já vividos naquela cadeira
 export function contextuaisResolvidos(registry, cadeira) {
-    return lerProgresso(registry).contextuaisResolvidos[cadeira] || [];
+    return sprintDaCadeira(registry, cadeira).contextuaisResolvidos;
 }
 
 export function registrarContextualResolvido(registry, cadeira, id) {
     const progresso = lerProgresso(registry);
-    const lista = progresso.contextuaisResolvidos[cadeira];
+    const lista = progresso.sprints[cadeira].contextuaisResolvidos;
 
     if (lista.indexOf(id) < 0) {
         lista.push(id);
     }
 
-    return salvarProgresso(registry, atualizarConquistas(progresso));
+    atualizarConquistas(progresso, cadeira, false);
+
+    return salvarProgresso(registry, progresso);
 }
 
-export function registrarSprintConcluida(registry, cadeira) {
+// Fecha a sprint da cadeira em uma única gravação: conta a sprint, avalia as
+// conquistas de fim de sprint e devolve a cadeira ao começo. Gravar tudo de
+// uma vez impede que recarregar a página na síntese conte a sprint de novo.
+// Devolve o retrato da sprint que acabou, que é o que a síntese mostra
+export function fecharSprint(registry, cadeira) {
     const progresso = lerProgresso(registry);
-    progresso.sprintsConcluidas[cadeira] += 1;
+    const encerrada = progresso.sprints[cadeira];
 
-    return salvarProgresso(registry, atualizarConquistas(progresso));
+    progresso.sprintsConcluidas[cadeira] += 1;
+    atualizarConquistas(progresso, cadeira, true);
+    progresso.sprints[cadeira] = sprintVazia();
+    salvarProgresso(registry, progresso);
+
+    return encerrada;
 }
 
 export function cadeirasConcluidas(registry) {
@@ -185,16 +245,36 @@ export function cadeirasConcluidas(registry) {
     });
 }
 
+export function sprintsConcluidas(registry, cadeira) {
+    return lerProgresso(registry).sprintsConcluidas[cadeira];
+}
+
 // ---------------------------------------------------------
 // conquistas
 
-// As conquistas são recalculadas a cada mudança: a condição olha o estado
-// inteiro, então nenhuma delas depende da ordem em que as coisas aconteceram
-export function atualizarConquistas(progresso) {
-    CONQUISTAS.forEach(function (conquista) {
-        const jaTem = progresso.conquistas.indexOf(conquista.id) >= 0;
+// A condição olha o estado da sprint inteira, então nenhuma conquista depende
+// da ordem em que as coisas aconteceram. As marcadas como de fechamento só
+// são avaliadas quando a sprint acaba. Cada sprint guarda as que mereceu,
+// mesmo que já tenham sido obtidas antes; o jogo guarda a união de todas
+function atualizarConquistas(progresso, cadeira, fechando) {
+    const sprint = progresso.sprints[cadeira];
 
-        if (!jaTem && conquista.condicao(progresso)) {
+    CONQUISTAS.forEach(function (conquista) {
+        if (conquista.noFechamento && !fechando) {
+            return;
+        }
+
+        if (sprint.conquistas.indexOf(conquista.id) >= 0) {
+            return;
+        }
+
+        if (!conquista.condicao(sprint, progresso, cadeira)) {
+            return;
+        }
+
+        sprint.conquistas.push(conquista.id);
+
+        if (progresso.conquistas.indexOf(conquista.id) < 0) {
             progresso.conquistas.push(conquista.id);
         }
     });
@@ -202,8 +282,8 @@ export function atualizarConquistas(progresso) {
     return progresso;
 }
 
-export function conquistasObtidas(progresso) {
+export function conquistasPorId(ids) {
     return CONQUISTAS.filter(function (conquista) {
-        return progresso.conquistas.indexOf(conquista.id) >= 0;
+        return ids.indexOf(conquista.id) >= 0;
     });
 }

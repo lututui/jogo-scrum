@@ -140,7 +140,7 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
             wordWrap: {width: LARGURA_DO_CARTAO - 40}
         });
 
-        const conduz = this.add.text(20, 228, "Conduz: " + cadeira.conduz, {
+        const nosEventos = this.add.text(20, 222, "Nos eventos: " + cadeira.nosEventos, {
             fontFamily: FONTE,
             fontSize: "11px",
             color: COR.textoSecundario,
@@ -148,13 +148,13 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
             wordWrap: {width: LARGURA_DO_CARTAO - 40}
         });
 
-        const mentor = this.add.text(20, 258, "Mentor: " + this.nomeDoTitular(chave), {
+        const mentor = this.add.text(20, 262, "Mentor: " + this.nomeDoTitular(chave), {
             fontFamily: FONTE,
             fontSize: "11px",
             color: COR.textoSecundario
         });
 
-        const elementos = [fundo, avatar, nome, resumo, conduz, mentor];
+        const elementos = [fundo, avatar, nome, resumo, nosEventos, mentor];
 
         if (cadeirasConcluidas(this.registry).indexOf(chave) >= 0) {
             elementos.push(this.add.text(LARGURA_DO_CARTAO - 20, 14, "\u2713 vivida", {

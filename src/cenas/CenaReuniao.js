@@ -13,7 +13,7 @@ import {ELENCO} from "../dados/elenco.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {ASSENTOS, ASSENTO_DO_JOGADOR, ESCALA, MESA} from "../dados/reuniao.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
-import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
+import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
 
 const ALTURA_DA_BARRA = 40;
@@ -40,6 +40,7 @@ export class CenaReuniao extends Phaser.Scene {
         this.aoTerminarFala = null;
         this.esperandoFala = false;
         this.pergunta = null;
+        this.emAndamento = false;
 
         this.montarSala();
         this.montarBarra();
@@ -128,7 +129,8 @@ export class CenaReuniao extends Phaser.Scene {
             color: CADEIRAS[this.cadeira()].cor
         }).setDepth(701);
         this.textoDaBarra = this.add.text(660, 13, "", estilo).setOrigin(1, 0).setDepth(701);
-        this.add.text(936, 13, "ESC PARA SAIR", estilo).setOrigin(1, 0).setDepth(701);
+        this.textoDeSaida = this.add.text(936, 13, "ESC PARA SAIR", estilo)
+            .setOrigin(1, 0).setDepth(701);
 
         this.add.rectangle(0, ALTURA_DA_BARRA, 960, ALTURA_DO_OBJETIVO, COR_HEX.painelSuave)
             .setOrigin(0, 0).setDepth(700);
@@ -312,10 +314,22 @@ export class CenaReuniao extends Phaser.Scene {
     // do evento ou da sequência de decisões da cadeira
     pontuar(opcao) {
         registrarDecisao(this.registry, {
+            cadeira: this.cadeira(),
             avaliacao: opcao.avaliacao,
             medidores: opcao.medidores,
             marca: opcao.marca
         });
+        this.travarSaida();
+    }
+
+    // Depois da primeira decisão a reunião vai até o fim.
+    travarSaida() {
+        if (this.emAndamento) {
+            return;
+        }
+
+        this.emAndamento = true;
+        this.textoDeSaida.setText("REUNIÃO EM ANDAMENTO");
     }
 
     abrirComoParticipante(aoTerminar) {
@@ -384,7 +398,7 @@ export class CenaReuniao extends Phaser.Scene {
             alturaDaLinha: ALTURA_DA_LINHA_DE_OPCAO,
             espaco: ESPACO_ENTRE_OPCOES,
             visiveis: this.opcoesVisiveis(),
-            opcoes: config.opcoes,
+            opcoes: config.multipla ? config.opcoes : embaralhar(config.opcoes),
             aoConfirmar: config.aoConfirmar
         });
     }
@@ -432,8 +446,8 @@ export class CenaReuniao extends Phaser.Scene {
     update(tempo, delta) {
         this.painel.atualizar(delta);
 
-        if (Phaser.Input.Keyboard.JustDown(this.teclas.sair)) {
-            this.sair();
+        if (Phaser.Input.Keyboard.JustDown(this.teclas.sair) && !this.emAndamento) {
+            this.desistir();
             return;
         }
 
@@ -472,8 +486,15 @@ export class CenaReuniao extends Phaser.Scene {
         }
     }
 
-    // A marca avisa o escritório de que uma reunião acabou de terminar: é
-    // entre as reuniões que os eventos contextuais acontecem
+    // Saída antes da primeira decisão: a reunião continua pendente na agenda
+    desistir() {
+        this.scene.stop();
+        this.scene.resume("CenaEscritorio");
+    }
+
+    // Fim natural da reunião. A marca avisa o escritório de que uma reunião
+    // acabou de terminar: é entre as reuniões que os eventos contextuais
+    // acontecem
     sair() {
         registrarEventoConcluido(this.registry, this.cadeira(), this.evento.chave);
         this.registry.set("saiuDeReuniao", true);

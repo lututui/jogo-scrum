@@ -4,6 +4,7 @@
 // e as transforma em uma ação. A reunião fecha com ação escolhida.
 
 import {SPRINT_RETROSPECTIVE} from "../dados/eventos.js";
+import {embaralhar} from "../ui/ListaDeOpcoes.js";
 import {CenaReuniao} from "./CenaReuniao.js";
 
 export class CenaSprintRetrospective extends CenaReuniao {
@@ -31,7 +32,8 @@ export class CenaSprintRetrospective extends CenaReuniao {
     // Cada observação é dita por quem a levantou, antes de virar opção
     ouvirOTime() {
         const cena = this;
-        const falas = this.evento.observacoes.map(function (observacao) {
+        this.observacoes = embaralhar(this.evento.observacoes);
+        const falas = this.observacoes.map(function (observacao) {
             return {quem: observacao.quem, texto: observacao.titulo};
         });
 
@@ -41,7 +43,7 @@ export class CenaSprintRetrospective extends CenaReuniao {
     }
 
     abrirObservacoes() {
-        this.opcoesDeObservacoes = this.evento.observacoes.map(function (observacao) {
+        this.opcoesDeObservacoes = this.observacoes.map(function (observacao) {
             return {
                 id: observacao.id,
                 titulo: observacao.titulo,

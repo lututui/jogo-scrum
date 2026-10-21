@@ -1,13 +1,15 @@
 // Sprint Planning
 //
-// Mecânica: escolher a meta e montar o Sprint Backlog dentro da capacidade
-// estimada pelo time.
+// Mecânica: propor a meta ao time e montar o Sprint Backlog dentro da
+// capacidade estimada pelos desenvolvedores.
 //
 // A meta é dita pelo jogador como resposta, e o retorno vem pela boca de
-// quem ocupa a cadeira de Product Owner.
+// quem ocupa a cadeira de Product Owner. A capacidade é anunciada por uma
+// desenvolvedora, porque quem diz o que cabe é quem faz.
 
 import {CAPACIDADE_DA_SPRINT, PRODUTO_BACKLOG, SPRINT_PLANNING} from "../dados/eventos.js";
 import {acrescentarItem} from "../dados/estadoDoQuadro.js";
+import {embaralhar} from "../ui/ListaDeOpcoes.js";
 import {CenaReuniao} from "./CenaReuniao.js";
 
 export class CenaSprintPlanning extends CenaReuniao {
@@ -62,7 +64,7 @@ export class CenaSprintPlanning extends CenaReuniao {
 
     abrirBacklog() {
         const cena = this;
-        this.opcoesDoBacklog = PRODUTO_BACKLOG.map(function (item) {
+        this.opcoesDoBacklog = embaralhar(PRODUTO_BACKLOG).map(function (item) {
             return {
                 id: item.id,
                 titulo: item.titulo,
@@ -73,7 +75,7 @@ export class CenaSprintPlanning extends CenaReuniao {
             };
         });
 
-        this.falar(this.chaveDoMentor(), this.evento.instrucaoDoBacklog, function () {
+        this.falar(this.evento.vozDosDesenvolvedores, this.evento.instrucaoDoBacklog, function () {
             cena.mostrarBacklog();
         });
     }

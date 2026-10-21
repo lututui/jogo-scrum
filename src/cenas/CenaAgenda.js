@@ -82,7 +82,7 @@ export class CenaAgenda extends Phaser.Scene {
     }
 
     rotuloDaSituacao(situacao, chaveDoEvento) {
-        const papel = this.conduz(chaveDoEvento) ? "você conduz" : "você participa";
+        const papel = this.rotuloDoPapel(chaveDoEvento);
 
         if (situacao === "concluida") {
             return "\u2713 concluída";
@@ -153,12 +153,16 @@ export class CenaAgenda extends Phaser.Scene {
         return this.registry.get("cadeira") || "po";
     }
 
-    // Marca na lista os eventos que a cadeira atual conduz, porque é isso que
-    // muda a mecânica de cada reunião
-    conduz(chaveDoEvento) {
+    // Marca na lista os eventos em que a cadeira atual tem a mecânica própria.
+    rotuloDoPapel(chaveDoEvento) {
         const porPapel = PAPEIS_DOS_EVENTOS[chaveDoEvento] || {};
+        const papel = porPapel[this.cadeira()] || {};
 
-        return Boolean((porPapel[this.cadeira()] || {}).conduz);
+        if (!papel.conduz) {
+            return "você participa";
+        }
+
+        return papel.rotulo || "você conduz";
     }
 
     criarControles() {

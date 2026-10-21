@@ -16,6 +16,11 @@ const LARGURA_DA_MARCA = 18;
 // Abaixo desta altura a linha usa fonte menor
 const ALTURA_CONFORTAVEL = 34;
 
+// Cópia das opções em ordem aleatória.
+export function embaralhar(opcoes) {
+    return Phaser.Utils.Array.Shuffle(opcoes.slice());
+}
+
 export class ListaDeOpcoes {
 
     constructor(cena, config) {

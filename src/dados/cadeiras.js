@@ -11,22 +11,22 @@ export const CADEIRAS = {
         nome: "Product Owner",
         cor: "#c0392b",
         titular: "marcia",
-        resumo: "Ordena o Product Backlog e decide o que entra na sprint",
-        conduz: "Sprint Planning e Sprint Review"
+        resumo: "Ordena o Product Backlog e propõe o que entra na sprint",
+        nosEventos: "propõe a meta no Planning e conduz a Review"
     },
     sm: {
         nome: "Scrum Master",
         cor: "#1f6f8b",
         titular: "renan",
         resumo: "Facilita os eventos e remove o que trava o time",
-        conduz: "Daily Scrum e Sprint Retrospective"
+        nosEventos: "facilita a Daily e a Retrospective"
     },
     dev: {
         nome: "Desenvolvedor",
         cor: "#7a4bb5",
         titular: "bia",
         resumo: "Estima, constrói e responde pela qualidade do incremento",
-        conduz: "nenhum evento; participa de todos"
+        nosEventos: "estima o trabalho e participa de todos"
     }
 };
 
