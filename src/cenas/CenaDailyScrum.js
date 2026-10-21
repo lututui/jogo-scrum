@@ -81,6 +81,11 @@ export class CenaDailyScrum extends CenaReuniao {
         const fechamento = this.evento.fechamento;
         const dentroDoTempo = this.minutosUsados <= this.evento.duracaoEmMinutos;
 
+        // Passar do tempo é uma decisão com custo, somada às das rodadas
+        if (!dentroDoTempo) {
+            this.pontuar({avaliacao: "media"});
+        }
+
         const texto = (dentroDoTempo ? fechamento.dentroDoTempo : fechamento.acimaDoTempo)
             + " A reunião levou " + this.minutosUsados + " minutos. "
             + (this.impedimentosTratados > 0 ? fechamento.comImpedimento : fechamento.semImpedimento);

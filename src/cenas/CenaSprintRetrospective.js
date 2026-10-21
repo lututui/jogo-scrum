@@ -120,9 +120,15 @@ export class CenaSprintRetrospective extends CenaReuniao {
         });
     }
 
+    // Observações que não tocam o que travou a sprint contam como decisão
+    // própria, além da ação escolhida
     escolherAcao(acao) {
         const cena = this;
         this.pontuar(acao);
+
+        if (!this.escolheuRelevante) {
+            this.pontuar({avaliacao: "ruim"});
+        }
 
         this.responder(acao.titulo, function () {
             if (!cena.escolheuRelevante) {

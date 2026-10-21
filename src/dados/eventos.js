@@ -187,7 +187,7 @@ export const DAILY_SCRUM = {
                 },
                 {
                     titulo: "Sugerir que ela tente por outro caminho",
-                    custo: 2,
+                    custo: 4,
                     avaliacao: "media",
                     feedback: "Você propôs solução sem conhecer a causa. Pode ser "
                         + "que o caminho alternativo esbarre no mesmo bloqueio.",
@@ -218,7 +218,7 @@ export const DAILY_SCRUM = {
                 },
                 {
                     titulo: "Cobrar prazo para as telas",
-                    custo: 3,
+                    custo: 5,
                     avaliacao: "ruim",
                     feedback: "A cobrança transforma a reunião em prestação de "
                         + "contas. O time passa a relatar o que soa bem.",
