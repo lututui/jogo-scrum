@@ -30,6 +30,7 @@ export class ListaDeOpcoes {
         this.largura = config.largura;
         this.multipla = Boolean(config.multipla);
         this.comoFala = Boolean(config.comoFala);
+        this.centralizar = Boolean(config.centralizar);
         this.aoConfirmar = config.aoConfirmar;
         this.alturaDaLinha = config.alturaDaLinha || ALTURA_DA_LINHA;
         this.espaco = config.espaco === undefined ? ESPACO_ENTRE_LINHAS : config.espaco;
@@ -161,13 +162,21 @@ export class ListaDeOpcoes {
         const compacta = this.alturaDaLinha < ALTURA_CONFORTAVEL;
         const alturaDoTitulo = compacta ? 12 : 13;
 
-        const titulo = cena.add.text(esquerda, this.topoDoTitulo(opcao, compacta),
+        // Centralizado, o título usa a largura da linha inteira, como num botão
+        const titulo = cena.add.text(
+            this.centralizar ? this.largura / 2 : esquerda,
+            this.topoDoTitulo(opcao, compacta),
             this.comoFala ? "— " + opcao.titulo : opcao.titulo, {
                 fontFamily: FONTE,
                 fontSize: alturaDoTitulo + "px",
                 color: COR.texto,
+                align: this.centralizar ? "center" : "left",
                 wordWrap: {width: this.largura - esquerda - MARGEM_INTERNA - 60}
             });
+
+        if (this.centralizar) {
+            titulo.setOrigin(0.5, 0);
+        }
         elementos.push(titulo);
 
         if (opcao.detalhe) {

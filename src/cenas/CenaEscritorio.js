@@ -200,10 +200,9 @@ export class CenaEscritorio extends Phaser.Scene {
         });
 
         this.bloqueioAcaoAte = 0;
-        this.events.on("resume", function () {
-            this.bloqueioAcaoAte = this.time.now + 250;
-            this.aoRetomar();
-            this.seguirASprint();
+        this.events.on("resume", this.aoVoltarDaPausa, this);
+        this.events.once("shutdown", function () {
+            this.events.off("resume", this.aoVoltarDaPausa, this);
         }, this);
 
         this.teclaAcao = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
@@ -212,6 +211,7 @@ export class CenaEscritorio extends Phaser.Scene {
         this.teclaPapel = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
         this.teclaSintese = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
         this.teclaGlossario = this.input.keyboard.addKey(TECLA_DO_GLOSSARIO);
+        this.teclaMenu = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     }
 
     // O jogador para antes da pausa
@@ -220,6 +220,12 @@ export class CenaEscritorio extends Phaser.Scene {
         this.jogador.setVelocity(0, 0);
         this.jogador.anims.play("jogador_" + this.cadeiraAtual + "_parado", true);
         abrirGlossario(this);
+    }
+
+    aoVoltarDaPausa() {
+        this.bloqueioAcaoAte = this.time.now + 250;
+        this.aoRetomar();
+        this.seguirASprint();
     }
 
     // A troca de cadeira volta para a cena de seleção
@@ -377,7 +383,7 @@ export class CenaEscritorio extends Phaser.Scene {
     }
 
     linhaDeAjuda() {
-        const base = "setas ou WASD andam, ENTER interage, G abre o glossário";
+        const base = "setas ou WASD andam, ENTER interage, G glossário, ESC menu";
 
         if (DEPURACAO.trocaDeCadeiraLivre || !this.sprintComecou()) {
             return base + ", P troca de cadeira";
@@ -400,6 +406,12 @@ export class CenaEscritorio extends Phaser.Scene {
 
         if (Phaser.Input.Keyboard.JustDown(this.teclaGlossario)) {
             this.consultarGlossario();
+            return;
+        }
+
+        // O progresso já está salvo; a sprint continua de onde parou
+        if (!this.emDialogo && Phaser.Input.Keyboard.JustDown(this.teclaMenu)) {
+            this.scene.start("CenaMenu");
             return;
         }
 

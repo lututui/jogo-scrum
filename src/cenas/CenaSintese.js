@@ -35,6 +35,9 @@ export class CenaSintese extends Phaser.Scene {
         this.progresso = lerProgresso(this.registry);
         this.fechouTodas = cadeirasConcluidas(this.registry).length === ORDEM_DAS_CADEIRAS.length;
 
+        // A conquista das três cadeiras só sai na sprint que completa o trio
+        this.completouOTrio = this.sprint.conquistas.indexOf("tres-cadeiras") >= 0;
+
         this.montarMoldura();
         this.montarDecisoes();
         this.montarMedidores();
@@ -214,7 +217,9 @@ export class CenaSintese extends Phaser.Scene {
             wordWrap: {width: 960 - MARGEM * 2}
         });
 
-        this.add.text(MARGEM, 516, "ENTER volta para a escolha de cadeira", {
+        this.add.text(MARGEM, 516, this.completouOTrio
+            ? "ENTER segue para o encerramento"
+            : "ENTER volta para a escolha de cadeira", {
             fontFamily: FONTE,
             fontSize: "11px",
             color: COR.textoSecundario
@@ -260,7 +265,7 @@ export class CenaSintese extends Phaser.Scene {
 
         if (confirmou) {
             this.scene.stop();
-            this.scene.start("CenaSelecaoDePapel");
+            this.scene.start(this.completouOTrio ? "CenaFim" : "CenaSelecaoDePapel");
         }
     }
 }

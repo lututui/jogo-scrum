@@ -6,6 +6,7 @@
 import {GUIA} from "../dados/guia.js";
 import {marcarGuiaVisto} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {abrirPorCima, fecharPorCima} from "./sobreposicao.js";
 
 const PAINEL = {x: 120, y: 72, largura: 720, altura: 392};
 const RECUO = 24;
@@ -13,10 +14,7 @@ const RAIO_DO_PONTO = 4;
 const ESPACO_ENTRE_PONTOS = 18;
 
 export function abrirGuia(cena) {
-    cena.input.keyboard.resetKeys();
-    cena.scene.pause();
-    cena.scene.launch("CenaGuia", {retorno: cena.scene.key});
-    cena.scene.bringToTop("CenaGuia");
+    abrirPorCima(cena, "CenaGuia");
 }
 
 export class CenaGuia extends Phaser.Scene {
@@ -162,7 +160,6 @@ export class CenaGuia extends Phaser.Scene {
 
     fechar() {
         marcarGuiaVisto(this.registry);
-        this.scene.stop();
-        this.scene.resume(this.retorno);
+        fecharPorCima(this);
     }
 }

@@ -5,7 +5,7 @@
 import {CADEIRAS, ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
 import {DEPURACAO, marcarDepuracao, opcoesLigadas} from "../dados/depuracao.js";
 import {ELENCO} from "../dados/elenco.js";
-import {apagarProgresso, cadeirasConcluidas, guiaJaVisto} from "../dados/progresso.js";
+import {cadeirasConcluidas, guiaJaVisto} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {abrirGuia} from "./CenaGuia.js";
 
@@ -25,8 +25,6 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
     create() {
         this.indice = this.indiceDaCadeiraAtual();
         this.cartoes = [];
-        this.confirmandoApagar = false;
-        this.aviso = null;
 
         this.montarMoldura();
         this.montarCartoes();
@@ -92,7 +90,7 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
         this.listarDepuracao();
 
         this.add.text(MARGEM, 508,
-            "setas escolhem, ENTER confirma, H abre o guia, R apaga o progresso salvo", {
+            "setas escolhem, ENTER confirma, H abre o guia, ESC volta", {
                 fontFamily: FONTE,
                 fontSize: "12px",
                 color: COR.textoSecundario
@@ -221,54 +219,20 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
     // ---------------------------------------------------------
     // controles
 
-    pedirParaApagar() {
-        if (this.confirmandoApagar) {
-            apagarProgresso(this.registry);
-            this.scene.restart();
-            return;
-        }
-
-        this.confirmandoApagar = true;
-        this.avisar("R de novo apaga todo o progresso salvo");
-
-        this.time.delayedCall(3000, function () {
-            this.confirmandoApagar = false;
-        }, [], this);
-    }
-
-    avisar(texto) {
-        if (this.aviso) {
-            this.aviso.destroy();
-        }
-
-        this.aviso = this.add.text(MARGEM, 484, texto, {
-            fontFamily: FONTE,
-            fontSize: "12px",
-            color: COR.alerta
-        }).setDepth(900);
-
-        this.time.delayedCall(3000, function () {
-            if (this.aviso) {
-                this.aviso.destroy();
-                this.aviso = null;
-            }
-        }, [], this);
-    }
-
     criarControles() {
-        this.teclaReiniciar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
         this.teclaGuia = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.H);
         this.teclas = this.input.keyboard.addKeys({
             esquerda: Phaser.Input.Keyboard.KeyCodes.LEFT,
             direita: Phaser.Input.Keyboard.KeyCodes.RIGHT,
             acao: Phaser.Input.Keyboard.KeyCodes.ENTER,
-            espaco: Phaser.Input.Keyboard.KeyCodes.SPACE
+            espaco: Phaser.Input.Keyboard.KeyCodes.SPACE,
+            sair: Phaser.Input.Keyboard.KeyCodes.ESC
         });
     }
 
     update() {
-        if (Phaser.Input.Keyboard.JustDown(this.teclaReiniciar)) {
-            this.pedirParaApagar();
+        if (Phaser.Input.Keyboard.JustDown(this.teclas.sair)) {
+            this.voltar();
             return;
         }
 
@@ -290,6 +254,19 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
     mover(passo) {
         this.indice = Phaser.Math.Clamp(this.indice + passo, 0, this.cartoes.length - 1);
         this.destacarEscolhido();
+    }
+
+    // Vinda do escritório pela tecla P, a troca é cancelada e a cadeira não
+    // muda; vinda do menu, volta para ele
+    voltar() {
+        this.scene.stop();
+
+        if (this.scene.isPaused("CenaEscritorio")) {
+            this.scene.resume("CenaEscritorio");
+            return;
+        }
+
+        this.scene.start("CenaMenu");
     }
 
     // O escritório pode estar pausado atrás, se a troca veio de lá

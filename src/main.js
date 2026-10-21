@@ -15,6 +15,10 @@ import {CenaEventoContextual} from "./cenas/CenaEventoContextual.js";
 import {CenaSintese} from "./cenas/CenaSintese.js";
 import {CenaGlossario} from "./cenas/CenaGlossario.js";
 import {CenaGuia} from "./cenas/CenaGuia.js";
+import {CenaMenu} from "./cenas/CenaMenu.js";
+import {CenaConfiguracoes} from "./cenas/CenaConfiguracoes.js";
+import {CenaFPS} from "./cenas/CenaFPS.js";
+import {CenaFim} from "./cenas/CenaFim.js";
 
 const LARGURA = 960;
 const ALTURA = 540;
@@ -38,6 +42,7 @@ const configuracao = {
     },
     scene: [
         CenaCarregamento,
+        CenaMenu,
         CenaSelecaoDePapel,
         CenaEscritorio,
         CenaKanban,
@@ -48,8 +53,11 @@ const configuracao = {
         CenaSprintRetrospective,
         CenaEventoContextual,
         CenaSintese,
+        CenaFim,
         CenaGlossario,
-        CenaGuia
+        CenaGuia,
+        CenaConfiguracoes,
+        CenaFPS
     ]
 };
 

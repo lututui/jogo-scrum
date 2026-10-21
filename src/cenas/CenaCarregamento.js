@@ -3,6 +3,7 @@
 import {ELENCO} from "../dados/elenco.js";
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {COR, FONTE} from "../dados/tema.js";
+import {aplicarFps} from "./CenaFPS.js";
 
 const LARGURA_CORPO = 32;
 const ALTURA_CORPO = 32;
@@ -55,7 +56,8 @@ export class CenaCarregamento extends Phaser.Scene {
 
     create() {
         this.criarAnimacoes();
-        this.scene.start("CenaSelecaoDePapel");
+        aplicarFps(this);
+        this.scene.start("CenaMenu");
     }
 
     // Cada folha tem três quadros: parado, passo A, passo B

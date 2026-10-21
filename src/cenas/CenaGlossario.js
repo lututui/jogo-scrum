@@ -6,6 +6,7 @@
 import {GLOSSARIO, GRUPOS} from "../dados/glossario.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
+import {abrirPorCima, fecharPorCima} from "./sobreposicao.js";
 
 const MARGEM = 24;
 const TOPO = 60;
@@ -19,13 +20,8 @@ const RECUO = 16;
 
 export const TECLA_DO_GLOSSARIO = Phaser.Input.Keyboard.KeyCodes.G;
 
-// As teclas são soltas antes de pausar: uma seta segurada continuaria
-// apertada quando a cena voltasse
 export function abrirGlossario(cena) {
-    cena.input.keyboard.resetKeys();
-    cena.scene.pause();
-    cena.scene.launch("CenaGlossario", {retorno: cena.scene.key});
-    cena.scene.bringToTop("CenaGlossario");
+    abrirPorCima(cena, "CenaGlossario");
 }
 
 export class CenaGlossario extends Phaser.Scene {
@@ -166,7 +162,6 @@ export class CenaGlossario extends Phaser.Scene {
     }
 
     fechar() {
-        this.scene.stop();
-        this.scene.resume(this.retorno);
+        fecharPorCima(this);
     }
 }

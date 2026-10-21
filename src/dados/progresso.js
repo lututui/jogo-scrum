@@ -301,10 +301,44 @@ export function fecharSprint(registry, cadeira) {
 
     progresso.sprintsConcluidas[cadeira] += 1;
     atualizarConquistas(progresso, cadeira, true);
+    guardarUltimaSprint(progresso, cadeira, encerrada);
     progresso.sprints[cadeira] = sprintVazia();
     salvarProgresso(registry, progresso);
 
     return encerrada;
+}
+
+// O resumo da última sprint fechada em cada cadeira, para a tela de fim
+function guardarUltimaSprint(progresso, cadeira, encerrada) {
+    progresso.ultimasSprints = progresso.ultimasSprints || {};
+    progresso.ultimasSprints[cadeira] = {
+        pontos: encerrada.pontos,
+        decisoes: encerrada.decisoes,
+        medidores: encerrada.medidores
+    };
+}
+
+export function ultimaSprint(registry, cadeira) {
+    const ultimas = lerProgresso(registry).ultimasSprints || {};
+
+    return ultimas[cadeira] || null;
+}
+
+// Há o que continuar quando alguma cadeira já fechou ou começou uma sprint
+export function temProgresso(registry) {
+    const progresso = lerProgresso(registry);
+
+    return ORDEM_DAS_CADEIRAS.some(function (cadeira) {
+        const sprint = progresso.sprints[cadeira];
+
+        return progresso.sprintsConcluidas[cadeira] > 0
+            || sprint.eventosConcluidos.length > 0
+            || sprint.contextuaisResolvidos.length > 0;
+    });
+}
+
+export function conquistasDoJogo(registry) {
+    return lerProgresso(registry).conquistas;
 }
 
 export function cadeirasConcluidas(registry) {
