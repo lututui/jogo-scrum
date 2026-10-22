@@ -7,8 +7,8 @@
 // quem ocupa a cadeira de Product Owner. A capacidade é anunciada por uma
 // desenvolvedora, porque quem diz o que cabe é quem faz.
 
-import {CAPACIDADE_DA_SPRINT, PRODUTO_BACKLOG, SPRINT_PLANNING} from "../dados/eventos.js";
-import {acrescentarItem} from "../dados/estadoDoQuadro.js";
+import {CAPACIDADE_DA_SPRINT, PLANO_DO_TIME, PRODUTO_BACKLOG, SPRINT_PLANNING} from "../dados/eventos.js";
+import {planejarItens} from "../dados/estadoDoQuadro.js";
 import {embaralhar} from "../ui/ListaDeOpcoes.js";
 import {CenaReuniao} from "./CenaReuniao.js";
 
@@ -31,6 +31,12 @@ export class CenaSprintPlanning extends CenaReuniao {
         this.falarAbertura(function () {
             cena.etapaDaMeta();
         });
+    }
+
+    // Quem só participa também sai com Sprint Backlog: o plano do time
+    encerrarComoParticipante() {
+        planejarItens(this.registry, this.cadeira(), PLANO_DO_TIME);
+        super.encerrarComoParticipante();
     }
 
     // -------------------------------------------------------------
@@ -150,16 +156,9 @@ export class CenaSprintPlanning extends CenaReuniao {
         const resultado = this.avaliarPlano(marcados);
         this.pontuar(resultado);
 
-        // A marca de planejado é o que a Review procura para a conquista
-        marcados.forEach(function (opcao) {
-            acrescentarItem(this.registry, this.cadeira(), {
-                id: opcao.item.id,
-                tipo: opcao.item.tipo,
-                titulo: opcao.item.titulo,
-                etiquetas: [],
-                planejado: true
-            }, "afazer");
-        }, this);
+        planejarItens(this.registry, this.cadeira(), marcados.map(function (opcao) {
+            return opcao.item;
+        }));
 
         const cena = this;
         this.comentarDecisao(resultado.avaliacao, resultado.feedback, resultado.principio, function () {

@@ -52,6 +52,15 @@ export const PRODUTO_BACKLOG = [
     }
 ];
 
+// O Sprint Backlog que o time fecha quando o jogador não conduz o Planning:
+// os itens que servem à meta, que somam a capacidade
+export const PLANO_DO_TIME = PRODUTO_BACKLOG.filter(function (item) {
+    return item.alinhado;
+});
+
+// Na cadeira de Dev, o item que o jogador leva com as próprias mãos
+export const ITEM_DO_JOGADOR = {dev: "pb01"};
+
 export const SPRINT_PLANNING = {
     chave: "CenaSprintPlanning",
     nome: "SPRINT PLANNING",

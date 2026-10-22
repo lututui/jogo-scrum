@@ -53,7 +53,8 @@ function sprintVazia() {
         conquistas: [],
         paraRevisar: {},
         quadro: quadroInicial(),
-        movimentosNoQuadro: 0
+        movimentosNoQuadro: 0,
+        diaDoTime: 1
     };
 }
 
@@ -194,6 +195,19 @@ export function quadroDaCadeira(registry, cadeira) {
 export function salvarQuadroDaCadeira(registry, cadeira, itens) {
     const progresso = lerProgresso(registry);
     progresso.sprints[cadeira].quadro = itens;
+
+    return salvarProgresso(registry, progresso);
+}
+
+// Último dia em que o time já trabalhou no quadro; save sem o campo devolve null
+export function diaDoTime(registry, cadeira) {
+    const dia = sprintDaCadeira(registry, cadeira).diaDoTime;
+    return typeof dia === "number" ? dia : null;
+}
+
+export function marcarDiaDoTime(registry, cadeira, dia) {
+    const progresso = lerProgresso(registry);
+    progresso.sprints[cadeira].diaDoTime = dia;
 
     return salvarProgresso(registry, progresso);
 }

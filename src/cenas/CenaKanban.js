@@ -6,7 +6,7 @@
 // Coluna com mais cartões do que cabem rola.
 
 import {COLUNAS, motivoParaRecusar} from "../dados/quadro.js";
-import {lerItensDoQuadro, salvarItensDoQuadro} from "../dados/estadoDoQuadro.js";
+import {ETIQUETA_DO_JOGADOR, lerItensDoQuadro, salvarItensDoQuadro} from "../dados/estadoDoQuadro.js";
 import {
     DIAS_DA_SPRINT,
     diaDaSprint,
@@ -377,7 +377,7 @@ export class CenaKanban extends Phaser.Scene {
             return true;
         }
 
-        const motivo = motivoParaRecusar(item, idColuna);
+        const motivo = this.motivoDoMovimento(item, idColuna);
         if (motivo) {
             this.mostrarAviso(motivo);
             return false;
@@ -394,9 +394,30 @@ export class CenaKanban extends Phaser.Scene {
         }
 
         item.coluna = idColuna;
+        item.diaDoUltimoPasso = diaDaSprint(this.registry, this.cadeira);
         this.reordenar(item, posicao);
         registrarMovimentoNoQuadro(this.registry, this.cadeira);
         return true;
+    }
+
+    // Com um cartão do jogador no quadro, só ele anda pela mão do jogador, e
+    // uma coluna por dia
+    motivoDoMovimento(item, idColuna) {
+        const fluxo = motivoParaRecusar(item, idColuna);
+        if (fluxo || item.coluna === idColuna) {
+            return fluxo;
+        }
+
+        const temCartaoProprio = this.itens.some(function (outro) {
+            return outro.doJogador;
+        });
+        if (temCartaoProprio && !item.doJogador) {
+            return "esse cartão é de outra pessoa do time; o seu está marcado " + ETIQUETA_DO_JOGADOR;
+        }
+        if (item.doJogador && item.diaDoUltimoPasso === diaDaSprint(this.registry, this.cadeira)) {
+            return "o seu cartão já andou hoje; amanhã ele pode seguir";
+        }
+        return null;
     }
 
     reordenar(item, posicao) {
@@ -544,7 +565,7 @@ export class CenaKanban extends Phaser.Scene {
             const eAlvo = coluna === alvo;
             const mesmaColuna = item && item.coluna === coluna.dados.id;
             const aceita = mesmaColuna
-                || Boolean(item) && !motivoParaRecusar(item, coluna.dados.id) && this.podeReceber(coluna.dados.id);
+                || Boolean(item) && !this.motivoDoMovimento(item, coluna.dados.id) && this.podeReceber(coluna.dados.id);
 
             if (!eAlvo) {
                 coluna.fundo.setStrokeStyle(1, COR_HEX.contornoSuave);
