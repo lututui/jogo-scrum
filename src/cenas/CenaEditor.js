@@ -23,9 +23,11 @@ import {
     NOMES_SUGERIDOS,
     PRONOMES,
     TAMANHO_DO_NOME,
+    aparenciaValida,
     erroDoNome,
     normalizarNome,
     perfilDoJogador,
+    perfilValido,
     salvarPerfil
 } from "../dados/perfil.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
@@ -134,6 +136,14 @@ function coresLivres(aparencia) {
         livres[categoria] = cor && !sugerida ? cor : null;
     });
     return livres;
+}
+
+// "a", "a e b", "a, b e c"
+function juntar(partes) {
+    if (partes.length < 2) {
+        return partes.join("");
+    }
+    return partes.slice(0, -1).join(", ") + " e " + partes[partes.length - 1];
 }
 
 function corCss(cor) {
@@ -277,7 +287,7 @@ export class CenaEditor extends Phaser.Scene {
             paleta("interna", "Cor secundária", "interna", {
                 recuo: true,
                 ativa: function () {
-                    return PECAS_DE_CIMA[cena.aparencia.pecaDeCima].length > 1;
+                    return (PECAS_DE_CIMA[cena.aparencia.pecaDeCima] || []).length > 1;
                 }
             }),
             opcao("baixo", "Parte de baixo", Object.keys(PECAS_DE_BAIXO), "pecaDeBaixo"),
@@ -449,20 +459,27 @@ export class CenaEditor extends Phaser.Scene {
         if (!this.pronome) {
             faltam.push("o tratamento");
         }
+        if (!aparenciaValida(this.aparencia)) {
+            faltam.push("corrigir a aparência");
+        }
         return faltam;
     }
 
+    perfilEditado() {
+        return {nome: normalizarNome(this.nome), pronome: this.pronome, aparencia: copiar(this.aparencia)};
+    }
+
+    // só sai para o jogo com perfil completo: nome válido, tratamento escolhido
+    // e aparência dentro do catálogo
     confirmar() {
-        if (this.pendencias().length > 0) {
+        const perfil = this.perfilEditado();
+
+        if (this.pendencias().length > 0 || !perfilValido(perfil)) {
             this.atualizar();
             return;
         }
 
-        const gravou = salvarPerfil(this.registry, {
-            nome: this.nome,
-            pronome: this.pronome,
-            aparencia: this.aparencia
-        });
+        const gravou = salvarPerfil(this.registry, perfil);
 
         if (gravou) {
             aplicarPerfil(this);
@@ -768,7 +785,11 @@ export class CenaEditor extends Phaser.Scene {
             return;
         }
 
-        montarPrevia(this, this.aparencia);
+        // uma aparência fora do catálogo não se desenha; a prévia fica na última
+        // válida e o CONFIRMAR, bloqueado
+        if (aparenciaValida(this.aparencia)) {
+            montarPrevia(this, this.aparencia);
+        }
         this.rotuloDoNome.setText(normalizarNome(this.nome) || "sem nome");
         this.atualizarLinhas();
         this.atualizarBotoes();
@@ -836,7 +857,7 @@ export class CenaEditor extends Phaser.Scene {
             botao.titulo.setAlpha(bloqueado ? 0.4 : 1);
         }, this);
 
-        this.mensagem.setText(faltam.length > 0 ? "Para confirmar, falta " + faltam.join(" e ") : "");
+        this.mensagem.setText(faltam.length > 0 ? "Para confirmar, falta " + juntar(faltam) : "");
     }
 
     // ------------------------------------------------------------------

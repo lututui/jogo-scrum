@@ -6,8 +6,10 @@
 import {CADEIRAS, ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
 import {DEPURACAO, marcarDepuracao, opcoesLigadas} from "../dados/depuracao.js";
 import {ELENCO} from "../dados/elenco.js";
+import {temPerfil} from "../dados/perfil.js";
 import {cadeirasConcluidas} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {nomeDaCadeira} from "../dados/texto.js";
 import {abrirGuia} from "./CenaGuia.js";
 
 const MARGEM = 24;
@@ -23,7 +25,14 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
         super({key: "CenaSelecaoDePapel"});
     }
 
+    // sem perfil completo não se entra no jogo: o editor vem antes
     create() {
+        this.semPerfil = !temPerfil(this.registry);
+        if (this.semPerfil) {
+            this.scene.start("CenaEditor", {depois: "CenaSelecaoDePapel", voltar: "CenaMenu"});
+            return;
+        }
+
         this.indice = this.indiceDaCadeiraAtual();
         this.cartoes = [];
 
@@ -126,7 +135,7 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
             LARGURA_DO_CARTAO / 2, 78, "corpo_jogador_" + chave, 0
         ).setScale(ESCALA_DO_AVATAR);
 
-        const nome = this.add.text(LARGURA_DO_CARTAO / 2, 140, cadeira.nome, {
+        const nome = this.add.text(LARGURA_DO_CARTAO / 2, 140, nomeDaCadeira(this.registry, chave), {
             fontFamily: FONTE,
             fontSize: "15px",
             color: cadeira.cor
@@ -221,6 +230,10 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
     }
 
     update() {
+        if (this.semPerfil) {
+            return;
+        }
+
         if (Phaser.Input.Keyboard.JustDown(this.teclas.sair)) {
             this.voltar();
             return;

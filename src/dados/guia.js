@@ -2,10 +2,13 @@
 //
 // O mínimo de Scrum e de controles para começar a jogar. Os termos que
 // aparecem aqui sem explicação estão no glossário.
+//
+// O guia vem antes do editor de personagem, então não usa nome nem marca de
+// gênero do jogador: "Boas-vindas", e a cadeira de desenvolvimento é "Dev".
 
 export const GUIA = [
     {
-        titulo: "Bem-vindo à Catavento Software",
+        titulo: "Boas-vindas à Catavento Software",
         texto: "A Catavento é uma software house pequena, contratada pela "
             + "Escola Machado de Assis para construir um diário de classe "
             + "digital: chamada, notas e boletim.\n\n"
@@ -16,10 +19,10 @@ export const GUIA = [
     {
         titulo: "Três cadeiras, um mentor em cada",
         texto: "A cada sprint você ocupa uma cadeira do time: Product Owner, "
-            + "Scrum Master ou Desenvolvedor.\n\n"
+            + "Scrum Master ou Dev.\n\n"
             + "Quem exerce aquele papel senta ao seu lado como mentor: Márcia "
             + "na de Product Owner, Renan na de Scrum Master e Bia na de "
-            + "Desenvolvedor. O mentor orienta e comenta, mas a decisão é "
+            + "Dev. O mentor orienta e comenta, mas a decisão é "
             + "sempre sua.\n\n"
             + "O jogo completo pede as três cadeiras: a mesma sprint muda de "
             + "forma conforme o lugar de onde você a vê."

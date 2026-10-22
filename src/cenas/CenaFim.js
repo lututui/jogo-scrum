@@ -7,6 +7,7 @@ import {CADEIRAS, ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
 import {CONQUISTAS} from "../dados/conquistas.js";
 import {MEDIDORES, conquistasDoJogo, conquistasPorId, ultimaSprint} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {nomeDaCadeira, personalizar} from "../dados/texto.js";
 
 const MARGEM = 24;
 const TOPO_DA_TABELA = 150;
@@ -41,11 +42,11 @@ export class CenaFim extends Phaser.Scene {
             color: COR.texto
         });
 
-        this.add.text(MARGEM, 62,
+        this.add.text(MARGEM, 62, personalizar(this.registry,
             "Você viveu a mesma sprint pelas três cadeiras do time: no lugar de "
             + "quem decide o que vale a pena construir, de quem cuida do processo "
             + "e de quem responde pelo que é construído. A tabela mostra como foi "
-            + "a última sprint em cada uma.", {
+            + "a última sprint em cada uma."), {
                 fontFamily: FONTE,
                 fontSize: "13px",
                 color: COR.texto,
@@ -80,7 +81,7 @@ export class CenaFim extends Phaser.Scene {
             const y = TOPO_DA_TABELA + 28 + posicao * ALTURA_DA_LINHA;
             const sprint = ultimaSprint(this.registry, cadeira);
             const celulas = [
-                CADEIRAS[cadeira].nome,
+                nomeDaCadeira(this.registry, cadeira),
                 sprint ? String(sprint.pontos) : "—",
                 sprint ? this.textoDasDecisoes(sprint.decisoes) : "—",
                 sprint ? this.textoDosMedidores(sprint.medidores) : "—"

@@ -4,6 +4,7 @@
 
 import {quadroDaExpressao} from "../dados/expressoes.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {personalizar} from "../dados/texto.js";
 
 export const PAINEL = {
     x: 24,
@@ -103,7 +104,7 @@ export class PainelDeFala {
         this.nome.setText(personagem.nome + " — " + personagem.papel);
         this.nome.setColor(personagem.cor);
 
-        this.textoCompleto = texto;
+        this.textoCompleto = personalizar(this.cena.registry, texto);
         this.textoRevelado = "";
         this.acumulador = 0;
         this.revelando = true;

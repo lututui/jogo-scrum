@@ -17,6 +17,7 @@ import {
     sprintsConcluidas
 } from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {nomeDaCadeira, personalizar} from "../dados/texto.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
 const MARGEM = 24;
@@ -66,13 +67,13 @@ export class CenaSintese extends Phaser.Scene {
             color: COR.texto
         });
 
-        this.add.text(936, 13, "COMO " + CADEIRAS[this.cadeira].nome.toUpperCase(), {
+        this.add.text(936, 13, "COMO " + nomeDaCadeira(this.registry, this.cadeira).toUpperCase(), {
             fontFamily: FONTE,
             fontSize: "14px",
             color: CADEIRAS[this.cadeira].cor
         }).setOrigin(1, 0);
 
-        this.add.text(MARGEM, 62, this.resumoDaSprint(), {
+        this.add.text(MARGEM, 62, personalizar(this.registry, this.resumoDaSprint()), {
             fontFamily: FONTE,
             fontSize: "13px",
             color: COR.texto,
@@ -260,7 +261,7 @@ export class CenaSintese extends Phaser.Scene {
             const feita = vezes > 0;
             const contagem = feita ? " (" + vezes + ")" : "";
 
-            return (feita ? "\u2713 " : "\u25cb ") + CADEIRAS[cadeira].nome + contagem;
+            return (feita ? "\u2713 " : "\u25cb ") + nomeDaCadeira(registry, cadeira) + contagem;
         }).join("     ");
 
         this.add.text(MARGEM, y, marcadas, {
@@ -269,7 +270,7 @@ export class CenaSintese extends Phaser.Scene {
             color: COR.texto
         });
 
-        this.add.text(MARGEM, y + 24, this.textoDoEpilogo(), {
+        this.add.text(MARGEM, y + 24, personalizar(this.registry, this.textoDoEpilogo()), {
             fontFamily: FONTE,
             fontSize: "12px",
             color: this.fechouTodas ? COR.destaque : COR.textoSecundario,

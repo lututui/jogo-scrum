@@ -7,6 +7,7 @@
 // da Retrospective.
 
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {personalizar} from "../dados/texto.js";
 
 const ALTURA_DA_LINHA = 40;
 const ESPACO_ENTRE_LINHAS = 6;
@@ -166,7 +167,7 @@ export class ListaDeOpcoes {
         const titulo = cena.add.text(
             this.centralizar ? this.largura / 2 : esquerda,
             this.topoDoTitulo(opcao, compacta),
-            this.comoFala ? "— " + opcao.titulo : opcao.titulo, {
+            personalizar(cena.registry, this.comoFala ? "— " + opcao.titulo : opcao.titulo), {
                 fontFamily: FONTE,
                 fontSize: alturaDoTitulo + "px",
                 color: COR.texto,
@@ -181,7 +182,7 @@ export class ListaDeOpcoes {
 
         if (opcao.detalhe) {
             elementos.push(cena.add.text(
-                esquerda, this.alturaDaLinha - (compacta ? 13 : 16), opcao.detalhe, {
+                esquerda, this.alturaDaLinha - (compacta ? 13 : 16), personalizar(cena.registry, opcao.detalhe), {
                     fontFamily: FONTE,
                     fontSize: compacta ? "9px" : "11px",
                     color: COR.textoSecundario

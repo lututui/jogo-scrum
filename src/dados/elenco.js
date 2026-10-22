@@ -13,7 +13,7 @@ export const ELENCO = [
         y: 252,
         expressoes: ["aprovacao", "tenso", "neutro"],
         falas: [
-            "Chegou cedo. Boa.",
+            "Chegou cedo, {nome}. Boa.",
             "Anotei quatorze pedidos na reunião com a diretora. Estão todos na mesma folha, fora de ordem, e dois são a mesma coisa escrita diferente.",
             "A partir de hoje quem ordena essa lista é você. Eu fico junto, mas não decido no seu lugar."
         ]
@@ -27,7 +27,7 @@ export const ELENCO = [
         y: 252,
         expressoes: ["aprovacao", "neutro", "neutro"],
         falas: [
-            "Bom te ver por aqui.",
+            "Bom te ver por aqui, {nome}.",
             "A sprint começa amanhã e dura duas semanas. Dez dias úteis, uma meta só.",
             "Se em algum momento você não souber o que uma palavra significa, pergunta. Ninguém aqui nasceu sabendo o que é Product Backlog."
         ]
@@ -41,7 +41,7 @@ export const ELENCO = [
         y: 252,
         expressoes: ["neutro", "neutro", "tenso"],
         falas: [
-            "Você é o aprendiz, né?",
+            "Você é {o|a} aprendiz, né?",
             "Vou te dizer uma coisa agora para economizar discussão depois: aqui, item entregue é item que funciona do começo ao fim.",
             "Meia tela bonita não conta."
         ]
@@ -55,7 +55,7 @@ export const ELENCO = [
         y: 252,
         expressoes: ["aprovacao", "aprovacao", "aprovacao"],
         falas: [
-            "Opa! Bem-vindo.",
+            "Opa! Bem-{vindo|vinda}.",
             "Tô montando o lançamento de presença. Já tá quase pronto, só falta juntar as partes.",
             "Quase pronto mesmo. Uns dois dias."
         ]

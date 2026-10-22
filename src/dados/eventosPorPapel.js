@@ -27,7 +27,7 @@ export const PAPEIS_DOS_EVENTOS = {
             rotulo: "você propõe a meta",
             abertura: {
                 quem: "marcia",
-                texto: "A lista da diretora tem quatorze pedidos. Hoje você "
+                texto: "A lista da diretora tem quatorze pedidos. Hoje, {nome}, você "
                     + "senta na minha cadeira: propõe a meta e o que entra. "
                     + "Quem diz o que cabe são os desenvolvedores, e a meta "
                     + "sai da conversa com o time."
@@ -37,7 +37,7 @@ export const PAPEIS_DOS_EVENTOS = {
         sm: {
             abertura: {
                 quem: "renan",
-                texto: "Hoje quem facilita é você. Repara numa coisa: o Gustavo "
+                texto: "Hoje quem facilita é você, {nome}. Repara numa coisa: o Gustavo "
                     + "veio para a sala, e ele não faz parte do time."
             },
             decisoes: [
@@ -105,7 +105,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             detalhe: "Resposta pronta, sem o time",
                             avaliacao: "media",
                             conceito: "Scrum Master",
-                            feedback: "Você tem razão e ainda assim decidiu sozinho. "
+                            feedback: "Você tem razão e ainda assim decidiu {sozinho|sozinha}. "
                                 + "O time concordou com a sua frase, não com um plano dele.",
                             principio: "Facilitar é fazer o time chegar à conclusão, não anunciá-la."
                         }
@@ -124,7 +124,7 @@ export const PAPEIS_DOS_EVENTOS = {
         dev: {
             abertura: {
                 quem: "bia",
-                texto: "Você senta comigo. A parte que nos cabe aqui é dizer o "
+                texto: "{nome}, você senta comigo. A parte que nos cabe aqui é dizer o "
                     + "tamanho das coisas, e dizer direito."
             },
             decisoes: [
@@ -239,7 +239,7 @@ export const PAPEIS_DOS_EVENTOS = {
                     pergunta: "O que você diz?",
                     opcoes: [
                         {
-                            titulo: "Dizer que está parado há dois dias esperando a regra de arredondamento",
+                            titulo: "Dizer que está {parado|parada} há dois dias esperando a regra de arredondamento",
                             detalhe: "Nomeia o que trava",
                             avaliacao: "boa",
                             feedback: "O time ouviu, e a regra chegou no fim da manhã. "
@@ -256,7 +256,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             principio: "Percentual não é informação acionável; o que falta, é."
                         },
                         {
-                            titulo: "Dizer que está indo e resolver sozinho",
+                            titulo: "Dizer que está indo e resolver {sozinho|sozinha}",
                             detalhe: "Problema guardado",
                             avaliacao: "media",
                             conceito: "Meta da sprint",
@@ -282,7 +282,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             principio: "Item em progresso não entrega valor; concluir vale mais que começar."
                         },
                         {
-                            titulo: "Ficar calado, é problema dele",
+                            titulo: "Ficar {calado|calada}, é problema dele",
                             detalhe: "Cada um com o seu",
                             avaliacao: "ruim",
                             conceito: "Meta da sprint",
@@ -520,7 +520,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             principio: "Facilitar é criar as condições do evento, não executá-lo."
                         },
                         {
-                            titulo: "Demonstrar você mesmo para garantir",
+                            titulo: "Demonstrar você {mesmo|mesma} para garantir",
                             detalhe: "Assumir o trabalho do time",
                             avaliacao: "ruim",
                             conceito: "Autogestão",

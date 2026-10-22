@@ -3,6 +3,7 @@
 import {DEPURACAO} from "../dados/depuracao.js";
 import {TOTAL_DE_EXPRESSOES, quadroDaExpressao} from "../dados/expressoes.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {personalizar} from "../dados/texto.js";
 
 
 export class CaixaDialogo {
@@ -79,7 +80,10 @@ export class CaixaDialogo {
     // Abre a caixa com as falas de um interlocutor
     abrir(interlocutor, aoFechar) {
         this.aberta = true;
-        this.falas = interlocutor.falas;
+        const registry = this.cena.registry;
+        this.falas = interlocutor.falas.map(function (fala) {
+            return personalizar(registry, fala);
+        });
         this.expressoes = interlocutor.expressoes || [];
         this.indiceFala = 0;
         this.aoFechar = aoFechar || null;

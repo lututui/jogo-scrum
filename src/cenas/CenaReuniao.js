@@ -14,6 +14,7 @@ import {expressaoDaAvaliacao} from "../dados/expressoes.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {ASSENTOS, ASSENTO_DO_JOGADOR, ESCALA, MESA} from "../dados/reuniao.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {nomeDaCadeira, nomeDoJogador} from "../dados/texto.js";
 import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
@@ -139,7 +140,7 @@ export class CenaReuniao extends Phaser.Scene {
 
         const estilo = {fontFamily: FONTE, fontSize: "14px", color: COR.texto};
         this.add.text(24, 13, this.evento.nome, estilo).setDepth(701);
-        this.add.text(300, 13, "COMO " + CADEIRAS[this.cadeira()].nome.toUpperCase(), {
+        this.add.text(300, 13, "COMO " + nomeDaCadeira(this.registry, this.cadeira()).toUpperCase(), {
             fontFamily: FONTE,
             fontSize: "12px",
             color: CADEIRAS[this.cadeira()].cor
@@ -222,8 +223,8 @@ export class CenaReuniao extends Phaser.Scene {
             const cadeira = this.cadeira();
             return {
                 chaveDoRetrato: "jogador_" + cadeira,
-                nome: "Você",
-                papel: CADEIRAS[cadeira].nome,
+                nome: nomeDoJogador(this.registry),
+                papel: nomeDaCadeira(this.registry, cadeira),
                 cor: CADEIRAS[cadeira].cor
             };
         }

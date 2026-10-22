@@ -11,6 +11,7 @@ import {ELENCO} from "../dados/elenco.js";
 import {expressaoDaAvaliacao} from "../dados/expressoes.js";
 import {registrarContextualResolvido, registrarDecisao} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {nomeDaCadeira, nomeDoJogador} from "../dados/texto.js";
 import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
@@ -95,8 +96,8 @@ export class CenaEventoContextual extends Phaser.Scene {
 
             return {
                 chaveDoRetrato: "jogador_" + cadeira,
-                nome: "Você",
-                papel: CADEIRAS[cadeira].nome,
+                nome: nomeDoJogador(this.registry),
+                papel: nomeDaCadeira(this.registry, cadeira),
                 cor: CADEIRAS[cadeira].cor
             };
         }

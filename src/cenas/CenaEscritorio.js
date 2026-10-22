@@ -1,7 +1,6 @@
 // Cena do escritório
 
 import {ELENCO, MESAS, OBJETOS} from "../dados/elenco.js";
-import {CADEIRAS} from "../dados/cadeiras.js";
 import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
 import {EVENTOS, SPRINT_REVIEW} from "../dados/eventos.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
@@ -15,6 +14,7 @@ import {
     moveuNoQuadro,
     sprintsConcluidas
 } from "../dados/progresso.js";
+import {nomeDaCadeira} from "../dados/texto.js";
 import {MedidoresHUD} from "../ui/MedidoresHUD.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {CaixaDialogo} from "../ui/CaixaDialogo.js";
@@ -395,7 +395,7 @@ export class CenaEscritorio extends Phaser.Scene {
     atualizarCadeira(cadeira) {
         this.cadeiraAtual = cadeira;
         this.registry.set("cadeira", cadeira);
-        this.textoCadeira.setText("CADEIRA: " + CADEIRAS[cadeira].nome.toUpperCase());
+        this.textoCadeira.setText("CADEIRA: " + nomeDaCadeira(this.registry, cadeira).toUpperCase());
         if (this.jogador) {
             this.jogador.setTexture("corpo_jogador_" + cadeira, 0);
         }

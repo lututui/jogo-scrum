@@ -14,6 +14,7 @@ import {eventosConcluidos} from "../dados/progresso.js";
 import {EVENTOS} from "../dados/eventos.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {nomeDaCadeira} from "../dados/texto.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
@@ -43,7 +44,7 @@ export class CenaAgenda extends Phaser.Scene {
 
         const estilo = {fontFamily: FONTE, fontSize: "14px", color: COR.texto};
         this.add.text(MARGEM, 13, "AGENDA DA SPRINT", estilo);
-        this.add.text(480, 13, "COMO " + CADEIRAS[this.cadeira()].nome.toUpperCase(), {
+        this.add.text(480, 13, "COMO " + nomeDaCadeira(this.registry, this.cadeira()).toUpperCase(), {
             fontFamily: FONTE,
             fontSize: "14px",
             color: CADEIRAS[this.cadeira()].cor

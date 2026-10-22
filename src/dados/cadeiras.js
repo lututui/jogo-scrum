@@ -4,6 +4,9 @@
 // corpo_jogador_sm, corpo_jogador_dev), montadas em ui/montarJogador.js com
 // a cor da cadeira no crachá.
 //
+// A cadeira de Dev tem nome no feminino, usado com o tratamento feminino
+// (dados/texto.js, nomeDaCadeira).
+//
 // O titular é quem ocupa aquela cadeira no time e acompanha o aprendiz como
 // mentor.
 
@@ -24,6 +27,7 @@ export const CADEIRAS = {
     },
     dev: {
         nome: "Desenvolvedor",
+        nomeNoFeminino: "Desenvolvedora",
         cor: "#7a4bb5",
         titular: "bia",
         resumo: "Estima, constrói e responde pela qualidade do incremento",
