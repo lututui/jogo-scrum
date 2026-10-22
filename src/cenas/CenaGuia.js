@@ -1,7 +1,9 @@
 // Guia introdutório
 //
-// Abre por cima da escolha de cadeira, que fica pausada atrás. Fechar o guia,
-// pelo fim ou por ESC, marca o guia como visto.
+// Abre de dois jeitos. Como primeiro passo de uma partida nova, ocupa a tela
+// e, ao fechar, segue para a próxima cena (o editor de personagem). Pelo menu
+// ou pela tecla H, abre por cima da cena de onde veio, que volta ao fechar.
+// Fechar, pelo fim ou por ESC, marca o guia como visto.
 
 import {GUIA} from "../dados/guia.js";
 import {marcarGuiaVisto} from "../dados/progresso.js";
@@ -17,6 +19,11 @@ export function abrirGuia(cena) {
     abrirPorCima(cena, "CenaGuia");
 }
 
+// o guia como passo de um fluxo: ao fechar, abre a cena depois com os dados
+export function comecarPeloGuia(cena, depois, dadosDepois) {
+    cena.scene.start("CenaGuia", {depois: depois, dadosDepois: dadosDepois});
+}
+
 export class CenaGuia extends Phaser.Scene {
 
     constructor() {
@@ -25,6 +32,8 @@ export class CenaGuia extends Phaser.Scene {
 
     init(dados) {
         this.retorno = dados.retorno;
+        this.depois = dados.depois;
+        this.dadosDepois = dados.dadosDepois;
         this.pagina = 0;
     }
 
@@ -160,6 +169,11 @@ export class CenaGuia extends Phaser.Scene {
 
     fechar() {
         marcarGuiaVisto(this.registry);
+
+        if (this.depois) {
+            this.scene.start(this.depois, this.dadosDepois);
+            return;
+        }
         fecharPorCima(this);
     }
 }

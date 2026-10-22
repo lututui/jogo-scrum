@@ -1,11 +1,12 @@
 // Seleção de papel
 //
-// Permite troca de cadeira. Na primeira partida, abre o guia por cima.
+// Permite troca de cadeira. O guia vem antes, no começo da partida, e daqui
+// só abre pela tecla H.
 
 import {CADEIRAS, ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
 import {DEPURACAO, marcarDepuracao, opcoesLigadas} from "../dados/depuracao.js";
 import {ELENCO} from "../dados/elenco.js";
-import {cadeirasConcluidas, guiaJaVisto} from "../dados/progresso.js";
+import {cadeirasConcluidas} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {abrirGuia} from "./CenaGuia.js";
 
@@ -30,17 +31,6 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
         this.montarCartoes();
         this.criarControles();
         this.destacarEscolhido();
-        this.abrirGuiaNaPrimeiraVez();
-    }
-
-    abrirGuiaNaPrimeiraVez() {
-        if (guiaJaVisto(this.registry)) {
-            return;
-        }
-
-        this.events.once(Phaser.Scenes.Events.CREATE, function () {
-            abrirGuia(this);
-        }, this);
     }
 
     indiceDaCadeiraAtual() {

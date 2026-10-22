@@ -3,14 +3,20 @@
 // Primeira tela depois do carregamento. Sem progresso salvo, a partida começa
 // direto; com progresso, dá para continuar ou começar outra, e começar outra
 // pede confirmação, porque apaga o que foi salvo.
+//
+// Começar e Nova partida seguem guia, editor de personagem e escolha de
+// cadeira. Continuar vai direto à escolha, ou passa antes pelo editor se o
+// save não tiver perfil. PERSONAGEM edita o perfil e volta ao menu; a sprint
+// em andamento continua onde estava.
 
+import {temPerfil} from "../dados/perfil.js";
 import {apagarProgresso, temProgresso} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
 import {aplicarPerfil} from "../ui/montarJogador.js";
 import {abrirConfiguracoes} from "./CenaConfiguracoes.js";
 import {abrirGlossario} from "./CenaGlossario.js";
-import {abrirGuia} from "./CenaGuia.js";
+import {abrirGuia, comecarPeloGuia} from "./CenaGuia.js";
 
 const LARGURA_DA_LISTA = 420;
 const TOPO_DA_LISTA = 196;
@@ -101,8 +107,10 @@ export class CenaMenu extends Phaser.Scene {
             this.cancelarConfirmacao();
         }
 
-        if (opcao.id === "comecar" || opcao.id === "continuar") {
-            this.scene.start("CenaSelecaoDePapel");
+        if (opcao.id === "comecar") {
+            this.comecarPartida();
+        } else if (opcao.id === "continuar") {
+            this.continuarPartida();
         } else if (opcao.id === "personagem") {
             this.scene.start("CenaEditor", {depois: "CenaMenu", voltar: "CenaMenu"});
         } else if (opcao.id === "novaPartida") {
@@ -122,12 +130,26 @@ export class CenaMenu extends Phaser.Scene {
             apagarProgresso(this.registry);
             aplicarPerfil(this);
             this.registry.set("cadeira", null);
-            this.scene.start("CenaSelecaoDePapel");
+            this.comecarPartida();
             return;
         }
 
         this.confirmandoNovaPartida = true;
         this.aviso.setText("Isso apaga todo o progresso salvo. ENTER de novo confirma, ESC cancela.");
+    }
+
+    // guia, editor e escolha de cadeira; ESC no editor volta ao menu sem
+    // criar nada
+    comecarPartida() {
+        comecarPeloGuia(this, "CenaEditor", {depois: "CenaSelecaoDePapel", voltar: "CenaMenu"});
+    }
+
+    continuarPartida() {
+        if (temPerfil(this.registry)) {
+            this.scene.start("CenaSelecaoDePapel");
+            return;
+        }
+        this.scene.start("CenaEditor", {depois: "CenaSelecaoDePapel", voltar: "CenaMenu"});
     }
 
     cancelarConfirmacao() {
