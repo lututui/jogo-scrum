@@ -7,10 +7,12 @@
 
 import {COLUNAS, motivoParaRecusar} from "../dados/quadro.js";
 import {ETIQUETA_DO_JOGADOR, lerItensDoQuadro, salvarItensDoQuadro} from "../dados/estadoDoQuadro.js";
+import {CADEIRAS} from "../dados/cadeiras.js";
 import {
     DIAS_DA_SPRINT,
     diaDaSprint,
     registrarMovimentoNoQuadro,
+    registrarVisitaAoQuadro,
     sprintsConcluidas
 } from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
@@ -25,6 +27,8 @@ const ALTURA_DA_COLUNA = 424;
 const ALTURA_DO_CABECALHO = 34;
 const ESPACO_ENTRE_CARTOES = 8;
 const ALTURA_DO_RODAPE_DA_COLUNA = 22;
+
+const AVISO_DE_SO_LEITURA = "quem move os cartões são os desenvolvedores; daqui você acompanha o quadro";
 
 // Quantos cartões cabem numa coluna sem passar do fundo dela
 function capacidadeDaColuna() {
@@ -41,6 +45,8 @@ export class CenaKanban extends Phaser.Scene {
 
     create() {
         this.cadeira = this.registry.get("cadeira") || "po";
+        this.soLeitura = !CADEIRAS[this.cadeira].moveCartoes;
+        registrarVisitaAoQuadro(this.registry, this.cadeira);
         this.deslocamentos = {};
         this.itens = this.carregarItens();
         this.cartoes = [];
@@ -81,8 +87,10 @@ export class CenaKanban extends Phaser.Scene {
         this.add.text(
             MARGEM,
             516,
-            "setas escolhem o cartão, SHIFT com as setas move o cartão, "
-            + "ou arraste com o mouse; G abre o glossário",
+            this.soLeitura
+                ? "setas percorrem os cartões; quem move é o time de desenvolvimento; G abre o glossário"
+                : "setas escolhem o cartão, SHIFT com as setas move o cartão, "
+                + "ou arraste com o mouse; G abre o glossário",
             {fontFamily: FONTE, fontSize: "12px", color: COR.textoSecundario}
         );
     }
@@ -198,6 +206,9 @@ export class CenaKanban extends Phaser.Scene {
 
             itens.slice(inicio, inicio + capacidade).forEach(function (item) {
                 const cartao = new CartaoKanban(this, item);
+                if (this.soLeitura) {
+                    this.input.setDraggable(cartao.container, false);
+                }
                 cartao.posicionar(coluna.x + (LARGURA_DA_COLUNA - LARGURA_CARTAO) / 2, y);
                 this.cartoes.push(cartao);
                 y += ALTURA_CARTAO + ESPACO_ENTRE_CARTOES;
@@ -296,7 +307,7 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     posicionarDica(cartao) {
-        if (!cartao || this.arrastando) {
+        if (!cartao || this.arrastando || this.soLeitura) {
             this.dica.setVisible(false);
             return;
         }
@@ -372,6 +383,11 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     moverItem(item, idColuna, posicao) {
+        if (this.soLeitura) {
+            this.mostrarAviso(AVISO_DE_SO_LEITURA);
+            return false;
+        }
+
         if (item.coluna === idColuna) {
             this.reordenar(item, posicao);
             return true;
@@ -481,6 +497,11 @@ export class CenaKanban extends Phaser.Scene {
             return;
         }
 
+        if (this.soLeitura) {
+            this.mostrarAviso(AVISO_DE_SO_LEITURA);
+            return;
+        }
+
         const item = this.itemSelecionado();
         const idDestino = this.colunas[destino].dados.id;
         if (!this.moverItem(item, idDestino)) {
@@ -495,6 +516,11 @@ export class CenaKanban extends Phaser.Scene {
     navegarVertical(passo, levandoCartao) {
         const item = this.itemSelecionado();
         if (!item) {
+            return;
+        }
+
+        if (levandoCartao && this.soLeitura) {
+            this.mostrarAviso(AVISO_DE_SO_LEITURA);
             return;
         }
 

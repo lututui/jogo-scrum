@@ -7,6 +7,8 @@
 // A cadeira de Dev tem nome no feminino, usado com o tratamento feminino
 // (dados/texto.js, nomeDaCadeira).
 //
+// Só quem desenvolve move cartões no quadro; as outras cadeiras acompanham.
+//
 // O titular é quem ocupa aquela cadeira no time e acompanha o aprendiz como
 // mentor.
 
@@ -31,7 +33,8 @@ export const CADEIRAS = {
         cor: "#7a4bb5",
         titular: "bia",
         resumo: "Estima, constrói e responde pela qualidade do incremento",
-        nosEventos: "estima o trabalho e participa de todos"
+        nosEventos: "estima o trabalho e participa de todos",
+        moveCartoes: true
     }
 };
 

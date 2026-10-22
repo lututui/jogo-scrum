@@ -54,6 +54,7 @@ function sprintVazia() {
         paraRevisar: {},
         quadro: quadroInicial(),
         movimentosNoQuadro: 0,
+        diaDaVisitaAoQuadro: null,
         diaDoTime: 1
     };
 }
@@ -221,8 +222,15 @@ export function registrarMovimentoNoQuadro(registry, cadeira) {
     return salvarProgresso(registry, progresso);
 }
 
-export function moveuNoQuadro(registry, cadeira) {
-    return (sprintDaCadeira(registry, cadeira).movimentosNoQuadro || 0) > 0;
+export function registrarVisitaAoQuadro(registry, cadeira) {
+    const progresso = lerProgresso(registry);
+    progresso.sprints[cadeira].diaDaVisitaAoQuadro = diaDaSprint(registry, cadeira);
+
+    return salvarProgresso(registry, progresso);
+}
+
+export function viuOQuadroHoje(registry, cadeira) {
+    return sprintDaCadeira(registry, cadeira).diaDaVisitaAoQuadro === diaDaSprint(registry, cadeira);
 }
 
 // ---------------------------------------------------------

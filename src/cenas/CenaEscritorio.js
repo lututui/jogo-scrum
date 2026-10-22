@@ -11,8 +11,8 @@ import {
     diaDaSprint,
     eventosConcluidos,
     medidoresDaCadeira,
-    moveuNoQuadro,
-    sprintsConcluidas
+    sprintsConcluidas,
+    viuOQuadroHoje
 } from "../dados/progresso.js";
 import {nomeDaCadeira} from "../dados/texto.js";
 import {MedidoresHUD} from "../ui/MedidoresHUD.js";
@@ -357,11 +357,11 @@ export class CenaEscritorio extends Phaser.Scene {
         );
 
         if (!conduzReview || pendente !== SPRINT_REVIEW
-            || moveuNoQuadro(this.registry, this.cadeiraAtual)) {
+            || viuOQuadroHoje(this.registry, this.cadeiraAtual)) {
             return "";
         }
 
-        return "dica: antes da Review, leve ao CONCLUÍDO o que ficou pronto no quadro da parede";
+        return "dica: antes da Review, veja no quadro da parede o que o time concluiu";
     }
 
     proximoPasso() {
