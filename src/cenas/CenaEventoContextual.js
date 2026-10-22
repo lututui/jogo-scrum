@@ -8,12 +8,14 @@
 
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {ELENCO} from "../dados/elenco.js";
+import {aplicarNoQuadro} from "../dados/estadoDoQuadro.js";
 import {expressaoDaAvaliacao} from "../dados/expressoes.js";
 import {registrarContextualResolvido, registrarDecisao} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira, nomeDoJogador} from "../dados/texto.js";
 import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
+import {QuadroReduzido} from "../ui/QuadroReduzido.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
 const TOPO_DAS_OPCOES = 32;
@@ -37,6 +39,7 @@ export class CenaEventoContextual extends Phaser.Scene {
         this.pergunta = null;
         this.esperandoFala = false;
         this.aoTerminarFala = null;
+        this.quadroReduzido = null;
 
         this.escurecerFundo();
         this.montarTarja();
@@ -171,11 +174,29 @@ export class CenaEventoContextual extends Phaser.Scene {
             conceito: opcao.conceito,
             semMentor: Boolean(this.evento.semMentor)
         });
+        const mudanca = aplicarNoQuadro(this.registry, this.cadeira(), opcao.quadro);
 
         this.falar("jogador", opcao.titulo, function () {
-            cena.falar(cena.mentor(), opcao.feedback, function () {
-                cena.encerrar();
-            }, opcao.principio, expressaoDaAvaliacao(opcao.avaliacao));
+            cena.mostrarMudanca(mudanca, function () {
+                cena.falar(cena.mentor(), opcao.feedback, function () {
+                    cena.encerrar();
+                }, opcao.principio, expressaoDaAvaliacao(opcao.avaliacao));
+            });
+        });
+    }
+
+    // Sem mudança no quadro, segue direto
+    mostrarMudanca(mudanca, aoTerminar) {
+        if (!mudanca) {
+            aoTerminar();
+            return;
+        }
+
+        const cena = this;
+        this.ajuda.setText("ENTER continua  ·  G abre o glossário");
+        this.quadroReduzido = new QuadroReduzido(this, mudanca, function () {
+            cena.quadroReduzido = null;
+            aoTerminar();
         });
     }
 
@@ -219,6 +240,13 @@ export class CenaEventoContextual extends Phaser.Scene {
 
         if (Phaser.Input.Keyboard.JustDown(this.teclas.glossario)) {
             abrirGlossario(this);
+            return;
+        }
+
+        if (this.quadroReduzido) {
+            if (this.confirmou()) {
+                this.quadroReduzido.avancar();
+            }
             return;
         }
 

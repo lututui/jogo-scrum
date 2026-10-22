@@ -57,7 +57,7 @@ export class CenaDailyScrum extends CenaReuniao {
     }
 
     responderNaRodada(opcao) {
-        this.pontuar(Object.assign({}, opcao, {
+        const mudanca = this.pontuar(Object.assign({}, opcao, {
             marca: opcao.registraImpedimento ? "impedimento" : opcao.marca
         }));
         this.minutosUsados += opcao.custo;
@@ -68,9 +68,11 @@ export class CenaDailyScrum extends CenaReuniao {
 
         const cena = this;
         this.responder(opcao.titulo, function () {
-            cena.comentarDecisao(opcao.avaliacao, opcao.feedback, opcao.principio, function () {
-                cena.rodadaAtual += 1;
-                cena.abrirRodada();
+            cena.mostrarMudanca(mudanca, function () {
+                cena.comentarDecisao(opcao.avaliacao, opcao.feedback, opcao.principio, function () {
+                    cena.rodadaAtual += 1;
+                    cena.abrirRodada();
+                });
             });
         });
     }

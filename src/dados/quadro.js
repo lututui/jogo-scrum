@@ -38,15 +38,21 @@ export function motivoParaRecusar(item, destino) {
     return "o cartão não volta: só a REVISÃO volta, para EM PROGRESSO";
 }
 
+export const ETIQUETA_DE_BLOQUEIO = "BLOQUEADO";
+
 // Itens com sprintAnterior já estavam prontos antes desta sprint: ficam no
-// quadro como histórico, mas não podem ser mostrados na Review
+// quadro como histórico, mas não podem ser mostrados na Review.
+// Dois cartões começam parados sem que o quadro diga: o da Bia espera o
+// acesso à base de matrículas, e o da Lu espera código de outra pessoa.
+// Quem destrava são as decisões
 export const ITENS_INICIAIS = [
     {
         id: "it02",
         tipo: "feature",
         titulo: "Listar turmas do professor",
         etiquetas: ["API"],
-        coluna: "afazer"
+        coluna: "afazer",
+        bloqueado: true
     },
     {
         id: "it04",
@@ -60,7 +66,8 @@ export const ITENS_INICIAIS = [
         tipo: "feature",
         titulo: "Marcar presença da turma",
         etiquetas: ["UI"],
-        coluna: "progresso"
+        coluna: "progresso",
+        bloqueado: true
     },
     {
         id: "it06",

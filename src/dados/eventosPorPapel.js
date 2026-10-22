@@ -12,6 +12,9 @@
 // propõe a meta, que o time define junto; a Review é do time com a escola, e
 // o Product Owner é quem recebe a escola.
 //
+// O campo "quadro" de uma opção é o que ela muda no quadro Kanban (ver
+// aplicarNoQuadro).
+//
 // O fechamento de quem participa tem três textos: "texto" quando todas as
 // decisões seguiram o princípio, "textoComCusto" quando só parte delas, e
 // "textoContra" quando nenhuma.
@@ -61,6 +64,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             detalhe: "Decidir no lugar de quem executa",
                             avaliacao: "ruim",
                             conceito: "Autogestão",
+                            quadro: [{planeja: "pb04"}],
                             feedback: "O compromisso foi assumido por quem não vai "
                                 + "cumpri-lo. O time descobriu o próprio plano depois de pronto.",
                             principio: "Compromisso assumido por terceiros corrói a autogestão."
@@ -277,6 +281,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             titulo: "Oferecer pegar um dos itens dele",
                             detalhe: "Fluxo antes de volume",
                             avaliacao: "boa",
+                            quadro: [{coluna: "progresso", avancam: 2}],
                             feedback: "Dois itens saíram da coluna do meio antes de "
                                 + "sexta. O quadro parou de crescer para os lados.",
                             principio: "Item em progresso não entrega valor; concluir vale mais que começar."
@@ -363,6 +368,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             titulo: "Anotar e ir falar com a escola depois da reunião",
                             detalhe: "O impedimento é de fora do time",
                             avaliacao: "boa",
+                            quadro: [{cartao: "it02", desbloqueia: true}],
                             feedback: "O acesso é conversa com a secretaria, e essa "
                                 + "porta é a sua. O time seguiu com a Daily.",
                             principio: "Impedimento externo se resolve com quem tem a relação, fora da reunião."

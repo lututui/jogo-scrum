@@ -197,6 +197,7 @@ export const DAILY_SCRUM = {
                     custo: 3,
                     avaliacao: "boa",
                     registraImpedimento: true,
+                    quadro: [{cartao: "it02", mostraBloqueio: true}],
                     feedback: "O bloqueio virou impedimento com nome: falta acesso "
                         + "à base de matrículas. Agora dá para agir sobre ele.",
                     principio: "Impedimento não declarado é impedimento que ninguém remove."

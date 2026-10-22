@@ -10,6 +10,7 @@
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {registrarDecisao, registrarEventoConcluido} from "../dados/progresso.js";
 import {ELENCO} from "../dados/elenco.js";
+import {aplicarNoQuadro} from "../dados/estadoDoQuadro.js";
 import {expressaoDaAvaliacao} from "../dados/expressoes.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {ASSENTOS, ASSENTO_DO_JOGADOR, ESCALA, MESA} from "../dados/reuniao.js";
@@ -17,6 +18,7 @@ import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira, nomeDoJogador} from "../dados/texto.js";
 import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
+import {QuadroReduzido} from "../ui/QuadroReduzido.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
 const LEMBRETE_DO_GLOSSARIO = "  ·  G abre o glossário";
@@ -48,6 +50,7 @@ export class CenaReuniao extends Phaser.Scene {
         this.aviso = null;
         this.emAndamento = false;
         this.avaliacoesDaReuniao = [];
+        this.quadroReduzido = null;
 
         this.montarSala();
         this.montarBarra();
@@ -351,9 +354,11 @@ export class CenaReuniao extends Phaser.Scene {
                 pergunta: decisao.pergunta,
                 opcoes: decisao.opcoes,
                 aoConfirmar: function (opcao) {
-                    cena.pontuar(opcao);
+                    const mudanca = cena.pontuar(opcao);
                     cena.responder(opcao.titulo, function () {
-                        cena.comentarDecisao(opcao.avaliacao, opcao.feedback, opcao.principio, aoTerminar);
+                        cena.mostrarMudanca(mudanca, function () {
+                            cena.comentarDecisao(opcao.avaliacao, opcao.feedback, opcao.principio, aoTerminar);
+                        });
                     });
                 }
             });
@@ -361,7 +366,8 @@ export class CenaReuniao extends Phaser.Scene {
     }
 
     // Toda escolha com avaliação declarada entra no placar, venha da mecânica
-    // do evento ou da sequência de decisões da cadeira
+    // do evento ou da sequência de decisões da cadeira. Devolve o que a
+    // escolha mudou no quadro
     pontuar(opcao) {
         registrarDecisao(this.registry, {
             cadeira: this.cadeira(),
@@ -370,11 +376,28 @@ export class CenaReuniao extends Phaser.Scene {
             marca: opcao.marca,
             conceito: opcao.conceito
         });
+        const mudanca = aplicarNoQuadro(this.registry, this.cadeira(), opcao.quadro);
 
         if (opcao.avaliacao) {
             this.avaliacoesDaReuniao.push(opcao.avaliacao);
         }
         this.travarSaida();
+        return mudanca;
+    }
+
+    // Sem mudança no quadro, segue direto
+    mostrarMudanca(mudanca, aoTerminar) {
+        if (!mudanca) {
+            aoTerminar();
+            return;
+        }
+
+        const cena = this;
+        this.definirAjuda("ENTER continua");
+        this.quadroReduzido = new QuadroReduzido(this, mudanca, function () {
+            cena.quadroReduzido = null;
+            aoTerminar();
+        });
     }
 
     // Todas as decisões desta reunião seguiram o princípio, só parte delas ou
@@ -529,6 +552,13 @@ export class CenaReuniao extends Phaser.Scene {
 
         if (Phaser.Input.Keyboard.JustDown(this.teclas.sair) && !this.emAndamento) {
             this.desistir();
+            return;
+        }
+
+        if (this.quadroReduzido) {
+            if (this.confirmou()) {
+                this.quadroReduzido.avancar();
+            }
             return;
         }
 

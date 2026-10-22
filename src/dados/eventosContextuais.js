@@ -3,7 +3,23 @@
 // Acontecem no escritório, entre as reuniões. Cada evento tem dia e cadeira.
 //
 // O campo "semMentor" marca as decisões tomadas sem ninguém por perto,
-// que pesam o dobro no placar.
+// que pesam o dobro no placar. O campo "quadro" de cada opção é o que ela
+// muda no quadro Kanban (ver aplicarNoQuadro).
+
+const BUG_EM_PRODUCAO = {
+    id: "bug01",
+    tipo: "bug",
+    titulo: "Presença some em produção",
+    etiquetas: ["URGENTE"]
+};
+
+const DEBITO_DO_ATALHO = {
+    id: "deb01",
+    tipo: "chore",
+    titulo: "Refazer o atalho do boletim",
+    etiquetas: ["DÉBITO"],
+    foraDaSprint: true
+};
 
 export const EVENTOS_CONTEXTUAIS = [
     {
@@ -109,6 +125,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "boa",
                 marca: "impedimento",
                 medidores: ["valor", "confianca"],
+                quadro: [{cartao: "it02", desbloqueia: true}],
                 feedback: "O medo era de responsabilidade sobre dados de menores. "
                     + "Um recorte anonimizado destravou tudo em meia hora.",
                 principio: "Remover impedimento começa por entender do que ele é feito."
@@ -119,6 +136,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "media",
                 conceito: "Impedimento",
                 medidores: ["valor", "confianca"],
+                quadro: [{cartao: "it02", desbloqueia: true}],
                 feedback: "O acesso saiu em um dia e a secretaria passou a "
                     + "responder por obrigação. Vocês ainda dependem dela.",
                 principio: "Impedimento removido por autoridade volta como atrito."
@@ -152,6 +170,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "boa",
                 marca: "definicao-de-pronto",
                 medidores: ["valor", "confianca"],
+                quadro: [{entra: BUG_EM_PRODUCAO, coluna: "progresso"}],
                 feedback: "A correção entrou no quadro, o time replanejou o dia e "
                     + "o professor soube quando voltaria a funcionar.",
                 principio: "Software em uso tem prioridade, e a correção entra no plano visível."
@@ -172,6 +191,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "ruim",
                 conceito: "Incremento",
                 medidores: ["confianca", "valor"],
+                quadro: [{entra: Object.assign({foraDaSprint: true}, BUG_EM_PRODUCAO), coluna: "afazer"}],
                 feedback: "Três turmas seguem perdendo chamada. A escola deixou "
                     + "de usar o piloto na quarta-feira.",
                 principio: "Incremento em uso que falha deixa de ser incremento."
@@ -195,6 +215,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "boa",
                 marca: "debito-visivel",
                 medidores: ["valor", "saude"],
+                quadro: [{entra: DEBITO_DO_ATALHO, coluna: "afazer"}],
                 feedback: "Os dois dias entraram na sprint e o custo ficou "
                     + "escrito onde o time decide o que fazer depois.",
                 principio: "Débito técnico é decisão legítima quando é explícita e registrada."
@@ -237,6 +258,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 detalhe: "A meta é do time",
                 avaliacao: "boa",
                 medidores: ["valor", "saude"],
+                quadro: [{cartao: "it05", desbloqueia: true, avanca: true}],
                 feedback: "Meia hora sua economizou um dia dela, e o item saiu da "
                     + "coluna do meio antes de sexta.",
                 principio: "Item parado não entrega valor; concluir vale mais que começar."
