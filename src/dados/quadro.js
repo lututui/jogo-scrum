@@ -7,6 +7,37 @@ export const COLUNAS = [
     {id: "concluido", titulo: "CONCLUÍDO"}
 ];
 
+function posicaoDaColuna(id) {
+    return COLUNAS.findIndex(function (coluna) {
+        return coluna.id === id;
+    });
+}
+
+// O cartão anda uma coluna por vez, para a frente. Só a revisão volta para
+// em progresso, como retrabalho; o que está concluído não sai.
+// Devolve o motivo da recusa, ou null se o movimento vale
+export function motivoParaRecusar(item, destino) {
+    const de = posicaoDaColuna(item.coluna);
+    const para = posicaoDaColuna(destino);
+
+    if (de === para || para === de + 1 && !item.sprintAnterior) {
+        return null;
+    }
+    if (item.sprintAnterior || item.coluna === "concluido") {
+        return "o que está em CONCLUÍDO não sai de lá";
+    }
+    if (item.coluna === "revisao" && destino === "progresso") {
+        return null;
+    }
+    if (para > de) {
+        return "um passo por vez: de " + COLUNAS[de].titulo + " o cartão vai para " + COLUNAS[de + 1].titulo;
+    }
+    if (item.coluna === "revisao") {
+        return "da REVISÃO, o cartão só volta para EM PROGRESSO";
+    }
+    return "o cartão não volta: só a REVISÃO volta, para EM PROGRESSO";
+}
+
 // Itens com sprintAnterior já estavam prontos antes desta sprint: ficam no
 // quadro como histórico, mas não podem ser mostrados na Review
 export const ITENS_INICIAIS = [

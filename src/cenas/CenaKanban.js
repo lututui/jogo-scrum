@@ -5,7 +5,7 @@
 // Mostra o quadro da cadeira atual.
 // Coluna com mais cartões do que cabem rola.
 
-import {COLUNAS} from "../dados/quadro.js";
+import {COLUNAS, motivoParaRecusar} from "../dados/quadro.js";
 import {lerItensDoQuadro, salvarItensDoQuadro} from "../dados/estadoDoQuadro.js";
 import {
     DIAS_DA_SPRINT,
@@ -46,6 +46,7 @@ export class CenaKanban extends Phaser.Scene {
         this.cartoes = [];
         this.selecao = {coluna: 0, indice: 0};
         this.arrastando = null;
+        this.relogioDoAviso = null;
 
         this.criarFundo();
         this.criarCabecalho();
@@ -345,12 +346,14 @@ export class CenaKanban extends Phaser.Scene {
         this.selecao.indice = Phaser.Math.Clamp(this.selecao.indice, 0, total - 1);
     }
 
+    // Um aviso novo recomeça a contagem, mesmo que repita o texto anterior
     mostrarAviso(texto) {
         this.aviso.setText(texto);
-        this.time.delayedCall(2600, function () {
-            if (this.aviso.text === texto) {
-                this.aviso.setText("");
-            }
+        if (this.relogioDoAviso) {
+            this.relogioDoAviso.remove();
+        }
+        this.relogioDoAviso = this.time.delayedCall(2600, function () {
+            this.aviso.setText("");
         }, [], this);
     }
 
@@ -372,6 +375,12 @@ export class CenaKanban extends Phaser.Scene {
         if (item.coluna === idColuna) {
             this.reordenar(item, posicao);
             return true;
+        }
+
+        const motivo = motivoParaRecusar(item, idColuna);
+        if (motivo) {
+            this.mostrarAviso(motivo);
+            return false;
         }
 
         if (!this.podeReceber(idColuna)) {
@@ -534,7 +543,8 @@ export class CenaKanban extends Phaser.Scene {
         this.colunas.forEach(function (coluna) {
             const eAlvo = coluna === alvo;
             const mesmaColuna = item && item.coluna === coluna.dados.id;
-            const aceita = mesmaColuna || this.podeReceber(coluna.dados.id);
+            const aceita = mesmaColuna
+                || Boolean(item) && !motivoParaRecusar(item, coluna.dados.id) && this.podeReceber(coluna.dados.id);
 
             if (!eAlvo) {
                 coluna.fundo.setStrokeStyle(1, COR_HEX.contornoSuave);

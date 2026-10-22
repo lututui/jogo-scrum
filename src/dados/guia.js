@@ -42,8 +42,9 @@ export const GUIA = [
     {
         titulo: "O quadro e os três medidores",
         texto: "O quadro Kanban na parede mostra em que etapa cada item está. "
-            + "Você pode mover os cartões entre as colunas, respeitando o "
-            + "limite de cada uma.\n\n"
+            + "Os cartões andam uma coluna por vez, para a frente, e cada "
+            + "coluna tem um limite. Só a revisão volta, quando algo precisa "
+            + "ser refeito.\n\n"
             + "No alto da tela, três medidores mostram como a sprint vai: "
             + "valor entregue, confiança do cliente e saúde do time. Cada "
             + "decisão mexe em um ou mais deles, para cima quando segue o "
