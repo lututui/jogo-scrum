@@ -79,6 +79,9 @@ export class CenaEventoContextual extends Phaser.Scene {
             color: COR.alerta
         }).setOrigin(1, 0).setDepth(702);
 
+        // Faixa própria no rodapé, para a ajuda do escritório não aparecer por baixo
+        this.add.rectangle(0, 514, 960, 26, COR_HEX.fundo).setOrigin(0, 0).setDepth(701);
+
         this.ajuda = this.add.text(24, 522, "", {
             fontFamily: FONTE,
             fontSize: "11px",

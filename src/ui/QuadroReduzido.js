@@ -38,12 +38,18 @@ export class QuadroReduzido {
         const antes = visiveis(mudanca.antes);
         const depois = visiveis(mudanca.depois);
         this.alterados = idsAlterados(antes, depois);
+        this.parados = mudanca.parados || [];
 
         this.montarMoldura(mudanca.texto);
         this.posicoesDepois = posicoes(depois);
         this.montarCartoes(antes, depois);
         this.contadores = this.montarColunas(antes);
         this.animar(depois);
+
+        // Nada andou: o quadro já abre no fim, com o cartão parado em destaque
+        if (this.alterados.length === 0) {
+            this.finalizar();
+        }
     }
 
     montarMoldura(texto) {
@@ -177,6 +183,12 @@ export class QuadroReduzido {
             const cartao = this.cartoes[id];
             if (cartao) {
                 cartao.fundo.setStrokeStyle(2, cartao.bloqueado ? COR_HEX.alerta : COR_HEX.destaque);
+            }
+        }, this);
+        this.parados.forEach(function (id) {
+            const cartao = this.cartoes[id];
+            if (cartao) {
+                cartao.fundo.setStrokeStyle(2, COR_HEX.alerta);
             }
         }, this);
         this.atualizarContadores(this.contadores, this.depois);

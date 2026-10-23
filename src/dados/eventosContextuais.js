@@ -159,6 +159,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "ruim",
                 conceito: "Impedimento",
                 medidores: ["valor"],
+                quadro: [{cartao: "pb02", continuaParado: true}],
                 feedback: "O contorno virou retrabalho: o caso do aluno "
                     + "transferido só aparece com dado real.",
                 principio: "Contornar impedimento adia o custo e o aumenta."
@@ -282,6 +283,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "media",
                 conceito: "Limite de WIP",
                 medidores: ["valor"],
+                quadro: [{cartao: "pb03", continuaParado: true}],
                 feedback: "Ninguém ficou parado e nada foi concluído. O quadro "
                     + "cresceu para os lados.",
                 principio: "Limitar trabalho em progresso existe para o fluxo terminar, não para ninguém parar."
@@ -292,6 +294,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "ruim",
                 conceito: "Meta da sprint",
                 medidores: ["saude", "valor"],
+                quadro: [{cartao: "pb03", continuaParado: true}],
                 feedback: "Dois dias de trabalho dela ficaram parados por uma "
                     + "hora do seu.",
                 principio: "A meta é compromisso coletivo, não soma de tarefas individuais."

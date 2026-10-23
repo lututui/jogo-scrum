@@ -54,6 +54,11 @@ export function entregaDaSprint(registry, cadeira) {
         prontos: plano.length - faltaram.length,
         faltaram: faltaram.map(function (item) {
             return {id: item.id, titulo: item.titulo, coluna: item.coluna, parado: Boolean(item.bloqueado)};
+        }),
+        foraDaMeta: plano.filter(function (item) {
+            return item.alinhado === false;
+        }).map(function (item) {
+            return item.titulo;
         })
     };
 }
@@ -63,14 +68,21 @@ export function descreverEntrega(entrega) {
         return "O Sprint Backlog ficou vazio: não há item planejado para mostrar.";
     }
 
-    const texto = entrega.prontos + " de " + entrega.total + " itens do Sprint Backlog prontos.";
-    if (entrega.faltaram.length === 0) {
-        return texto;
+    let texto = entrega.prontos + " de " + entrega.total + " itens do Sprint Backlog prontos.";
+    if (entrega.faltaram.length > 0) {
+        texto += " Ficou de fora: " + entrega.faltaram.map(function (item) {
+            return item.titulo + (item.parado ? ", parado em " : ", em ") + tituloDaColuna(item.coluna);
+        }).join("; ") + ".";
     }
 
-    return texto + " Ficou de fora: " + entrega.faltaram.map(function (item) {
-        return item.titulo + (item.parado ? ", parado em " : ", em ") + tituloDaColuna(item.coluna);
-    }).join("; ") + ".";
+    // Pronto não quer dizer útil: o mentor diz o que não serve à meta
+    const fora = entrega.foraDaMeta || [];
+    if (fora.length === entrega.total) {
+        texto += (entrega.prontos > 0 ? " Mas" : " E") + " nenhum item do plano serve à meta de presença da turma.";
+    } else if (fora.length > 0) {
+        texto += " Fora da meta de presença da turma: " + fora.join("; ") + ".";
+    }
+    return texto;
 }
 
 // Usado pelo Planning, que enche a coluna A FAZER, e pela Review, que devolve
@@ -107,6 +119,7 @@ function cartaoPlanejado(cadeira, item) {
         esforco: item.esforco,
         etiquetas: doJogador ? [ETIQUETA_DO_JOGADOR] : [],
         planejado: true,
+        alinhado: Boolean(item.alinhado),
         doJogador: doJogador,
         bloqueado: (item.bloqueadoEm || []).indexOf(cadeira) >= 0,
         travaNoFim: Boolean(item.travaNoFim)
@@ -128,7 +141,10 @@ function cartaoPlanejado(cadeira, item) {
 //   {noSprintBacklog, aumenta: n} o mesmo, no item do Sprint Backlog que
 //                             o time está fazendo
 //   {coluna: id, avancam: n}  até n cartões do time saem da coluna
-// Devolve a mudança, {antes, depois, texto}, ou null se nada mudou
+//   {cartao: id, continuaParado} nada muda, mas o quadro mostra que o cartão
+//                             segue parado: é o custo de não destravar
+// Devolve a mudança, {antes, depois, texto, parados}, ou null se não há o
+// que mostrar
 
 export function aplicarNoQuadro(registry, cadeira, efeitos) {
     if (!efeitos || efeitos.length === 0) {
@@ -143,11 +159,27 @@ export function aplicarNoQuadro(registry, cadeira, efeitos) {
         aplicarEfeito(itens, efeito, cadeira, quando);
     });
 
+    const parados = efeitos.filter(function (efeito) {
+        const item = efeito.continuaParado && buscar(itens, efeito.cartao);
+        return item && item.bloqueado;
+    }).map(function (efeito) {
+        return buscar(itens, efeito.cartao);
+    });
+
     if (JSON.stringify(itens) === JSON.stringify(antes)) {
-        return null;
+        return parados.length === 0 ? null : {
+            antes: antes,
+            depois: itens,
+            parados: parados.map(function (item) {
+                return item.id;
+            }),
+            texto: parados.map(function (item) {
+                return item.titulo + " continua parado";
+            }).join("; ") + "."
+        };
     }
     salvarItensDoQuadro(registry, cadeira, itens);
-    return {antes: antes, depois: itens, texto: descreverMudanca(antes, itens)};
+    return {antes: antes, depois: itens, parados: [], texto: descreverMudanca(antes, itens)};
 }
 
 // Uma frase por cartão que mudou

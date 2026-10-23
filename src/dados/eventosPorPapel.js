@@ -384,6 +384,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             detalhe: "Pressão no lugar de remoção",
                             avaliacao: "ruim",
                             conceito: "Impedimento",
+                            quadro: [{cartao: "pb02", continuaParado: true}],
                             feedback: "Ninguém contorna falta de dado com esforço. "
                                 + "A cobrança só acrescentou desconforto ao bloqueio.",
                             principio: "Cobrança não remove impedimento; remove transparência."

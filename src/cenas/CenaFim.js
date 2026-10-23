@@ -12,7 +12,7 @@ import {nomeDaCadeira, personalizar} from "../dados/texto.js";
 const MARGEM = 24;
 const TOPO_DA_TABELA = 150;
 const ALTURA_DA_LINHA = 30;
-const COLUNAS_DA_TABELA = [MARGEM, 250, 360, 640];
+const COLUNAS_DA_TABELA = [MARGEM, 180, 260, 360, 660];
 
 export class CenaFim extends Phaser.Scene {
 
@@ -64,7 +64,7 @@ export class CenaFim extends Phaser.Scene {
 
     // Uma linha por cadeira, com a última sprint fechada nela
     montarTabela() {
-        const titulos = ["CADEIRA", "PONTOS", "DECISÕES", "MEDIDORES"];
+        const titulos = ["CADEIRA", "PONTOS", "ENTREGA", "DECISÕES", "MEDIDORES"];
 
         titulos.forEach(function (titulo, indice) {
             this.add.text(COLUNAS_DA_TABELA[indice], TOPO_DA_TABELA, titulo, {
@@ -83,6 +83,7 @@ export class CenaFim extends Phaser.Scene {
             const celulas = [
                 nomeDaCadeira(this.registry, cadeira),
                 sprint ? String(sprint.pontos) : "—",
+                sprint && sprint.entrega ? sprint.entrega.prontos + " de " + sprint.entrega.total : "—",
                 sprint ? this.textoDasDecisoes(sprint.decisoes) : "—",
                 sprint ? this.textoDosMedidores(sprint.medidores) : "—"
             ];
