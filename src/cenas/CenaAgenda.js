@@ -10,7 +10,7 @@
 
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
-import {eventosConcluidos} from "../dados/progresso.js";
+import {compromissoDaVez, eventosConcluidos} from "../dados/progresso.js";
 import {EVENTOS} from "../dados/eventos.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
@@ -74,13 +74,10 @@ export class CenaAgenda extends Phaser.Scene {
         return chaveDoEvento === this.proximoEvento() ? "agora" : "depois";
     }
 
+    // Antes de um evento contextual do calendário, nenhuma reunião é a da vez
     proximoEvento() {
-        const feitos = eventosConcluidos(this.registry, this.cadeira());
-        const pendente = EVENTOS.find(function (evento) {
-            return feitos.indexOf(evento.chave) < 0;
-        });
-
-        return pendente ? pendente.chave : null;
+        const vez = compromissoDaVez(this.registry, this.cadeira());
+        return vez && vez.reuniao ? vez.chave : null;
     }
 
     rotuloDaSituacao(situacao, chaveDoEvento) {
@@ -109,7 +106,7 @@ export class CenaAgenda extends Phaser.Scene {
                 return {
                     id: evento.chave,
                     titulo: evento.nome,
-                    detalhe: evento.resumo,
+                    detalhe: "dia " + evento.dia + " · " + evento.resumo,
                     sufixo: cena.rotuloDaSituacao(situacao, evento.chave),
                     chave: evento.chave,
                     situacao: situacao

@@ -18,11 +18,14 @@ export class CenaSprintPlanning extends CenaReuniao {
         super(SPRINT_PLANNING.chave, SPRINT_PLANNING);
     }
 
+    // Quem só participa também sai com Sprint Backlog: o plano do time, posto
+    // no quadro quando a reunião começa, para as decisões dela mexerem nele
     iniciar() {
         this.meta = null;
         this.opcoesDoBacklog = null;
 
         if (!this.conduzOEvento()) {
+            planejarItens(this.registry, this.cadeira(), PLANO_DO_TIME);
             this.participarDoEvento();
             return;
         }
@@ -31,12 +34,6 @@ export class CenaSprintPlanning extends CenaReuniao {
         this.falarAbertura(function () {
             cena.etapaDaMeta();
         });
-    }
-
-    // Quem só participa também sai com Sprint Backlog: o plano do time
-    encerrarComoParticipante() {
-        planejarItens(this.registry, this.cadeira(), PLANO_DO_TIME);
-        super.encerrarComoParticipante();
     }
 
     // -------------------------------------------------------------

@@ -603,12 +603,9 @@ export class CenaReuniao extends Phaser.Scene {
         this.scene.resume("CenaEscritorio");
     }
 
-    // Fim natural da reunião. A marca avisa o escritório de que uma reunião
-    // acabou de terminar: é entre as reuniões que os eventos contextuais
-    // acontecem
+    // Fim natural da reunião: o calendário segue para o próximo compromisso
     sair() {
         registrarEventoConcluido(this.registry, this.cadeira(), this.evento.chave);
-        this.registry.set("saiuDeReuniao", true);
         this.scene.stop();
         this.scene.resume("CenaEscritorio");
     }

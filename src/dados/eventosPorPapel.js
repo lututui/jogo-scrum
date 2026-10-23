@@ -187,6 +187,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             detalhe: "Problema adiado",
                             avaliacao: "ruim",
                             conceito: "Sprint Backlog",
+                            quadro: [{cartao: "pb01", aumenta: 2}],
                             feedback: "O plano fechou com uma ordem impossível. O "
                                 + "bloqueio vai aparecer no meio da semana como surpresa.",
                             principio: "O Sprint Backlog é o plano do time, e plano com dependência oculta não se cumpre."
@@ -196,6 +197,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             detalhe: "Aposta sem combinar",
                             avaliacao: "media",
                             conceito: "Transparência",
+                            quadro: [{cartao: "pb01", aumenta: 1}],
                             feedback: "Pode dar certo. Se não der, duas pessoas "
                                 + "descobrem juntas na quinta-feira.",
                             principio: "Suposição não declarada é risco que ninguém está acompanhando."
@@ -255,6 +257,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             detalhe: "Percentual sem conteúdo",
                             avaliacao: "ruim",
                             conceito: "Transparência",
+                            quadro: [{cartao: "pb01", aumenta: 2}],
                             feedback: "Ninguém sabe o que falta, então ninguém pode "
                                 + "ajudar. Amanhã o número vai ser noventa e cinco.",
                             principio: "Percentual não é informação acionável; o que falta, é."
@@ -264,6 +267,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             detalhe: "Problema guardado",
                             avaliacao: "media",
                             conceito: "Meta da sprint",
+                            quadro: [{cartao: "pb01", aumenta: 1}],
                             feedback: "Você pode até resolver. O time descobriu o "
                                 + "risco junto com o atraso, e não antes dele.",
                             principio: "Autonomia não é isolamento: a meta é do time inteiro."
@@ -291,6 +295,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             detalhe: "Cada um com o seu",
                             avaliacao: "ruim",
                             conceito: "Meta da sprint",
+                            quadro: [{noSprintBacklog: true, aumenta: 2}],
                             feedback: "Sexta chegou com quatro itens pela metade e a "
                                 + "meta sem fechar. O resultado é do time, e ele não fechou.",
                             principio: "A meta é compromisso coletivo, não soma de tarefas individuais."
@@ -351,6 +356,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             detalhe: "Excesso de zelo",
                             avaliacao: "media",
                             conceito: "Product Owner",
+                            quadro: [{noSprintBacklog: true, aumenta: 1}],
                             feedback: "O time ficou bloqueado meio dia por uma "
                                 + "resposta de dez segundos.",
                             principio: "Proteger o ritual não vale bloquear o trabalho."
@@ -368,7 +374,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             titulo: "Anotar e ir falar com a escola depois da reunião",
                             detalhe: "O impedimento é de fora do time",
                             avaliacao: "boa",
-                            quadro: [{cartao: "it02", desbloqueia: true}],
+                            quadro: [{cartao: "pb02", desbloqueia: true}],
                             feedback: "O acesso é conversa com a secretaria, e essa "
                                 + "porta é a sua. O time seguiu com a Daily.",
                             principio: "Impedimento externo se resolve com quem tem a relação, fora da reunião."
@@ -387,6 +393,7 @@ export const PAPEIS_DOS_EVENTOS = {
                             detalhe: "Papel levado ao pé da letra",
                             avaliacao: "media",
                             conceito: "Impedimento",
+                            quadro: [{cartao: "pb02", desbloqueiaNoDia: 6}],
                             feedback: "É o papel dele, sim, e a diretora atende você. "
                                 + "A regra ficou acima do resultado.",
                             principio: "Papéis organizam responsabilidade; não impedem ajuda."

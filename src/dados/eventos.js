@@ -1,12 +1,18 @@
 // Conteúdo dos eventos do Scrum
 //
 // Cada opção carrega o princípio que o feedback deve nomear (RF10), e cada
-// evento abre declarando seu objetivo de aprendizagem (RF08).
+// evento abre declarando seu objetivo de aprendizagem (RF08). O "dia" de cada
+// reunião é o lugar dela no calendário da sprint.
 
 export const CAPACIDADE_DA_SPRINT = 8;
 
 // Itens candidatos, com esforço estimado pelo time. "alinhado" marca os que
-// servem à meta proposta; é o que o feedback usa para avaliar a escolha
+// servem à meta proposta; é o que o feedback usa para avaliar a escolha.
+// Dois deles travam no caminho, e são as decisões que destravam: o login
+// precisa da base de matrículas da escola, que a Bia ainda não acessa
+// ("bloqueadoEm", nas cadeiras que podem resolver isso), e o acento depende
+// de código de outra pessoa, que a Lu espera quando termina a parte dela
+// ("travaNoFim")
 export const PRODUTO_BACKLOG = [
     {
         id: "pb01",
@@ -20,14 +26,16 @@ export const PRODUTO_BACKLOG = [
         tipo: "feature",
         titulo: "Login do professor",
         esforco: 2,
-        alinhado: true
+        alinhado: true,
+        bloqueadoEm: ["po", "sm"]
     },
     {
         id: "pb03",
         tipo: "bug",
         titulo: "Acento quebrado no nome do aluno",
         esforco: 1,
-        alinhado: true
+        alinhado: true,
+        travaNoFim: true
     },
     {
         id: "pb04",
@@ -63,6 +71,7 @@ export const ITEM_DO_JOGADOR = {dev: "pb01"};
 
 export const SPRINT_PLANNING = {
     chave: "CenaSprintPlanning",
+    dia: 1,
     nome: "SPRINT PLANNING",
     resumo: "Definir a meta e montar o Sprint Backlog",
     objetivo: "Definir com o time uma meta que restrinja o escopo e um Sprint "
@@ -146,6 +155,7 @@ export const SPRINT_PLANNING = {
 
 export const DAILY_SCRUM = {
     chave: "CenaDailyScrum",
+    dia: 2,
     nome: "DAILY SCRUM",
     resumo: "Quinze minutos para sincronizar o time",
     objetivo: "Fazer a Daily servir aos desenvolvedores em quinze minutos e "
@@ -197,7 +207,7 @@ export const DAILY_SCRUM = {
                     custo: 3,
                     avaliacao: "boa",
                     registraImpedimento: true,
-                    quadro: [{cartao: "it02", mostraBloqueio: true}],
+                    quadro: [{cartao: "pb02", mostraBloqueio: true}],
                     feedback: "O bloqueio virou impedimento com nome: falta acesso "
                         + "à base de matrículas. Agora dá para agir sobre ele.",
                     principio: "Impedimento não declarado é impedimento que ninguém remove."
@@ -269,6 +279,7 @@ export const DAILY_SCRUM = {
 
 export const SPRINT_REVIEW = {
     chave: "CenaSprintReview",
+    dia: 9,
     nome: "SPRINT REVIEW",
     resumo: "Mostrar o incremento e ouvir a escola",
     objetivo: "Apresentar o incremento como inspeção, e não como venda, e sair "
@@ -317,7 +328,8 @@ export const SPRINT_REVIEW = {
     feedbackDoUsuario: {
         tipo: "feature",
         titulo: "Reduzir cliques para marcar falta",
-        etiquetas: ["UI"]
+        etiquetas: ["UI"],
+        esforco: 2
     },
     fechamento: {
         comItens: {
@@ -342,6 +354,7 @@ export const SPRINT_REVIEW = {
 
 export const SPRINT_RETROSPECTIVE = {
     chave: "CenaSprintRetrospective",
+    dia: 10,
     nome: "SPRINT RETROSPECTIVE",
     resumo: "Transformar o que o time viu em uma ação",
     objetivo: "Transformar o que o time observou em uma ação verificável, com "

@@ -3,6 +3,7 @@
 // Cada cartão é um contêiner com faixa de tipo, rótulo, título e etiquetas.
 // A faixa colorida à esquerda é o que identifica o tipo
 
+import {esforcoDe} from "../dados/quadro.js";
 import {COR, COR_HEX, FONTE, TIPO_DE_ITEM} from "../dados/tema.js";
 
 export const LARGURA_CARTAO = 206;
@@ -31,7 +32,7 @@ export class CartaoKanban {
         this.faixa = cena.add.rectangle(0, 0, LARGURA_DA_FAIXA, ALTURA_CARTAO, this.tipo.corHex);
         this.faixa.setOrigin(0, 0);
 
-        this.rotuloTipo = cena.add.text(MARGEM_INTERNA, 8, this.tipo.rotulo, {
+        this.rotuloTipo = cena.add.text(MARGEM_INTERNA, 8, this.tipo.rotulo + " · " + esforcoDe(this.item) + " pt", {
             fontFamily: FONTE,
             fontSize: "10px",
             color: this.tipo.cor
@@ -47,6 +48,7 @@ export class CartaoKanban {
 
         this.container.add([this.fundo, this.faixa, this.rotuloTipo, this.titulo]);
         this.montarEtiquetas();
+        this.montarAndamento();
 
         this.container.setSize(LARGURA_CARTAO, ALTURA_CARTAO);
 
@@ -67,6 +69,22 @@ export class CartaoKanban {
         this.container.on("pointerdown", function () {
             cena.selecionarCartao(this);
         }, this);
+    }
+
+    // Em EM PROGRESSO, uma barra no pé do cartão mostra quanto do esforço já
+    // foi feito
+    montarAndamento() {
+        if (this.item.coluna !== "progresso") {
+            return;
+        }
+
+        const largura = LARGURA_CARTAO - LARGURA_DA_FAIXA;
+        const feito = Math.min((this.item.feito || 0) / esforcoDe(this.item), 1);
+        const trilho = this.cena.add.rectangle(LARGURA_DA_FAIXA, ALTURA_CARTAO - 3, largura, 3, COR_HEX.sombra);
+        const barra = this.cena.add.rectangle(LARGURA_DA_FAIXA, ALTURA_CARTAO - 3, largura * feito, 3, this.tipo.corHex);
+        trilho.setOrigin(0, 0);
+        barra.setOrigin(0, 0);
+        this.container.add([trilho, barra]);
     }
 
     montarEtiquetas() {

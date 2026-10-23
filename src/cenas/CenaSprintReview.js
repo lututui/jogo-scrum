@@ -6,7 +6,14 @@
 // O que a escola pede volta ao quadro como item novo.
 
 import {SPRINT_REVIEW} from "../dados/eventos.js";
-import {acrescentarItem, lerItensDoQuadro} from "../dados/estadoDoQuadro.js";
+import {
+    acrescentarItem,
+    descreverEntrega,
+    entrouNestaSprint,
+    entregaDaSprint,
+    lerItensDoQuadro
+} from "../dados/estadoDoQuadro.js";
+import {registrarEntrega} from "../dados/progresso.js";
 import {CenaReuniao} from "./CenaReuniao.js";
 
 const COLUNA_CONCLUIDO = "concluido";
@@ -19,18 +26,23 @@ export class CenaSprintReview extends CenaReuniao {
         super(SPRINT_REVIEW.chave, SPRINT_REVIEW);
     }
 
+    // Antes de tudo, o mentor lê no quadro o que ficou pronto
     iniciar() {
         this.formato = null;
         this.opcoesDeItens = null;
 
-        if (!this.conduzOEvento()) {
-            this.participarDoEvento();
-            return;
-        }
+        const entrega = entregaDaSprint(this.registry, this.cadeira());
+        registrarEntrega(this.registry, this.cadeira(), entrega);
 
         const cena = this;
-        this.falarAbertura(function () {
-            cena.etapaDoFormato();
+        this.falar(this.chaveDoMentor(), "Antes de começar, o quadro: " + descreverEntrega(entrega), function () {
+            if (!cena.conduzOEvento()) {
+                cena.participarDoEvento();
+                return;
+            }
+            cena.falarAbertura(function () {
+                cena.etapaDoFormato();
+            });
         });
     }
 
@@ -58,12 +70,15 @@ export class CenaSprintReview extends CenaReuniao {
     }
 
     // Os candidatos incluem o que está em revisão, que ainda não está pronto.
-    // O que já estava pronto antes da sprint não entra; sem candidatos, a
-    // reunião fecha sem nada para mostrar
+    // Só entra o trabalho desta sprint: o que já estava no quadro quando ela
+    // começou fica de fora. Sem candidatos, a reunião fecha sem nada para
+    // mostrar
     abrirItens() {
-        const itens = lerItensDoQuadro(this.registry, this.cadeira()).filter(function (item) {
+        const registry = this.registry;
+        const cadeira = this.cadeira();
+        const itens = lerItensDoQuadro(registry, cadeira).filter(function (item) {
             const naColuna = item.coluna === COLUNA_CONCLUIDO || item.coluna === COLUNA_EM_REVISAO;
-            return naColuna && !item.sprintAnterior;
+            return naColuna && entrouNestaSprint(registry, cadeira, item);
         });
 
         this.opcoesDeItens = itens.map(function (item) {

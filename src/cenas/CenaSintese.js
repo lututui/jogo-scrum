@@ -86,8 +86,13 @@ export class CenaSintese extends Phaser.Scene {
         const decisoes = this.sprint.decisoes;
         const total = decisoes.boa + decisoes.media + decisoes.ruim;
 
+        const entrega = this.sprint.entrega;
+        const naReview = entrega && entrega.total > 0
+            ? " Na Review, o Sprint Backlog tinha " + entrega.prontos + " de " + entrega.total + " itens prontos."
+            : "";
+
         return "Você tomou " + total + " decisões nesta sprint e somou "
-            + this.sprint.pontos + " pontos.";
+            + this.sprint.pontos + " pontos." + naReview;
     }
 
     // ---------------------------------------------------------

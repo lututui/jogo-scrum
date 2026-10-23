@@ -12,6 +12,7 @@
 // mudança, sem servidor nem cadastro. O perfil do jogador (dados/perfil.js)
 // também mora aqui, para que Nova partida o apague junto.
 
+import {proximoCompromisso} from "./calendario.js";
 import {ORDEM_DAS_CADEIRAS} from "./cadeiras.js";
 import {CONQUISTAS} from "./conquistas.js";
 import {ITENS_INICIAIS} from "./quadro.js";
@@ -55,7 +56,8 @@ function sprintVazia() {
         quadro: quadroInicial(),
         movimentosNoQuadro: 0,
         diaDaVisitaAoQuadro: null,
-        diaDoTime: 1
+        diaDoTime: 1,
+        entrega: null
     };
 }
 
@@ -169,12 +171,16 @@ function sprintDaCadeira(registry, cadeira) {
     return lerProgresso(registry).sprints[cadeira];
 }
 
-// O dia avança a cada reunião e a cada evento contextual vivido
-export function diaDaSprint(registry, cadeira) {
+// A reunião ou o evento contextual que vem agora; null com a sprint encerrada
+export function compromissoDaVez(registry, cadeira) {
     const sprint = sprintDaCadeira(registry, cadeira);
-    const vividos = sprint.eventosConcluidos.length + sprint.contextuaisResolvidos.length;
+    return proximoCompromisso(cadeira, sprint.eventosConcluidos, sprint.contextuaisResolvidos);
+}
 
-    return Math.min(1 + vividos, DIAS_DA_SPRINT);
+// Hoje é o dia do próximo compromisso; com a sprint encerrada, o último dia
+export function diaDaSprint(registry, cadeira) {
+    const proximo = compromissoDaVez(registry, cadeira);
+    return proximo ? proximo.dia : DIAS_DA_SPRINT;
 }
 
 // ---------------------------------------------------------
@@ -218,6 +224,14 @@ export function registrarMovimentoNoQuadro(registry, cadeira) {
     const progresso = lerProgresso(registry);
     const sprint = progresso.sprints[cadeira];
     sprint.movimentosNoQuadro = (sprint.movimentosNoQuadro || 0) + 1;
+
+    return salvarProgresso(registry, progresso);
+}
+
+// O Sprint Backlog como estava quando a Review começou
+export function registrarEntrega(registry, cadeira, entrega) {
+    const progresso = lerProgresso(registry);
+    progresso.sprints[cadeira].entrega = entrega;
 
     return salvarProgresso(registry, progresso);
 }
@@ -345,7 +359,8 @@ function guardarUltimaSprint(progresso, cadeira, encerrada) {
     progresso.ultimasSprints[cadeira] = {
         pontos: encerrada.pontos,
         decisoes: encerrada.decisoes,
-        medidores: encerrada.medidores
+        medidores: encerrada.medidores,
+        entrega: encerrada.entrega || null
     };
 }
 

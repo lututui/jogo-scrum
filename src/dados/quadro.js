@@ -40,11 +40,17 @@ export function motivoParaRecusar(item, destino) {
 
 export const ETIQUETA_DE_BLOQUEIO = "BLOQUEADO";
 
-// Itens com sprintAnterior já estavam prontos antes desta sprint: ficam no
-// quadro como histórico, mas não podem ser mostrados na Review.
-// Dois cartões começam parados sem que o quadro diga: o da Bia espera o
-// acesso à base de matrículas, e o da Lu espera código de outra pessoa.
-// Quem destrava são as decisões
+// Quanto o time trabalha por dia em EM PROGRESSO, e quanto cabe num cartão só
+export const RITMO_DO_TIME = {pontosPorDia: 2, pontosPorCartao: 1};
+
+// Pontos de um cartão; o que veio sem esforço conta como 1
+export function esforcoDe(item) {
+    return item.esforco || 1;
+}
+
+// Itens com sprintAnterior já estavam prontos antes desta sprint e ficam no
+// quadro como histórico. Nenhum item daqui entra na Review: não são trabalho
+// desta sprint.
 export const ITENS_INICIAIS = [
     {
         id: "it02",
@@ -52,14 +58,15 @@ export const ITENS_INICIAIS = [
         titulo: "Listar turmas do professor",
         etiquetas: ["API"],
         coluna: "afazer",
-        bloqueado: true
+        esforco: 2
     },
     {
         id: "it04",
         tipo: "spike",
         titulo: "Formato do arquivo do censo",
         etiquetas: [],
-        coluna: "afazer"
+        coluna: "afazer",
+        esforco: 1
     },
     {
         id: "it05",
@@ -67,35 +74,44 @@ export const ITENS_INICIAIS = [
         titulo: "Marcar presença da turma",
         etiquetas: ["UI"],
         coluna: "progresso",
-        bloqueado: true
+        esforco: 2,
+        feito: 1
     },
     {
         id: "it06",
         tipo: "feature",
         titulo: "Salvar chamada no servidor",
         etiquetas: ["API"],
-        coluna: "progresso"
+        coluna: "progresso",
+        esforco: 2,
+        feito: 1
     },
     {
         id: "it07",
         tipo: "chore",
         titulo: "Máscara de data no diário",
         etiquetas: [],
-        coluna: "progresso"
+        coluna: "progresso",
+        esforco: 1,
+        feito: 0
     },
     {
         id: "it08",
         tipo: "feature",
         titulo: "Relatório de frequência do mês",
         etiquetas: ["API"],
-        coluna: "progresso"
+        coluna: "progresso",
+        esforco: 3,
+        feito: 1
     },
     {
         id: "it09",
         tipo: "bug",
         titulo: "Presença some ao trocar de turma",
         etiquetas: ["URGENTE"],
-        coluna: "revisao"
+        coluna: "revisao",
+        esforco: 1,
+        feito: 1
     },
     {
         id: "it10",
@@ -103,6 +119,7 @@ export const ITENS_INICIAIS = [
         titulo: "Cadastro de turmas",
         etiquetas: ["SPRINT ANTERIOR"],
         coluna: "concluido",
+        esforco: 3,
         sprintAnterior: true
     },
     {
@@ -111,6 +128,7 @@ export const ITENS_INICIAIS = [
         titulo: "Padronizar mensagens de erro",
         etiquetas: ["SPRINT ANTERIOR"],
         coluna: "concluido",
+        esforco: 1,
         sprintAnterior: true
     }
 ];

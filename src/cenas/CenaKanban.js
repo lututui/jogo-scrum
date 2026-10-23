@@ -6,7 +6,12 @@
 // Coluna com mais cartões do que cabem rola.
 
 import {COLUNAS, motivoParaRecusar} from "../dados/quadro.js";
-import {ETIQUETA_DO_JOGADOR, lerItensDoQuadro, salvarItensDoQuadro} from "../dados/estadoDoQuadro.js";
+import {
+    ETIQUETA_DO_JOGADOR,
+    lerItensDoQuadro,
+    motivoDoTrabalho,
+    salvarItensDoQuadro
+} from "../dados/estadoDoQuadro.js";
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {
     DIAS_DA_SPRINT,
@@ -306,8 +311,12 @@ export class CenaKanban extends Phaser.Scene {
         this.posicionarDica(selecionado);
     }
 
+    // A dica de mover só aparece no cartão que o jogador pode mover
     posicionarDica(cartao) {
-        if (!cartao || this.arrastando || this.soLeitura) {
+        const deOutraPessoa = cartao && !cartao.item.doJogador && this.itens.some(function (item) {
+            return item.doJogador;
+        });
+        if (!cartao || this.arrastando || this.soLeitura || deOutraPessoa) {
             this.dica.setVisible(false);
             return;
         }
@@ -416,8 +425,8 @@ export class CenaKanban extends Phaser.Scene {
         return true;
     }
 
-    // Com um cartão do jogador no quadro, só ele anda pela mão do jogador, e
-    // uma coluna por dia
+    // Com um cartão do jogador no quadro, só ele anda pela mão do jogador,
+    // uma coluna por dia e só com o trabalho feito
     motivoDoMovimento(item, idColuna) {
         const fluxo = motivoParaRecusar(item, idColuna);
         if (fluxo || item.coluna === idColuna) {
@@ -433,7 +442,7 @@ export class CenaKanban extends Phaser.Scene {
         if (item.doJogador && item.diaDoUltimoPasso === diaDaSprint(this.registry, this.cadeira)) {
             return "o seu cartão já andou hoje; amanhã ele pode seguir";
         }
-        return null;
+        return item.doJogador ? motivoDoTrabalho(item, idColuna) : null;
     }
 
     reordenar(item, posicao) {

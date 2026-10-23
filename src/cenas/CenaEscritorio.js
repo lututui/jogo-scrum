@@ -4,9 +4,10 @@ import {ELENCO, MESAS, OBJETOS} from "../dados/elenco.js";
 import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
 import {EVENTOS, SPRINT_REVIEW} from "../dados/eventos.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
-import {proximoContextual} from "../dados/eventosContextuais.js";
+import {proximoPassoDoJogador} from "../dados/estadoDoQuadro.js";
 import {
     DIAS_DA_SPRINT,
+    compromissoDaVez,
     contextuaisResolvidos,
     diaDaSprint,
     eventosConcluidos,
@@ -20,6 +21,10 @@ import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {CaixaDialogo} from "../ui/CaixaDialogo.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
+// Um respiro no escritório antes do evento contextual, para o dia novo
+// aparecer no painel
+const ESPERA_DO_CONTEXTUAL = 500;
+
 export class CenaEscritorio extends Phaser.Scene {
 
     constructor() {
@@ -31,6 +36,7 @@ export class CenaEscritorio extends Phaser.Scene {
     create() {
         this.cadeiraAtual = this.registry.get("cadeira") || "po";
         this.emDialogo = false;
+        this.contextualAgendado = false;
         this.interativos = [];
 
         this.criarAmbiente();
@@ -287,41 +293,37 @@ export class CenaEscritorio extends Phaser.Scene {
     // ---------------------------------------------------------
     // andamento da sprint
 
-    // Depois de uma reunião vem o que acontece entre elas; quando não sobra
-    // reunião nem evento contextual, a sprint daquela cadeira fecha
+    // O calendário diz o que vem agora: um evento contextual abre sozinho,
+    // uma reunião espera o jogador ir ao calendário. Sem compromisso, a
+    // sprint daquela cadeira fecha
     seguirASprint() {
         this.atualizarPainelDaSprint();
-
-        const saiuDeReuniao = this.registry.get("saiuDeReuniao");
-        this.registry.set("saiuDeReuniao", false);
 
         if (this.sprintTerminou()) {
             this.abrirSintese();
             return;
         }
 
-        if (saiuDeReuniao) {
-            this.abrirContextualPendente();
+        if (this.contextualPendente() && !this.contextualAgendado) {
+            this.contextualAgendado = true;
+            this.time.delayedCall(ESPERA_DO_CONTEXTUAL, this.abrirContextualPendente, [], this);
         }
     }
 
     contextualPendente() {
-        return proximoContextual(
-            this.cadeiraAtual,
-            contextuaisResolvidos(this.registry, this.cadeiraAtual)
-        );
+        const vez = compromissoDaVez(this.registry, this.cadeiraAtual);
+        return vez && !vez.reuniao ? vez.evento : null;
     }
 
     sprintTerminou() {
-        const reunioes = eventosConcluidos(this.registry, this.cadeiraAtual);
-
-        return reunioes.length >= EVENTOS.length && !this.contextualPendente();
+        return !compromissoDaVez(this.registry, this.cadeiraAtual);
     }
 
     abrirContextualPendente() {
+        this.contextualAgendado = false;
         const evento = this.contextualPendente();
 
-        if (!evento) {
+        if (!evento || !this.scene.isActive()) {
             return;
         }
 
@@ -350,7 +352,13 @@ export class CenaEscritorio extends Phaser.Scene {
         this.textoAjuda.setText(this.linhaDeAjuda());
     }
 
+    // Na cadeira de Dev, avisa quando o cartão do jogador pode andar; nas
+    // outras, lembra o PO de olhar o quadro antes da Review
     dicaDoQuadro() {
+        if (proximoPassoDoJogador(this.registry, this.cadeiraAtual)) {
+            return "dica: o seu cartão no quadro da parede pode andar hoje";
+        }
+
         const pendente = this.reuniaoPendente();
         const conduzReview = Boolean(
             (PAPEIS_DOS_EVENTOS[SPRINT_REVIEW.chave][this.cadeiraAtual] || {}).conduz

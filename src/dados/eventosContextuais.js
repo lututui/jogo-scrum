@@ -10,7 +10,17 @@ const BUG_EM_PRODUCAO = {
     id: "bug01",
     tipo: "bug",
     titulo: "Presença some em produção",
-    etiquetas: ["URGENTE"]
+    etiquetas: ["URGENTE"],
+    esforco: 2
+};
+
+const RELATORIO_DE_BOLETIM = {
+    id: "rel01",
+    tipo: "feature",
+    titulo: "Relatório para a reunião de pais",
+    etiquetas: ["FORA DO PLANO"],
+    esforco: 4,
+    passaNaFrente: true
 };
 
 const DEBITO_DO_ATALHO = {
@@ -18,6 +28,7 @@ const DEBITO_DO_ATALHO = {
     tipo: "chore",
     titulo: "Refazer o atalho do boletim",
     etiquetas: ["DÉBITO"],
+    esforco: 3,
     foraDaSprint: true
 };
 
@@ -49,6 +60,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "ruim",
                 conceito: "Sprint Backlog",
                 medidores: ["valor", "saude"],
+                quadro: [{entra: RELATORIO_DE_BOLETIM, coluna: "progresso"}],
                 feedback: "O time trocou de assunto no meio da semana e a meta "
                     + "ficou sem dono. O relatório saiu; a chamada, não.",
                 principio: "O Sprint Backlog é do time, e trocá-lo por fora quebra o compromisso."
@@ -125,7 +137,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "boa",
                 marca: "impedimento",
                 medidores: ["valor", "confianca"],
-                quadro: [{cartao: "it02", desbloqueia: true}],
+                quadro: [{cartao: "pb02", desbloqueia: true}],
                 feedback: "O medo era de responsabilidade sobre dados de menores. "
                     + "Um recorte anonimizado destravou tudo em meia hora.",
                 principio: "Remover impedimento começa por entender do que ele é feito."
@@ -136,7 +148,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "media",
                 conceito: "Impedimento",
                 medidores: ["valor", "confianca"],
-                quadro: [{cartao: "it02", desbloqueia: true}],
+                quadro: [{cartao: "pb02", desbloqueiaNoDia: 5}],
                 feedback: "O acesso saiu em um dia e a secretaria passou a "
                     + "responder por obrigação. Vocês ainda dependem dela.",
                 principio: "Impedimento removido por autoridade volta como atrito."
@@ -181,6 +193,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 avaliacao: "media",
                 conceito: "Transparência",
                 medidores: ["saude"],
+                quadro: [{cartao: "pb01", aumenta: 1}],
                 feedback: "O bug sumiu e o tempo gasto também. O plano da sprint "
                     + "não bate com o que aconteceu de verdade.",
                 principio: "Trabalho invisível impede o time de inspecionar o próprio plano."
@@ -258,7 +271,7 @@ export const EVENTOS_CONTEXTUAIS = [
                 detalhe: "A meta é do time",
                 avaliacao: "boa",
                 medidores: ["valor", "saude"],
-                quadro: [{cartao: "it05", desbloqueia: true, avanca: true}],
+                quadro: [{cartao: "pb03", desbloqueia: true, avanca: true}],
                 feedback: "Meia hora sua economizou um dia dela, e o item saiu da "
                     + "coluna do meio antes de sexta.",
                 principio: "Item parado não entrega valor; concluir vale mais que começar."
@@ -286,13 +299,6 @@ export const EVENTOS_CONTEXTUAIS = [
         ]
     }
 ];
-
-// O próximo evento contextual ainda não vivido naquela cadeira
-export function proximoContextual(cadeira, resolvidos) {
-    return contextuaisDaCadeira(cadeira).find(function (evento) {
-        return resolvidos.indexOf(evento.id) < 0;
-    }) || null;
-}
 
 // Os eventos que cabem numa cadeira, em ordem de dia
 export function contextuaisDaCadeira(cadeira) {
