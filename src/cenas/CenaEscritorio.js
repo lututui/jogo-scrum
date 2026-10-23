@@ -2,7 +2,7 @@
 
 import {ELENCO, MESAS, OBJETOS} from "../dados/elenco.js";
 import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
-import {EVENTOS, SPRINT_REVIEW} from "../dados/eventos.js";
+import {SPRINT_REVIEW} from "../dados/eventos.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {proximoPassoDoJogador} from "../dados/estadoDoQuadro.js";
 import {
@@ -21,10 +21,6 @@ import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {CaixaDialogo} from "../ui/CaixaDialogo.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
-// Um respiro no escritório antes do evento contextual, para o dia novo
-// aparecer no painel
-const ESPERA_DO_CONTEXTUAL = 500;
-
 export class CenaEscritorio extends Phaser.Scene {
 
     constructor() {
@@ -36,7 +32,6 @@ export class CenaEscritorio extends Phaser.Scene {
     create() {
         this.cadeiraAtual = this.registry.get("cadeira") || "po";
         this.emDialogo = false;
-        this.contextualAgendado = false;
         this.interativos = [];
 
         this.criarAmbiente();
@@ -293,47 +288,18 @@ export class CenaEscritorio extends Phaser.Scene {
     // ---------------------------------------------------------
     // andamento da sprint
 
-    // O calendário diz o que vem agora: um evento contextual abre sozinho,
-    // uma reunião espera o jogador ir ao calendário. Sem compromisso, a
-    // sprint daquela cadeira fecha
+    // O jogador segue a sprint pelo calendário, reunião ou imprevisto; sem
+    // compromisso, a sprint daquela cadeira fecha
     seguirASprint() {
         this.atualizarPainelDaSprint();
 
         if (this.sprintTerminou()) {
             this.abrirSintese();
-            return;
         }
-
-        if (this.contextualPendente() && !this.contextualAgendado) {
-            this.contextualAgendado = true;
-            this.time.delayedCall(ESPERA_DO_CONTEXTUAL, this.abrirContextualPendente, [], this);
-        }
-    }
-
-    contextualPendente() {
-        const vez = compromissoDaVez(this.registry, this.cadeiraAtual);
-        return vez && !vez.reuniao ? vez.evento : null;
     }
 
     sprintTerminou() {
         return !compromissoDaVez(this.registry, this.cadeiraAtual);
-    }
-
-    abrirContextualPendente() {
-        this.contextualAgendado = false;
-        const evento = this.contextualPendente();
-
-        if (!evento || !this.scene.isActive()) {
-            return;
-        }
-
-        this.rotulo.setVisible(false);
-        this.jogador.setVelocity(0, 0);
-        this.jogador.anims.play("jogador_" + this.cadeiraAtual + "_parado", true);
-
-        this.scene.pause();
-        this.scene.launch("CenaEventoContextual", {evento: evento});
-        this.scene.bringToTop("CenaEventoContextual");
     }
 
     abrirSintese() {
@@ -359,12 +325,12 @@ export class CenaEscritorio extends Phaser.Scene {
             return "dica: o seu cartão no quadro da parede pode andar hoje";
         }
 
-        const pendente = this.reuniaoPendente();
+        const vez = compromissoDaVez(this.registry, this.cadeiraAtual);
         const conduzReview = Boolean(
             (PAPEIS_DOS_EVENTOS[SPRINT_REVIEW.chave][this.cadeiraAtual] || {}).conduz
         );
 
-        if (!conduzReview || pendente !== SPRINT_REVIEW
+        if (!conduzReview || !vez || vez.chave !== SPRINT_REVIEW.chave
             || viuOQuadroHoje(this.registry, this.cadeiraAtual)) {
             return "";
         }
@@ -373,21 +339,13 @@ export class CenaEscritorio extends Phaser.Scene {
     }
 
     proximoPasso() {
-        const pendente = this.reuniaoPendente();
+        const vez = compromissoDaVez(this.registry, this.cadeiraAtual);
 
-        if (!pendente) {
+        if (!vez) {
             return "sprint encerrada";
         }
 
-        return "próximo: " + pendente.nome + " (calendário)";
-    }
-
-    reuniaoPendente() {
-        const feitos = eventosConcluidos(this.registry, this.cadeiraAtual);
-
-        return EVENTOS.find(function (evento) {
-            return feitos.indexOf(evento.chave) < 0;
-        }) || null;
+        return "próximo: " + (vez.reuniao ? vez.evento.nome : "um imprevisto") + " (calendário)";
     }
 
     linhaDeAjuda() {

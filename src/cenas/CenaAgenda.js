@@ -2,16 +2,18 @@
 //
 // Aberta pelo calendário da parede do escritório.
 //
-// A agenda abre a reunião da vez. As outras aparecem como já concluídas
-// ou como ainda não chegadas.
+// A agenda é o calendário da sprint: as reuniões e os imprevistos, dia a
+// dia. Ela abre o compromisso da vez, e é assim que o dia avança; os outros
+// aparecem como já vividos ou ainda não chegados. O imprevisto só mostra o
+// dia: o que é, o jogador descobre quando chega.
 //
 // Abrir qualquer uma, fora de ordem, é ferramenta de desenvolvimento e
 // depende da depuração ligada no servidor.
 
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
-import {compromissoDaVez, eventosConcluidos} from "../dados/progresso.js";
-import {EVENTOS} from "../dados/eventos.js";
+import {agendaDaCadeira} from "../dados/calendario.js";
+import {compromissoDaVez, contextuaisResolvidos, eventosConcluidos} from "../dados/progresso.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira} from "../dados/texto.js";
@@ -51,7 +53,7 @@ export class CenaAgenda extends Phaser.Scene {
         }).setOrigin(0.5, 0);
         this.add.text(940, 13, "ESC PARA VOLTAR", estilo).setOrigin(1, 0);
 
-        this.add.text(MARGEM, 72, "Os quatro eventos do Scrum, cada um com sua mecânica.", {
+        this.add.text(MARGEM, 72, "Os quatro eventos do Scrum e os imprevistos da sprint, dia a dia.", {
             fontFamily: FONTE,
             fontSize: "13px",
             color: COR.texto
@@ -59,39 +61,35 @@ export class CenaAgenda extends Phaser.Scene {
 
         marcarDepuracao(this, 936, 46);
 
-        this.add.text(MARGEM, 516, "setas escolhem, ENTER abre a reunião da vez, G abre o glossário", {
+        this.add.text(MARGEM, 516, "setas escolhem, ENTER abre o compromisso da vez, G abre o glossário", {
             fontFamily: FONTE,
             fontSize: "12px",
             color: COR.textoSecundario
         });
     }
 
-    situacao(chaveDoEvento) {
-        if (eventosConcluidos(this.registry, this.cadeira()).indexOf(chaveDoEvento) >= 0) {
+    situacao(compromisso) {
+        const vividos = compromisso.reuniao
+            ? eventosConcluidos(this.registry, this.cadeira())
+            : contextuaisResolvidos(this.registry, this.cadeira());
+        if (vividos.indexOf(compromisso.chave) >= 0) {
             return "concluida";
         }
 
-        return chaveDoEvento === this.proximoEvento() ? "agora" : "depois";
-    }
-
-    // Antes de um evento contextual do calendário, nenhuma reunião é a da vez
-    proximoEvento() {
         const vez = compromissoDaVez(this.registry, this.cadeira());
-        return vez && vez.reuniao ? vez.chave : null;
+        return vez && vez.chave === compromisso.chave ? "agora" : "depois";
     }
 
-    rotuloDaSituacao(situacao, chaveDoEvento) {
-        const papel = this.rotuloDoPapel(chaveDoEvento);
-
+    rotuloDaSituacao(situacao, compromisso) {
         if (situacao === "concluida") {
-            return "\u2713 concluída";
+            return "\u2713 " + (compromisso.reuniao ? "concluída" : "resolvido");
         }
 
         if (situacao === "depois") {
             return "ainda não é a hora";
         }
 
-        return papel;
+        return compromisso.reuniao ? this.rotuloDoPapel(compromisso.chave) : "acontece agora";
     }
 
     criarLista() {
@@ -100,15 +98,18 @@ export class CenaAgenda extends Phaser.Scene {
             x: MARGEM,
             y: TOPO_DA_LISTA,
             largura: 960 - MARGEM * 2,
-            opcoes: EVENTOS.map(function (evento) {
-                const situacao = cena.situacao(evento.chave);
+            visiveis: 7,
+            opcoes: agendaDaCadeira(this.cadeira()).map(function (compromisso) {
+                const situacao = cena.situacao(compromisso);
 
                 return {
-                    id: evento.chave,
-                    titulo: evento.nome,
-                    detalhe: "dia " + evento.dia + " · " + evento.resumo,
-                    sufixo: cena.rotuloDaSituacao(situacao, evento.chave),
-                    chave: evento.chave,
+                    id: compromisso.chave,
+                    titulo: compromisso.reuniao ? compromisso.evento.nome : "IMPREVISTO",
+                    detalhe: "dia " + compromisso.dia + " · "
+                        + (compromisso.reuniao ? compromisso.evento.resumo : "algo vai acontecer no escritório"),
+                    sufixo: cena.rotuloDaSituacao(situacao, compromisso),
+                    chave: compromisso.chave,
+                    compromisso: compromisso,
                     situacao: situacao
                 };
             }),
@@ -130,14 +131,14 @@ export class CenaAgenda extends Phaser.Scene {
     }
 
     escolher(opcao) {
-        if (DEPURACAO.eventosLivres || opcao.situacao === "agora") {
-            this.abrirEvento(opcao.chave);
+        if (opcao.situacao === "agora" || DEPURACAO.eventosLivres && opcao.compromisso.reuniao) {
+            this.abrirEvento(opcao.compromisso);
             return;
         }
 
         this.avisar(opcao.situacao === "concluida"
-            ? "esta reunião já aconteceu nesta sprint"
-            : "esta reunião vem depois; a sprint segue a ordem dos eventos");
+            ? "isto já aconteceu nesta sprint"
+            : "isto vem depois; a sprint segue a ordem do calendário");
     }
 
     avisar(texto) {
@@ -203,9 +204,10 @@ export class CenaAgenda extends Phaser.Scene {
 
     // A agenda sai de cena enquanto o evento roda
     // O escritório segue pausado atrás dos dois e é para ele que o evento volta
-    abrirEvento(chave) {
+    abrirEvento(compromisso) {
+        const chave = compromisso.reuniao ? compromisso.chave : "CenaEventoContextual";
         this.scene.stop();
-        this.scene.launch(chave);
+        this.scene.launch(chave, compromisso.reuniao ? undefined : {evento: compromisso.evento});
         this.scene.bringToTop(chave);
     }
 

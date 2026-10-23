@@ -57,7 +57,9 @@ export const GUIA = [
         titulo: "Como jogar",
         texto: "Setas ou WASD andam pelo escritório. ENTER conversa com as "
             + "pessoas e abre o que está na parede.\n\n"
-            + "A agenda, à direita do quadro, abre a reunião da vez. Nas "
+            + "A agenda, à direita do quadro, é o calendário da sprint: ela "
+            + "abre o que vem a seguir, reunião ou imprevisto, e assim o dia "
+            + "avança. Entre um e outro, dá para ver o quadro e conversar. Nas "
             + "reuniões, as setas escolhem a resposta e ENTER confirma.\n\n"
             + "G abre o glossário em qualquer tela, para consultar um termo "
             + "sem perder o lugar. P troca de cadeira antes de a sprint "
