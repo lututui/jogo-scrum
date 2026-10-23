@@ -4,11 +4,15 @@ import {ELENCO, MESAS, OBJETOS} from "../dados/elenco.js";
 import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
 import {SPRINT_REVIEW} from "../dados/eventos.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
-import {proximoPassoDoJogador} from "../dados/estadoDoQuadro.js";
+import {entregaDaSprint, lerItensDoQuadro, proximoPassoDoJogador} from "../dados/estadoDoQuadro.js";
+import {falasDoEscritorio} from "../dados/falasDoEscritorio.js";
+import {COLUNAS} from "../dados/quadro.js";
+import {CADEIRAS} from "../dados/cadeiras.js";
 import {
     DIAS_DA_SPRINT,
     compromissoDaVez,
     contextuaisResolvidos,
+    entregaRegistrada,
     diaDaSprint,
     eventosConcluidos,
     medidoresDaCadeira,
@@ -500,8 +504,33 @@ export class CenaEscritorio extends Phaser.Scene {
         this.jogador.setVelocity(0, 0);
 
         const cena = this;
-        this.caixa.abrir(alvo.dados, function () {
+        const daSprint = falasDoEscritorio(alvo.dados.chave, this.contextoDasFalas());
+        this.caixa.abrir(daSprint ? Object.assign({}, alvo.dados, daSprint) : alvo.dados, function () {
             cena.emDialogo = false;
         });
+    }
+
+    // O que as falas do escritório precisam saber da sprint
+    contextoDasFalas() {
+        const cadeira = this.cadeiraAtual;
+        const itens = lerItensDoQuadro(this.registry, cadeira);
+        const entrega = entregaDaSprint(this.registry, cadeira);
+        const doJogador = itens.find(function (item) {
+            return item.doJogador;
+        });
+        const coluna = doJogador && COLUNAS.find(function (outra) {
+            return outra.id === doJogador.coluna;
+        });
+
+        return {
+            dia: diaDaSprint(this.registry, cadeira),
+            cadeira: cadeira,
+            mentor: CADEIRAS[cadeira].titular,
+            itens: itens,
+            entrega: entregaRegistrada(this.registry, cadeira),
+            prontos: entrega.prontos,
+            total: entrega.total,
+            colunaDoJogador: coluna ? coluna.titulo : null
+        };
     }
 }

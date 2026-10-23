@@ -236,6 +236,10 @@ export function registrarEntrega(registry, cadeira, entrega) {
     return salvarProgresso(registry, progresso);
 }
 
+export function entregaRegistrada(registry, cadeira) {
+    return sprintDaCadeira(registry, cadeira).entrega || null;
+}
+
 export function registrarVisitaAoQuadro(registry, cadeira) {
     const progresso = lerProgresso(registry);
     progresso.sprints[cadeira].diaDaVisitaAoQuadro = diaDaSprint(registry, cadeira);
