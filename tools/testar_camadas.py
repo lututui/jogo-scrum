@@ -23,6 +23,7 @@ from testes.formas import (
     conferir_cabelo_e_olhos,
     conferir_combinacoes,
     conferir_limites,
+    conferir_membros,
     conferir_roupa_e_cabeca,
 )
 
@@ -39,6 +40,7 @@ def main():
         ("formas: cabelo longe dos olhos", conferir_cabelo_e_olhos),
         ("formas: roupa longe da cabeça", conferir_roupa_e_cabeca),
         ("formas: olhos, mãos e sapatos à mostra", conferir_combinacoes),
+        ("formas: braços e pernas presos ao andar", conferir_membros),
     )
 
     todas_as_falhas = []

@@ -10,18 +10,28 @@ from .medidas import CABECA_X, CABECA_Y, r
 from .paleta import COR_DE_SAPATO
 
 
-# quadro 1 levanta a perna esquerda e abaixa a mão direita; quadro 2, o oposto
+# quadro 1 levanta o pé esquerdo e balança o braço direito; quadro 2, o
+# oposto. A perna continua presa ao quadril: o que sobe é o pé, e a perna
+# encurta por baixo. O braço que balança desce um pixel sem soltar do ombro.
+ELEVACAO_DO_PE = 2
+
+
 def passos(frame):
-    return (1 if frame == 1 else 0), (1 if frame == 2 else 0)
+    return (ELEVACAO_DO_PE if frame == 1 else 0), (ELEVACAO_DO_PE if frame == 2 else 0)
+
+
+# uma perna, do quadril até o sapato
+def perna(d, x, elevacao, cor, altura=5):
+    r(d, x, 24, 4, altura - elevacao, cor)
 
 
 # pele: pernas, mãos, pescoço e cabeça; as pernas aparecem com shorts e saias
 def camada_corpo(d, frame, pele):
     passo_a, passo_b = passos(frame)
-    r(d, 12, 24 + passo_a, 4, 5 - passo_a, pele)
-    r(d, 16, 24 + passo_b, 4, 5 - passo_b, pele)
-    r(d, 8, 19 + passo_b, 2, 4, pele)
-    r(d, 22, 19 + passo_a, 2, 4, pele)
+    perna(d, 12, passo_a, pele)
+    perna(d, 16, passo_b, pele)
+    r(d, 8, 19, 2, 4 + min(passo_b, 1), pele)
+    r(d, 22, 19, 2, 4 + min(passo_a, 1), pele)
     r(d, 14, 13, 4, 2, pele)
     r(d, CABECA_X, CABECA_Y, 10, 9, pele)
 
@@ -48,8 +58,8 @@ def mangas_curtas(d, cor):
 # acompanham o braço e deixam dois pixels de mão
 def mangas_compridas(d, frame, cor):
     passo_a, passo_b = passos(frame)
-    r(d, 8, 15, 2, 6 + passo_b, cor)
-    r(d, 22, 15, 2, 6 + passo_a, cor)
+    r(d, 8, 15, 2, 6 + min(passo_b, 1), cor)
+    r(d, 22, 15, 2, 6 + min(passo_a, 1), cor)
 
 
 def camada_camiseta(d, frame, cor, altura=ALTURA_DO_TRONCO):
@@ -76,25 +86,26 @@ def camada_jaqueta(d, frame, cor, cor_interna):
 # ------------------------------------------------------------------
 # parte de baixo
 
-def sapatos(d):
-    r(d, 12, 29, 4, 2, COR_DE_SAPATO)
-    r(d, 16, 29, 4, 2, COR_DE_SAPATO)
+# o sapato do pé levantado sobe junto
+def sapatos(d, frame):
+    passo_a, passo_b = passos(frame)
+    r(d, 12, 29 - passo_a, 4, 2, COR_DE_SAPATO)
+    r(d, 16, 29 - passo_b, 4, 2, COR_DE_SAPATO)
 
 
 # mesma geometria das pernas
 def camada_calca(d, frame, cor):
     passo_a, passo_b = passos(frame)
-    r(d, 12, 24 + passo_a, 4, 5 - passo_a, cor)
-    r(d, 16, 24 + passo_b, 4, 5 - passo_b, cor)
-    sapatos(d)
+    perna(d, 12, passo_a, cor)
+    perna(d, 16, passo_b, cor)
+    sapatos(d, frame)
 
 
-# até o joelho: sempre sobram dois pixels de perna
+# até o joelho; a coxa não muda com o passo, só a canela encurta
 def camada_shorts(d, frame, cor):
-    passo_a, passo_b = passos(frame)
-    r(d, 12, 24 + passo_a, 4, 3 - passo_a, cor)
-    r(d, 16, 24 + passo_b, 4, 3 - passo_b, cor)
-    sapatos(d)
+    r(d, 12, 24, 4, 3, cor)
+    r(d, 16, 24, 4, 3, cor)
+    sapatos(d, frame)
 
 
 # as saias começam no torso, com a cintura um pixel mais estreita de cada
@@ -108,7 +119,7 @@ def camada_saia_curta(d, frame, cor):
     cintura_da_saia(d, cor)
     r(d, 10, 24, 12, 1, cor)
     r(d, 9, 25, 14, 2, cor)
-    sapatos(d)
+    sapatos(d, frame)
 
 
 # mesmo comprimento da calça
@@ -116,7 +127,7 @@ def camada_saia_longa(d, frame, cor):
     cintura_da_saia(d, cor)
     r(d, 10, 24, 12, 2, cor)
     r(d, 9, 26, 14, 3, cor)
-    sapatos(d)
+    sapatos(d, frame)
 
 
 # ------------------------------------------------------------------

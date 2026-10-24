@@ -1,8 +1,9 @@
 # Formas das peças
 #
 # Confere o desenho de cada camada, sem olhar cor: nada sai do quadro de
-# 32x32, nada cobre os olhos e o rosto, e as mãos e os sapatos continuam à
-# mostra em todas as combinações.
+# 32x32, nada cobre os olhos e o rosto, as mãos e os sapatos continuam à
+# mostra em todas as combinações, e braços e pernas não se soltam do tronco
+# ao andar.
 #
 # As camadas são desenhadas num gravador, que anota os pixels em vez de
 # pintar; assim um pixel fora do quadro aparece, em vez de ser cortado.
@@ -107,6 +108,32 @@ def aparencias():
                    estilo_de_cabelo=estilo, oculos=oculos)
 
 
+# braços: colunas e linhas do ombro até a ponta da mão; pernas: do quadril
+# até a sola
+BRACOS = ((8, 9, 22, 23), range(15, 24))
+PERNAS = (tuple(range(12, 20)), range(23, ALTURA_SPRITE))
+
+
+# no personagem montado, em cada quadro, cada coluna de braço e de perna é
+# um traço só, do ombro ou do quadril até a mão ou o sapato, sem buraco
+def conferir_membros():
+    casos, falhas = 0, []
+    for aparencia in aparencias():
+        for frame in range(QUADROS):
+            casos += 1
+            img = montar_jogador(aparencia, frame, "neutro", "po")
+            soltos = []
+            for colunas, linhas in (BRACOS, PERNAS):
+                for x in colunas:
+                    cheios = [y for y in linhas if img.getpixel((x, y))[3] > 0]
+                    if cheios and (cheios[0] != linhas[0] or len(cheios) != cheios[-1] - cheios[0] + 1):
+                        soltos.append(x)
+            if soltos:
+                falhas.append("%s + %s, quadro %d: coluna solta em x %s" % (
+                    aparencia["peca_de_cima"], aparencia["peca_de_baixo"], frame, soltos))
+    return casos, falhas
+
+
 # no personagem montado: olhos, mãos e sapatos aparecem na cor certa
 def conferir_combinacoes():
     casos, falhas = 0, []
@@ -131,7 +158,7 @@ def conferir_combinacoes():
                     problemas.append("olho coberto em %s" % (pixel,))
             if any(img.getpixel(p) != pele for p in maos(frame)):
                 problemas.append("mão coberta")
-            if any(img.getpixel(p) != sapato for p in gravar(sapatos)):
+            if any(img.getpixel(p) != sapato for p in gravar(sapatos, frame)):
                 problemas.append("sapato coberto")
 
             if problemas:
