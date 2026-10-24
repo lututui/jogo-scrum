@@ -1,6 +1,13 @@
 // Cena do escritório
 
-import {ELENCO, MESAS, OBJETOS} from "../dados/elenco.js";
+import {
+    DECORACOES,
+    ELENCO,
+    ESCALA_DO_ESCRITORIO,
+    FIM_DA_PAREDE,
+    MESAS,
+    OBJETOS
+} from "../dados/elenco.js";
 import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
 import {SPRINT_REVIEW} from "../dados/eventos.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
@@ -30,8 +37,8 @@ export class CenaEscritorio extends Phaser.Scene {
 
     constructor() {
         super({key: "CenaEscritorio"});
-        this.alcanceInteracao = 64;
-        this.velocidade = 160;
+        this.alcanceInteracao = 72;
+        this.velocidade = 200;
     }
 
     create() {
@@ -54,54 +61,93 @@ export class CenaEscritorio extends Phaser.Scene {
 
     // Piso, parede e limites do mundo
     criarAmbiente() {
-        this.add.tileSprite(0, 0, 960, 104, "parede").setOrigin(0, 0).setDepth(0);
-        this.add.tileSprite(0, 104, 960, 436, "chao").setOrigin(0, 0).setDepth(0);
+        this.add.tileSprite(0, 0, 960, FIM_DA_PAREDE, "parede").setOrigin(0, 0).setDepth(0);
+        this.add.tileSprite(0, FIM_DA_PAREDE, 960, 540 - FIM_DA_PAREDE, "chao")
+            .setOrigin(0, 0).setTileScale(ESCALA_DO_ESCRITORIO).setDepth(0);
 
-        const rodape = this.add.rectangle(480, 104, 960, 4, COR_HEX.rodape);
+        const rodape = this.add.rectangle(480, FIM_DA_PAREDE, 960, 4, COR_HEX.rodape);
         rodape.setDepth(1);
 
-        this.physics.world.setBounds(0, 100, 960, 440);
+        this.physics.world.setBounds(0, FIM_DA_PAREDE, 960, 510 - FIM_DA_PAREDE);
+        this.obstaculos = this.physics.add.staticGroup();
     }
 
-    // Mesas: sprite com corpo estático na base, para o jogador passar por trás
-    criarMobiliario() {
-        this.mobiliario = this.physics.add.staticGroup();
+    // Imagem pela base, na escala do escritório; a profundidade é a base
+    imagemPelaBase(x, y, chave, quadro) {
+        return this.add.image(x, y, chave, quadro).setOrigin(0.5, 1)
+            .setScale(ESCALA_DO_ESCRITORIO).setDepth(y);
+    }
 
+    // Retângulo invisível que o jogador não atravessa
+    bloquear(x, y, largura, altura) {
+        const bloco = this.add.rectangle(x, y, largura, altura).setVisible(false);
+        this.physics.add.existing(bloco, true);
+        this.obstaculos.add(bloco);
+        return bloco;
+    }
+
+    // Mesas com os objetos de cada pessoa, e a decoração
+    criarMobiliario() {
         MESAS.forEach(function (mesa) {
-            const sprite = this.mobiliario.create(mesa.x, mesa.y, "mesa");
-            sprite.setDepth(mesa.y);
-            sprite.body.setSize(48, 22);
-            sprite.body.setOffset(0, 18);
-            sprite.refreshBody();
+            this.imagemPelaBase(mesa.x, mesa.y, mesa.imagem || "mesa");
+            mesa.objetos.forEach(function (objeto) {
+                this.imagemPelaBase(mesa.x + objeto.dx, mesa.y - 44, objeto.imagem).setDepth(mesa.y + 1);
+            }, this);
+            this.bloquear(mesa.x, mesa.y - 20, mesa.largura || 136, 32);
+        }, this);
+
+        DECORACOES.forEach(function (deco) {
+            const imagem = this.imagemPelaBase(deco.x, deco.y, deco.imagem);
+            if (deco.naParede) {
+                imagem.setDepth(2);
+            } else if (deco.solido) {
+                this.bloquear(deco.x, deco.y - 8, imagem.displayWidth - 4, 16);
+            }
         }, this);
     }
 
-    // Objetos de cenário com fala própria
+    // Objetos da parede: o jogador interage do piso logo abaixo
     criarObjetos() {
         OBJETOS.forEach(function (objeto) {
-            const sprite = this.add.image(objeto.x, objeto.y, objeto.chave);
-            sprite.setDepth(2);
-            this.interativos.push({dados: objeto, sprite: sprite, alturaRotulo: 26});
+            const sprite = this.imagemPelaBase(objeto.x, objeto.y, objeto.imagem).setDepth(2);
+            this.interativos.push({
+                dados: objeto,
+                sprite: sprite,
+                x: objeto.x,
+                y: FIM_DA_PAREDE + 22,
+                topo: objeto.y - sprite.displayHeight
+            });
         }, this);
     }
 
+    // Pessoas com o nome embaixo e o "!" em cima, quando há ação pendente
     criarNpcs() {
-        this.npcs = this.physics.add.staticGroup();
-        this.marcarAreaDeTeste();
-
         ELENCO.forEach(function (npc) {
-            const sprite = this.npcs.create(npc.x, npc.y, "corpo_" + npc.chave, 0);
-            sprite.setDepth(npc.y);
-            sprite.body.setSize(18, 12);
-            sprite.body.setOffset(7, 19);
-            sprite.refreshBody();
-            const aviso = this.add.text(npc.x, npc.y - 20, "!", {
+            const sprite = this.imagemPelaBase(npc.x, npc.y, "corpo_" + npc.chave, 0);
+            const topo = npc.y - sprite.displayHeight;
+            const nome = this.add.text(npc.x, npc.y + 2, npc.nome, {
                 fontFamily: FONTE,
-                fontSize: "16px",
+                fontSize: "11px",
+                color: COR.texto
+            }).setOrigin(0.5, 0).setDepth(7000);
+            const aviso = this.add.text(npc.x, topo + 4, "!", {
+                fontFamily: FONTE,
+                fontSize: "20px",
                 fontStyle: "bold",
                 color: COR.alerta
-            }).setOrigin(0.5, 1).setDepth(npc.y + 1).setVisible(false);
-            this.interativos.push({dados: npc, sprite: sprite, aviso: aviso, alturaRotulo: 24});
+            }).setOrigin(0.5, 1).setDepth(7001).setVisible(false);
+            const bloqueio = this.bloquear(npc.x, npc.y - 8, 28, 16);
+
+            this.interativos.push({
+                dados: npc,
+                sprite: sprite,
+                x: npc.x,
+                y: npc.y,
+                topo: topo,
+                nome: nome,
+                aviso: aviso,
+                bloqueio: bloqueio
+            });
         }, this);
     }
 
@@ -117,44 +163,21 @@ export class CenaEscritorio extends Phaser.Scene {
 
             item.ausente = !presente;
             item.sprite.setVisible(presente);
-            item.sprite.body.enable = presente;
+            item.nome.setVisible(presente);
+            item.bloqueio.body.enable = presente;
             item.aviso.setVisible(Boolean(acao));
         }, this);
     }
 
-    marcarAreaDeTeste() {
-        if (!DEPURACAO.npcsDeTeste) {
-            return;
-        }
-
-        const visitantes = ELENCO.filter(function (npc) {
-            return npc.teste;
-        });
-
-        if (visitantes.length === 0) {
-            return;
-        }
-
-        const faixa = this.add.rectangle(900, 322, 88, 420, COR_HEX.painel, 0.35);
-        faixa.setDepth(1);
-        faixa.setStrokeStyle(1, COR_HEX.contornoSuave);
-
-        this.add.text(900, 120, "área de teste", {
-            fontFamily: FONTE,
-            fontSize: "11px",
-            color: COR.textoSecundario
-        }).setOrigin(0.5).setDepth(2);
-    }
-
     criarJogador() {
-        this.jogador = this.physics.add.sprite(480, 470, "corpo_jogador_po", 0);
+        this.jogador = this.physics.add.sprite(560, 220, "corpo_jogador_po", 0);
+        this.jogador.setScale(ESCALA_DO_ESCRITORIO);
         this.jogador.body.setSize(16, 10);
         this.jogador.body.setOffset(8, 21);
         this.jogador.setCollideWorldBounds(true);
-        this.jogador.setDepth(this.jogador.y);
+        this.jogador.setDepth(this.pesDoJogador());
 
-        this.physics.add.collider(this.jogador, this.mobiliario);
-        this.physics.add.collider(this.jogador, this.npcs);
+        this.physics.add.collider(this.jogador, this.obstaculos);
     }
 
     // Barra superior e rótulo de interação
@@ -466,7 +489,12 @@ export class CenaEscritorio extends Phaser.Scene {
         }
 
         this.jogador.setVelocity(vetor.x, vetor.y);
-        this.jogador.setDepth(this.jogador.y);
+        this.jogador.setDepth(this.pesDoJogador());
+    }
+
+    // Altura dos pés do jogador na tela: o sprite tem a origem no meio
+    pesDoJogador() {
+        return this.jogador.y + this.jogador.displayHeight / 2 - 2;
     }
 
     // Interativo mais próximo dentro do alcance, medido pelos pés
@@ -479,8 +507,7 @@ export class CenaEscritorio extends Phaser.Scene {
                 return;
             }
             const distancia = Phaser.Math.Distance.Between(
-                this.jogador.x, this.jogador.y + 8,
-                item.sprite.x, item.sprite.y + 8
+                this.jogador.x, this.pesDoJogador(), item.x, item.y
             );
             if (distancia < menorDistancia) {
                 menorDistancia = distancia;
@@ -496,7 +523,7 @@ export class CenaEscritorio extends Phaser.Scene {
             this.rotulo.setVisible(false);
             return;
         }
-        this.rotulo.setPosition(alvo.sprite.x, alvo.sprite.y - alvo.alturaRotulo);
+        this.rotulo.setPosition(alvo.x, alvo.topo - 2);
         this.rotulo.setVisible(true);
     }
 

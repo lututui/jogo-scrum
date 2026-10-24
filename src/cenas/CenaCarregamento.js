@@ -1,6 +1,6 @@
 // Cena de carregamento
 
-import {ELENCO} from "../dados/elenco.js";
+import {ELENCO, imagensDoEscritorio} from "../dados/elenco.js";
 import {COR, FONTE} from "../dados/tema.js";
 import {aplicarPerfil, carregarCamadas, criarAnimacoesDoCorpo} from "../ui/montarJogador.js";
 import {aplicarFps} from "./CenaFPS.js";
@@ -36,12 +36,9 @@ export class CenaCarregamento extends Phaser.Scene {
 
         carregarCamadas(this);
 
-        this.load.image("chao", "assets/chao.png");
-        this.load.image("parede", "assets/parede.png");
-        this.load.image("mesa", "assets/mesa.png");
-        this.load.image("quadro_parede", "assets/quadro_parede.png");
-        this.load.image("agenda_parede", "assets/agenda_parede.png");
-        this.load.image("mesa_redonda", "assets/mesa_redonda.png");
+        ["chao", "parede", "quadro_parede", "mesa_redonda"].concat(imagensDoEscritorio()).forEach(function (nome) {
+            this.load.image(nome, "assets/" + nome + ".png");
+        }, this);
 
         this.personagens = personagens;
     }

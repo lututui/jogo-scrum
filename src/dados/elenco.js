@@ -9,8 +9,8 @@ export const ELENCO = [
         nome: "Márcia",
         papel: "Product Owner",
         cor: "#c0392b",
-        x: 180,
-        y: 252,
+        x: 440,
+        y: 466,
         expressoes: ["aprovacao", "tenso", "neutro"],
         falas: [
             "Chegou cedo, {nome}. Boa.",
@@ -23,8 +23,8 @@ export const ELENCO = [
         nome: "Renan",
         papel: "Scrum Master",
         cor: "#1f6f8b",
-        x: 380,
-        y: 252,
+        x: 600,
+        y: 466,
         expressoes: ["aprovacao", "neutro", "neutro"],
         falas: [
             "Bom te ver por aqui, {nome}.",
@@ -37,8 +37,8 @@ export const ELENCO = [
         nome: "Bia",
         papel: "Desenvolvedora sênior",
         cor: "#7a4bb5",
-        x: 580,
-        y: 252,
+        x: 80,
+        y: 316,
         expressoes: ["neutro", "neutro", "tenso"],
         falas: [
             "Você é {o|a} aprendiz, né?",
@@ -51,8 +51,8 @@ export const ELENCO = [
         nome: "Caio",
         papel: "Desenvolvedor",
         cor: "#e08a3c",
-        x: 780,
-        y: 252,
+        x: 230,
+        y: 316,
         expressoes: ["aprovacao", "aprovacao", "aprovacao"],
         falas: [
             "Opa! Bem-{vindo|vinda}.",
@@ -65,8 +65,8 @@ export const ELENCO = [
         nome: "Lu",
         papel: "Design e desenvolvimento",
         cor: "#8795a8",
-        x: 180,
-        y: 432,
+        x: 155,
+        y: 466,
         expressoes: ["aprovacao", "neutro", "tenso"],
         falas: [
             "Oi! Desculpa a bagunça da mesa.",
@@ -79,8 +79,8 @@ export const ELENCO = [
         nome: "Gustavo",
         papel: "Dono da Catavento",
         cor: "#6b7a90",
-        x: 380,
-        y: 432,
+        x: 754,
+        y: 466,
         expressoes: ["aprovacao", "neutro", "aprovacao"],
         falas: [
             "Ah, o pessoal do programa de aprendizagem. Que bom.",
@@ -94,8 +94,8 @@ export const ELENCO = [
         papel: "Diretora da escola",
         cor: "#c9a96a",
         teste: true,
-        x: 900,
-        y: 180,
+        x: 765,
+        y: 312,
         expressoes: ["neutro", "tenso"],
         falas: [
             "Então é aqui que o sistema está sendo feito.",
@@ -108,8 +108,8 @@ export const ELENCO = [
         papel: "Professor",
         cor: "#3f7a52",
         teste: true,
-        x: 900,
-        y: 300,
+        x: 818,
+        y: 312,
         expressoes: ["neutro", "tenso"],
         falas: [
             "Vim junto com a diretora, mas quero falar de outra coisa.",
@@ -122,8 +122,8 @@ export const ELENCO = [
         papel: "Secretaria da escola",
         cor: "#a87fc4",
         teste: true,
-        x: 900,
-        y: 420,
+        x: 871,
+        y: 312,
         expressoes: ["neutro", "tenso"],
         falas: [
             "Sei que estão esperando a base de matrículas.",
@@ -132,36 +132,84 @@ export const ELENCO = [
     }
 ];
 
-// Mesas do escritório: pontos onde o sprite de mesa é posicionado
+// Layout do escritório
+//
+// Tudo em pixels da tela, com os sprites na escala 2. O ponto (x, y) de
+// pessoas, mesas e decoração é o meio da base: é por ele que a profundidade
+// e as colisões são calculadas. Produto e processo ficam à esquerda, o time
+// de desenvolvimento no centro, a recepção e a mesa do dono à direita, sem
+// divisória entre as áreas.
+
+export const ESCALA_DO_ESCRITORIO = 2;
+
+// Altura da parede: abaixo dela começa o piso, onde se anda
+export const FIM_DA_PAREDE = 150;
+
+// Mesas e o que fica em cima de cada uma ("dx" a partir do meio da mesa)
 export const MESAS = [
-    {x: 180, y: 200},
-    {x: 380, y: 200},
-    {x: 580, y: 200},
-    {x: 780, y: 200},
-    {x: 180, y: 380},
-    {x: 380, y: 380},
-    {x: 580, y: 380},
-    {x: 780, y: 380}
+    {x: 440, y: 402, objetos: [{imagem: "mesa_papeis", dx: -42}]},
+    {x: 600, y: 402, objetos: [{imagem: "mesa_ampulheta", dx: 40}, {imagem: "planta_pequena", dx: -40}]},
+    {x: 80, y: 252, objetos: [{imagem: "mesa_monitor_e_livro", dx: 42}]},
+    {x: 230, y: 252, objetos: [{imagem: "mesa_cafe_e_post_its", dx: 36}]},
+    {x: 155, y: 402, objetos: [{imagem: "mesa_mochila_e_tablet", dx: -42}, {imagem: "planta_pequena", dx: 42}]},
+    {x: 860, y: 446, imagem: "mesa_do_dono", largura: 120, objetos: [{imagem: "planta_pequena", dx: 44}]}
 ];
 
-// Objetos de cenário com interação própria
+// Decoração: na parede, só imagem; no piso, "solido" vira obstáculo
+export const DECORACOES = [
+    {imagem: "janela", x: 130, y: 128, naParede: true},
+    {imagem: "relogio", x: 268, y: 96, naParede: true},
+    {imagem: "porta", x: 830, y: 150, naParede: true},
+    {imagem: "planta_grande", x: 330, y: 236, solido: true},
+    {imagem: "bebedouro", x: 940, y: 236, solido: true},
+    {imagem: "poltrona", x: 765, y: 244, solido: true},
+    {imagem: "mesinha", x: 818, y: 236, solido: true},
+    {imagem: "poltrona", x: 871, y: 244, solido: true},
+    {imagem: "planta_grande", x: 30, y: 506, solido: true},
+    {imagem: "planta_grande", x: 690, y: 506, solido: true}
+];
+
+// Todas as imagens que o escritório usa, para a cena de carregamento
+export function imagensDoEscritorio() {
+    const nomes = ["mesa"];
+    DECORACOES.forEach(function (deco) {
+        nomes.push(deco.imagem);
+    });
+    MESAS.forEach(function (mesa) {
+        nomes.push(mesa.imagem || "mesa");
+        mesa.objetos.forEach(function (objeto) {
+            nomes.push(objeto.imagem);
+        });
+    });
+    OBJETOS.forEach(function (objeto) {
+        nomes.push(objeto.imagem);
+    });
+    return nomes.filter(function (nome, indice) {
+        return nomes.indexOf(nome) === indice;
+    });
+}
+
+// Objetos de cenário com interação própria: ficam na parede, e o jogador
+// interage com eles do piso logo abaixo
 export const OBJETOS = [
     {
         chave: "quadro_parede",
+        imagem: "quadro_grande",
         nome: "Quadro da parede",
         papel: "Cenário",
         cor: "#5f7ba8",
-        x: 480,
-        y: 84,
+        x: 470,
+        y: 140,
         cena: "CenaKanban"
     },
     {
         chave: "agenda_parede",
+        imagem: "agenda_parede",
         nome: "Agenda da sprint",
         papel: "Cenário",
         cor: "#5f7ba8",
-        x: 620,
-        y: 82,
+        x: 680,
+        y: 140,
         cena: "CenaAgenda"
     }
 ];
