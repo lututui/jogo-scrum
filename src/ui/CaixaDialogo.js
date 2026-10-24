@@ -8,6 +8,9 @@ import {silabasDoTexto} from "../dados/voz.js";
 import {falarLetras} from "./PainelDeFala.js";
 
 
+// quanto a caixa desce quando abre embaixo
+const DESCIDA = 300;
+
 export class CaixaDialogo {
 
     constructor(cena) {
@@ -76,12 +79,22 @@ export class CaixaDialogo {
             elemento.setScrollFactor(0);
             elemento.setDepth(10000);
             elemento.setVisible(false);
+            elemento.setData("yDeCima", elemento.y);
         });
     }
 
-    // Abre a caixa com as falas de um interlocutor
-    abrir(interlocutor, aoFechar) {
+    // a caixa fica no alto da tela; "embaixo" a desce, para não cobrir a
+    // parede quando a conversa aponta para ela
+    posicionar(embaixo) {
+        this.elementos.forEach(function (elemento) {
+            elemento.setY(elemento.getData("yDeCima") + (embaixo ? DESCIDA : 0));
+        });
+    }
+
+    // Abre a caixa com as falas de um interlocutor; "embaixo" é opcional
+    abrir(interlocutor, aoFechar, embaixo) {
         this.aberta = true;
+        this.posicionar(Boolean(embaixo));
         const registry = this.cena.registry;
         this.falas = interlocutor.falas.map(function (fala) {
             return personalizar(registry, fala);

@@ -15,11 +15,15 @@ import {entregaDaSprint, lerItensDoQuadro, proximoPassoDoJogador} from "../dados
 import {falasDoEscritorio} from "../dados/falasDoEscritorio.js";
 import {acaoPendente} from "../dados/acoesDoEscritorio.js";
 import {COLUNAS} from "../dados/quadro.js";
+import {BOAS_VINDAS} from "../dados/boasVindas.js";
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {
     DIAS_DA_SPRINT,
     compromissoDaVez,
+    conheceOTime,
     contextuaisResolvidos,
+    foiRecebido,
+    registrarBoasVindas,
     entregaRegistrada,
     diaDaSprint,
     eventosConcluidos,
@@ -33,6 +37,10 @@ import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {CaixaDialogo} from "../ui/CaixaDialogo.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 import {tocarEfeito} from "../ui/som.js";
+import {abrirDicaUmaVez} from "./CenaDica.js";
+
+// passo do mentor quando vai receber o jogador, em pixels por segundo
+const VELOCIDADE_DO_MENTOR = 130;
 
 export class CenaEscritorio extends Phaser.Scene {
 
@@ -45,6 +53,7 @@ export class CenaEscritorio extends Phaser.Scene {
     create() {
         this.cadeiraAtual = this.registry.get("cadeira") || "po";
         this.emDialogo = false;
+        this.emChegada = false;
         this.interativos = [];
 
         this.criarAmbiente();
@@ -58,6 +67,83 @@ export class CenaEscritorio extends Phaser.Scene {
         this.caixa = new CaixaDialogo(this);
 
         this.seguirASprint();
+        this.receberSePreciso();
+    }
+
+    // ---------------------------------------------------------
+    // boas-vindas do mentor
+
+    // no dia 1, antes do Planning, uma vez por sprint
+    receberSePreciso() {
+        const cadeira = this.cadeiraAtual;
+        const mentor = this.interativos.find(function (item) {
+            return item.dados.chave === CADEIRAS[cadeira].titular;
+        });
+
+        if (this.emChegada || !mentor || !mentor.dados.chegada || this.sprintComecou()
+            || foiRecebido(this.registry, cadeira)) {
+            return;
+        }
+
+        const roteiro = BOAS_VINDAS[cadeira][conheceOTime(this.registry, cadeira) ? "seguinte" : "primeira"];
+        registrarBoasVindas(this.registry, cadeira);
+        this.emChegada = true;
+        this.rotulo.setVisible(false);
+
+        const ida = mentor.dados.chegada;
+        const volta = ida.slice(0, -1).reverse().concat([[mentor.x, mentor.y]]);
+        const cena = this;
+
+        this.andar(mentor, ida, function () {
+            cena.emDialogo = true;
+            // embaixo: a conversa aponta para a agenda e o quadro, na parede
+            cena.caixa.abrir(Object.assign({}, mentor.dados, roteiro), function () {
+                cena.emDialogo = false;
+                cena.emChegada = false;
+                cena.bloqueioAcaoAte = cena.time.now + 250;
+                cena.andar(mentor, volta, null);
+            }, true);
+        });
+    }
+
+    // o mentor anda de ponto em ponto, com o nome e o "!" junto; enquanto
+    // anda, não conversa
+    andar(item, pontos, aoChegar) {
+        const cena = this;
+        const sprite = item.sprite;
+        item.andando = true;
+        sprite.anims.play(item.dados.chave + "_andando", true);
+
+        const acompanhar = function () {
+            sprite.setDepth(sprite.y);
+            item.nome.setPosition(sprite.x, sprite.y + 2);
+            item.aviso.setPosition(sprite.x, sprite.y - sprite.displayHeight + 4);
+        };
+        const proximo = function (indice) {
+            if (indice >= pontos.length) {
+                item.andando = false;
+                sprite.anims.play(item.dados.chave + "_parado", true);
+                sprite.setFlipX(false);
+                if (aoChegar) {
+                    aoChegar();
+                }
+                return;
+            }
+            const destino = pontos[indice];
+            const distancia = Phaser.Math.Distance.Between(sprite.x, sprite.y, destino[0], destino[1]);
+            sprite.setFlipX(destino[0] < sprite.x);
+            cena.tweens.add({
+                targets: sprite,
+                x: destino[0],
+                y: destino[1],
+                duration: distancia / VELOCIDADE_DO_MENTOR * 1000,
+                onUpdate: acompanhar,
+                onComplete: function () {
+                    proximo(indice + 1);
+                }
+            });
+        };
+        proximo(0);
     }
 
     // Piso, parede e limites do mundo
@@ -108,15 +194,33 @@ export class CenaEscritorio extends Phaser.Scene {
     }
 
     // Objetos da parede: o jogador interage do piso logo abaixo
+    // Objetos da parede, com o nome escrito em cima; a agenda ganha um "!"
+    // no primeiro dia, até o Planning
     criarObjetos() {
         OBJETOS.forEach(function (objeto) {
             const sprite = this.imagemPelaBase(objeto.x, objeto.y, objeto.imagem).setDepth(2);
+            const topo = objeto.y - sprite.displayHeight;
+            const rotulo = this.add.text(objeto.x, topo - 2, objeto.rotulo || "", {
+                fontFamily: FONTE,
+                fontSize: "11px",
+                color: COR.texto
+            }).setOrigin(0.5, 1).setDepth(3);
+            const aviso = objeto.avisoAntesDoPlanning
+                ? this.add.text(rotulo.x + rotulo.width / 2 + 6, topo - 1, "!", {
+                    fontFamily: FONTE,
+                    fontSize: "16px",
+                    fontStyle: "bold",
+                    color: COR.alerta
+                }).setOrigin(0, 1).setDepth(3).setVisible(false)
+                : null;
+
             this.interativos.push({
                 dados: objeto,
                 sprite: sprite,
                 x: objeto.x,
                 y: FIM_DA_PAREDE + 22,
-                topo: objeto.y - sprite.displayHeight
+                topo: topo,
+                avisoDaParede: aviso
             });
         }, this);
     }
@@ -124,7 +228,9 @@ export class CenaEscritorio extends Phaser.Scene {
     // Pessoas com o nome embaixo e o "!" em cima, quando há ação pendente
     criarNpcs() {
         ELENCO.forEach(function (npc) {
-            const sprite = this.imagemPelaBase(npc.x, npc.y, "corpo_" + npc.chave, 0);
+            // sprite, e não imagem: o mentor anda quando vem receber o jogador
+            const sprite = this.add.sprite(npc.x, npc.y, "corpo_" + npc.chave, 0).setOrigin(0.5, 1)
+                .setScale(ESCALA_DO_ESCRITORIO).setDepth(npc.y);
             const topo = npc.y - sprite.displayHeight;
             const nome = this.add.text(npc.x, npc.y + 2, npc.nome, {
                 fontFamily: FONTE,
@@ -156,6 +262,9 @@ export class CenaEscritorio extends Phaser.Scene {
     // depuração); quem tem uma ação pendente ganha um "!"
     atualizarPresencas() {
         this.interativos.forEach(function (item) {
+            if (item.avisoDaParede) {
+                item.avisoDaParede.setVisible(!this.sprintComecou());
+            }
             if (!item.aviso) {
                 return;
             }
@@ -277,6 +386,20 @@ export class CenaEscritorio extends Phaser.Scene {
         this.bloqueioAcaoAte = this.time.now + 250;
         this.aoRetomar();
         this.seguirASprint();
+        this.receberSePreciso();
+        this.explicarMedidoresSePreciso();
+    }
+
+    // na primeira volta depois de uma decisão, os medidores já mexeram
+    explicarMedidoresSePreciso() {
+        if (!this.sprintComecou() || this.sprintTerminou() || this.emChegada) {
+            return;
+        }
+        this.time.delayedCall(300, function () {
+            if (this.scene.isActive()) {
+                abrirDicaUmaVez(this, "medidores");
+            }
+        }, [], this);
     }
 
     // A troca de cadeira volta para a cena de seleção
@@ -338,7 +461,7 @@ export class CenaEscritorio extends Phaser.Scene {
     // ---------------------------------------------------------
     // andamento da sprint
 
-    // O jogador segue a sprint pelo calendário, reunião ou imprevisto; sem
+    // O jogador segue a sprint pela agenda, reunião ou imprevisto; sem
     // compromisso, a sprint daquela cadeira fecha
     seguirASprint() {
         this.atualizarPainelDaSprint();
@@ -402,7 +525,7 @@ export class CenaEscritorio extends Phaser.Scene {
             return "sprint encerrada";
         }
 
-        return "próximo: " + (vez.reuniao ? vez.evento.nome : "um imprevisto") + " (calendário)";
+        return "próximo: " + (vez.reuniao ? vez.evento.nome : "um imprevisto") + ", na agenda";
     }
 
     linhaDeAjuda() {
@@ -426,6 +549,13 @@ export class CenaEscritorio extends Phaser.Scene {
 
     update(tempo, delta) {
         this.caixa.atualizar(delta);
+
+        // o mentor está vindo: o jogador espera parado
+        if (this.emChegada && !this.emDialogo) {
+            this.jogador.setVelocity(0, 0);
+            this.jogador.anims.play("jogador_" + this.cadeiraAtual + "_parado", true);
+            return;
+        }
 
         if (Phaser.Input.Keyboard.JustDown(this.teclaGlossario)) {
             this.consultarGlossario();
@@ -514,7 +644,7 @@ export class CenaEscritorio extends Phaser.Scene {
         let menorDistancia = this.alcanceInteracao;
 
         this.interativos.forEach(function (item) {
-            if (item.ausente) {
+            if (item.ausente || item.andando) {
                 return;
             }
             const distancia = Phaser.Math.Distance.Between(
@@ -605,6 +735,7 @@ export class CenaEscritorio extends Phaser.Scene {
             dia: diaDaSprint(this.registry, cadeira),
             cadeira: cadeira,
             mentor: CADEIRAS[cadeira].titular,
+            conhece: conheceOTime(this.registry, cadeira),
             itens: itens,
             entrega: entregaRegistrada(this.registry, cadeira),
             prontos: entrega.prontos,

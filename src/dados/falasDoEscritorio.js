@@ -1,12 +1,14 @@
 // O que as pessoas do escritório dizem conforme a sprint anda
 //
-// No dia 1 vale a apresentação de elenco.js. Do dia 2 em diante, cada pessoa
-// tem situações em ordem de prioridade, e vale a primeira cuja condição bate.
+// Do dia 2 em diante, cada pessoa tem situações em ordem de prioridade, e
+// vale a primeira cuja condição bate. No dia 1 só valem as situações que
+// declaram "dias" com o dia 1; sem nenhuma, vale a apresentação de elenco.js.
 // A condição olha o dia, a cadeira do jogador e o quadro; não olha a opção
 // escolhida em cada decisão, porque o quadro já guarda o que importa.
 //
 // Condições: "dias" [de, até]; "cadeiras"; "mentor" (a pessoa é a titular
-// da cadeira do jogador); e, sobre o quadro: "existe", "planejado",
+// da cadeira do jogador); "conhece" (o jogador já passou por outra cadeira e
+// conhece o time); e, sobre o quadro: "existe", "planejado",
 // "bloqueado", "parado" (bloqueado, sem etiqueta), "marcado" (com a etiqueta
 // BLOQUEADO),
 // "andando" (fora de bloqueio e ainda não concluído), "emProgresso",
@@ -22,6 +24,15 @@ const A = "aprovacao";
 
 export const FALAS_DO_ESCRITORIO = {
     marcia: [
+        {dias: [1, 1], mentor: true, falas: [
+            "Quando quiser, a agenda na parede abre o Planning. Leva na cabeça uma meta, não uma lista."], expressoes: [N]},
+        {dias: [1, 1], conhece: true, mentor: false, falas: [
+            "De volta, {nome}. Mesma sprint, outra cadeira: repara no que muda daqui."], expressoes: [A]},
+        {dias: [1, 1], mentor: false, falas: [
+            "Chegou cedo, {nome}. Boa.",
+            "Anotei quatorze pedidos na reunião com a diretora. Estão todos na mesma folha, fora de ordem, e dois são a mesma coisa escrita diferente.",
+            "Ordenar essa lista é trabalho meu, de Product Owner. No Planning você vê o que entrou e por quê."],
+            expressoes: [A, T, N]},
         {dias: [10, 10], entregaCompleta: true, falas: [
             "A Review foi tranquila: o que estava no plano estava pronto. A escola saiu com o que pediu e com o que aprendeu."], expressoes: [A]},
         {dias: [10, 10], entregaCompleta: false, falas: [
@@ -38,6 +49,10 @@ export const FALAS_DO_ESCRITORIO = {
     ],
 
     renan: [
+        {dias: [1, 1], mentor: true, falas: [
+            "A agenda na parede abre o Planning quando você quiser. Lá, o meu trabalho e o seu é a conversa andar."], expressoes: [N]},
+        {dias: [1, 1], conhece: true, mentor: false, falas: [
+            "Outra cadeira, mesma sprint. Presta atenção em quem decide o quê."], expressoes: [N]},
         {dias: [10, 10], falas: [
             "Hoje é Retrospective. Pensa no que você mudaria no jeito de trabalhar, não em quem errou."], expressoes: [N]},
         {cadeiras: ["po", "sm"], parado: "pb02", falas: [
@@ -53,6 +68,10 @@ export const FALAS_DO_ESCRITORIO = {
     ],
 
     bia: [
+        {dias: [1, 1], mentor: true, falas: [
+            "A agenda abre o Planning. Estima com calma: número chutado vira hora extra no fim da sprint."], expressoes: [N]},
+        {dias: [1, 1], conhece: true, mentor: false, falas: [
+            "Mudou de cadeira? O critério continua o mesmo: pronto é o que funciona do começo ao fim."], expressoes: [N]},
         {cadeiras: ["po", "sm"], bloqueado: "pb02", falas: [
             "Ainda sem acesso à base de matrículas. Mandei outro e-mail para a secretaria."], expressoes: [T]},
         {cadeiras: ["po", "sm"], andando: "pb02", falas: [
@@ -69,6 +88,8 @@ export const FALAS_DO_ESCRITORIO = {
     ],
 
     caio: [
+        {dias: [1, 1], conhece: true, falas: [
+            "Opa, de volta! O lançamento de presença tá quase pronto. Uns dois dias."], expressoes: [A]},
         {dias: [2, 2], falas: ["Tô com quatro coisas abertas, mas tá tudo andando. Até sexta fecha."], expressoes: [A]},
         {dias: [9, 9], falas: ["Review hoje. Torcendo para o professor não clicar no botão errado."], expressoes: [A]},
         {progressoCheio: true, falas: [
@@ -77,6 +98,8 @@ export const FALAS_DO_ESCRITORIO = {
     ],
 
     lu: [
+        {dias: [1, 1], conhece: true, falas: [
+            "Oi de novo! Hoje de manhã eu tô aqui; à tarde, no outro cliente."], expressoes: [A]},
         {parado: "pb03", falas: [
             "Terminei a minha parte do acento. Agora depende do código de vocês, e eu fico parada."], expressoes: [T]},
         {emProgresso: "pb03", falas: ["Estou no acento quebrado. Meio período rende pouco, mas rende."], expressoes: [N]},
@@ -86,6 +109,8 @@ export const FALAS_DO_ESCRITORIO = {
     ],
 
     gustavo: [
+        {dias: [1, 1], conhece: true, falas: [
+            "De volta? Ótimo. A diretora continua ansiosa, então capricha."], expressoes: [N]},
         {existe: "rel01", falas: [
             "Viu? Quando o cliente pede, a gente entrega. É assim que se segura contrato."], expressoes: [A]},
         {planejado: "pb04", falas: ["Vi o boletim no quadro. Ótimo, a diretora vai adorar."], expressoes: [A]},
@@ -97,16 +122,16 @@ export const FALAS_DO_ESCRITORIO = {
     ]
 };
 
-// contexto: {dia, cadeira, mentor, itens, entrega, prontos, total, colunaDoJogador}
-// Devolve {falas, expressoes}, ou null no dia 1 e para quem não tem situações
+// contexto: {dia, cadeira, mentor, conhece, itens, entrega, prontos, total,
+// colunaDoJogador}. Devolve {falas, expressoes}, ou null quando nada bate
 export function falasDoEscritorio(chave, contexto) {
     const situacoes = FALAS_DO_ESCRITORIO[chave];
-    if (!situacoes || contexto.dia < 2) {
+    if (!situacoes) {
         return null;
     }
 
     const escolhida = situacoes.find(function (situacao) {
-        return bate(situacao, chave, contexto);
+        return (contexto.dia >= 2 || situacao.dias) && bate(situacao, chave, contexto);
     });
     if (!escolhida) {
         return null;
@@ -149,6 +174,9 @@ function bate(situacao, chave, contexto) {
         },
         mentor: function (sim) {
             return (contexto.mentor === chave) === sim;
+        },
+        conhece: function (sim) {
+            return Boolean(contexto.conhece) === sim;
         },
         existe: function (id) {
             return Boolean(cartao(id));

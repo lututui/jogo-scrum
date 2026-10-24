@@ -58,7 +58,8 @@ function sprintVazia() {
         movimentosNoQuadro: 0,
         diaDaVisitaAoQuadro: null,
         diaDoTime: 1,
-        entrega: null
+        entrega: null,
+        recebido: false
     };
 }
 
@@ -88,6 +89,7 @@ function progressoVazio() {
         }),
         conquistas: [],
         guiaVisto: false,
+        dicasVistas: [],
         perfil: null
     };
 }
@@ -167,6 +169,18 @@ export function marcarGuiaVisto(registry) {
     return salvarProgresso(registry, progresso);
 }
 
+// Dicas de primeira vez (dados/dicas.js), uma vez por partida
+export function dicaVista(registry, id) {
+    return (lerProgresso(registry).dicasVistas || []).indexOf(id) >= 0;
+}
+
+export function registrarDica(registry, id) {
+    const progresso = lerProgresso(registry);
+    progresso.dicasVistas = (progresso.dicasVistas || []).concat([id]);
+
+    return salvarProgresso(registry, progresso);
+}
+
 // Sprint em andamento na cadeira
 function sprintDaCadeira(registry, cadeira) {
     return lerProgresso(registry).sprints[cadeira];
@@ -239,6 +253,27 @@ export function registrarEntrega(registry, cadeira, entrega) {
 
 export function entregaRegistrada(registry, cadeira) {
     return sprintDaCadeira(registry, cadeira).entrega || null;
+}
+
+// O mentor recebe o jogador uma vez por sprint, no dia 1
+export function registrarBoasVindas(registry, cadeira) {
+    const progresso = lerProgresso(registry);
+    progresso.sprints[cadeira].recebido = true;
+
+    return salvarProgresso(registry, progresso);
+}
+
+export function foiRecebido(registry, cadeira) {
+    return Boolean(sprintDaCadeira(registry, cadeira).recebido);
+}
+
+// Quem já passou por outra cadeira conhece o time
+export function conheceOTime(registry, cadeira) {
+    const progresso = lerProgresso(registry);
+
+    return cadeirasConcluidas(registry).length > 0 || Object.keys(progresso.sprints).some(function (outra) {
+        return outra !== cadeira && progresso.sprints[outra].recebido;
+    });
 }
 
 export function registrarVisitaAoQuadro(registry, cadeira) {

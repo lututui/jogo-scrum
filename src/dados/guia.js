@@ -5,10 +5,15 @@
 //
 // O guia vem antes do editor de personagem, então não usa nome nem marca de
 // gênero do jogador: "Boas-vindas", e a cadeira de desenvolvimento é "Dev".
+//
+// No começo da partida só aparecem as páginas de "entrada"; o resto o
+// jogador aprende no caminho (o mentor na chegada, as dicas de dados/dicas.js)
+// e encontra completo pelo menu ou pela tecla H.
 
 export const GUIA = [
     {
         titulo: "Boas-vindas à Catavento Software",
+        entrada: true,
         texto: "A Catavento é uma software house pequena, contratada pela "
             + "Escola Machado de Assis para construir um diário de classe "
             + "digital: chamada, notas e boletim.\n\n"
@@ -18,6 +23,7 @@ export const GUIA = [
     },
     {
         titulo: "Três cadeiras, um mentor em cada",
+        entrada: true,
         texto: "A cada sprint você ocupa uma cadeira do time: Product Owner, "
             + "Scrum Master ou Dev.\n\n"
             + "Quem exerce aquele papel senta ao seu lado como mentor: Márcia "
@@ -29,6 +35,7 @@ export const GUIA = [
     },
     {
         titulo: "Uma sprint, quatro eventos",
+        entrada: true,
         texto: "A sprint dura duas semanas e segue sempre a mesma ordem:\n\n"
             + "1. Sprint Planning: o time define a meta e o que entra na sprint.\n"
             + "2. Daily Scrum: quinze minutos para os desenvolvedores se "
@@ -37,7 +44,9 @@ export const GUIA = [
             + "4. Sprint Retrospective: o time escolhe o que melhorar.\n\n"
             + "Entre um evento e outro, imprevistos acontecem: um pedido da "
             + "diretora, um bug, um colega travado. Nessas horas o mentor não "
-            + "está por perto."
+            + "está por perto.\n\n"
+            + "No escritório, o mentor da sua cadeira vem receber você e "
+            + "mostra por onde começar."
     },
     {
         titulo: "O quadro e os três medidores",

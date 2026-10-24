@@ -15,6 +15,7 @@ import {CenaEventoContextual} from "./cenas/CenaEventoContextual.js";
 import {CenaSintese} from "./cenas/CenaSintese.js";
 import {CenaGlossario} from "./cenas/CenaGlossario.js";
 import {CenaGuia} from "./cenas/CenaGuia.js";
+import {CenaDica} from "./cenas/CenaDica.js";
 import {CenaMenu} from "./cenas/CenaMenu.js";
 import {CenaConfiguracoes} from "./cenas/CenaConfiguracoes.js";
 import {CenaFPS} from "./cenas/CenaFPS.js";
@@ -61,6 +62,7 @@ const configuracao = {
         CenaFim,
         CenaGlossario,
         CenaGuia,
+        CenaDica,
         CenaConfiguracoes,
         CenaFPS,
         CenaGlobal

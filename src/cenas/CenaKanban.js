@@ -24,6 +24,7 @@ import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ALTURA_CARTAO, CartaoKanban, LARGURA_CARTAO} from "../ui/CartaoKanban.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 import {tocarEfeito} from "../ui/som.js";
+import {abrirDicaUmaVez} from "./CenaDica.js";
 
 const MARGEM = 20;
 const LARGURA_DA_COLUNA = 218;
@@ -67,6 +68,12 @@ export class CenaKanban extends Phaser.Scene {
         this.criarDicaDeMover();
         this.criarControles();
         this.desenharCartoes();
+
+        // na primeira vez, a dica do quadro abre por cima, já com o quadro
+        // desenhado atrás
+        this.time.delayedCall(0, function () {
+            abrirDicaUmaVez(this, "quadro");
+        }, [], this);
     }
 
     // O estado vem do registry quando o jogador já esteve no quadro antes

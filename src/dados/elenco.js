@@ -2,6 +2,8 @@
 //
 // "expressoes" acompanha "falas" na mesma ordem: uma expressão de retrato
 // por fala (neutro, tenso ou aprovacao). "voz" segue dados/voz.js.
+// "chegada", nos mentores, é o caminho do lugar até o ponto onde o jogador
+// começa, contornando as mesas; a volta é o mesmo caminho ao contrário.
 
 export const ELENCO = [
     {
@@ -12,6 +14,7 @@ export const ELENCO = [
         voz: {timbre: "clara", altura: 1, melodia: 1, ritmo: 1},
         x: 440,
         y: 466,
+        chegada: [[300, 466], [300, 300], [505, 300], [505, 250]],
         expressoes: ["aprovacao", "tenso", "neutro"],
         falas: [
             "Chegou cedo, {nome}. Boa.",
@@ -27,10 +30,11 @@ export const ELENCO = [
         voz: {timbre: "suave", altura: -2, melodia: 1, ritmo: 0},
         x: 600,
         y: 466,
+        chegada: [[700, 466], [700, 300], [615, 300], [615, 250]],
         expressoes: ["aprovacao", "neutro", "neutro"],
         falas: [
             "Bom te ver por aqui, {nome}.",
-            "A sprint começa amanhã e dura duas semanas. Dez dias úteis, uma meta só.",
+            "A sprint começa hoje, com o Planning, e dura duas semanas. Dez dias úteis, uma meta só.",
             "Se em algum momento você não souber o que uma palavra significa, pergunta. Ninguém aqui nasceu sabendo o que é Product Backlog."
         ]
     },
@@ -42,6 +46,7 @@ export const ELENCO = [
         voz: {timbre: "redonda", altura: 1, melodia: 2, ritmo: 1},
         x: 80,
         y: 316,
+        chegada: [[80, 340], [505, 340], [505, 250]],
         expressoes: ["neutro", "neutro", "tenso"],
         falas: [
             "Você é {o|a} aprendiz, né?",
@@ -209,6 +214,7 @@ export const OBJETOS = [
         cor: "#5f7ba8",
         x: 470,
         y: 140,
+        rotulo: "QUADRO",
         cena: "CenaKanban"
     },
     {
@@ -219,6 +225,9 @@ export const OBJETOS = [
         cor: "#5f7ba8",
         x: 680,
         y: 140,
+        rotulo: "AGENDA",
+        // "!" enquanto o Sprint Planning não foi aberto, no dia 1
+        avisoAntesDoPlanning: true,
         cena: "CenaAgenda"
     }
 ];

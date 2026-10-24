@@ -1,8 +1,9 @@
 // Guia introdutório
 //
-// Abre de dois jeitos. Como primeiro passo de uma partida nova, ocupa a tela
-// e, ao fechar, segue para a próxima cena (o editor de personagem). Pelo menu
-// ou pela tecla H, abre por cima da cena de onde veio, que volta ao fechar.
+// Abre de dois jeitos. Como primeiro passo de uma partida nova, ocupa a tela,
+// mostra só as páginas de entrada e, ao fechar, segue para a próxima cena (o
+// editor de personagem). Pelo menu ou pela tecla H, abre completo, por cima
+// da cena de onde veio, que volta ao fechar.
 // Fechar, pelo fim ou por ESC, marca o guia como visto.
 
 import {GUIA} from "../dados/guia.js";
@@ -34,6 +35,9 @@ export class CenaGuia extends Phaser.Scene {
         this.retorno = dados.retorno;
         this.depois = dados.depois;
         this.dadosDepois = dados.dadosDepois;
+        this.paginas = this.depois ? GUIA.filter(function (pagina) {
+            return pagina.entrada;
+        }) : GUIA;
         this.pagina = 0;
     }
 
@@ -95,9 +99,9 @@ export class CenaGuia extends Phaser.Scene {
     // Um ponto por página, cheio na página atual
     montarPontos() {
         const y = PAINEL.y + PAINEL.altura + 22;
-        const inicio = 480 - (GUIA.length - 1) * ESPACO_ENTRE_PONTOS / 2;
+        const inicio = 480 - (this.paginas.length - 1) * ESPACO_ENTRE_PONTOS / 2;
 
-        this.pontos = GUIA.map(function (pagina, indice) {
+        this.pontos = this.paginas.map(function (pagina, indice) {
             const ponto = this.add.circle(
                 inicio + indice * ESPACO_ENTRE_PONTOS, y, RAIO_DO_PONTO, COR_HEX.painel
             );
@@ -108,10 +112,10 @@ export class CenaGuia extends Phaser.Scene {
     }
 
     mostrarPagina() {
-        const pagina = GUIA[this.pagina];
-        const ultima = this.pagina === GUIA.length - 1;
+        const pagina = this.paginas[this.pagina];
+        const ultima = this.pagina === this.paginas.length - 1;
 
-        this.textoDaPagina.setText((this.pagina + 1) + " DE " + GUIA.length);
+        this.textoDaPagina.setText((this.pagina + 1) + " DE " + this.paginas.length);
         this.textoDoTitulo.setText(pagina.titulo);
         this.textoDoCorpo.setText(pagina.texto);
 
@@ -120,7 +124,7 @@ export class CenaGuia extends Phaser.Scene {
         }, this);
 
         this.textoDeAjuda.setText(ultima
-            ? "ENTER começa, ← volta"
+            ? "ENTER começa, ← volta" + (this.depois ? "; o guia completo fica no menu" : "")
             : "ENTER ou → avança, ← volta, clique para avançar");
     }
 
@@ -149,7 +153,7 @@ export class CenaGuia extends Phaser.Scene {
     }
 
     avancar() {
-        if (this.pagina === GUIA.length - 1) {
+        if (this.pagina === this.paginas.length - 1) {
             this.fechar();
             return;
         }
