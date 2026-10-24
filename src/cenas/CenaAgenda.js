@@ -17,6 +17,7 @@ import {compromissoDaVez, contextuaisResolvidos, eventosConcluidos} from "../dad
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira} from "../dados/texto.js";
+import {tocarEfeito} from "../ui/som.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 
@@ -206,12 +207,16 @@ export class CenaAgenda extends Phaser.Scene {
     // O escritório segue pausado atrás dos dois e é para ele que o evento volta
     abrirEvento(compromisso) {
         const chave = compromisso.reuniao ? compromisso.chave : "CenaEventoContextual";
+        if (!compromisso.reuniao) {
+            tocarEfeito(this, "imprevisto", 120);
+        }
         this.scene.stop();
         this.scene.launch(chave, compromisso.reuniao ? undefined : {evento: compromisso.evento});
         this.scene.bringToTop(chave);
     }
 
     voltarAoEscritorio() {
+        tocarEfeito(this, "voltar");
         this.scene.stop();
         this.scene.resume("CenaEscritorio");
     }

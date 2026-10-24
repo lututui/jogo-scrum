@@ -62,8 +62,9 @@ export const GUIA = [
             + "avança. Entre um e outro, dá para ver o quadro e conversar. Nas "
             + "reuniões, as setas escolhem a resposta e ENTER confirma.\n\n"
             + "G abre o glossário em qualquer tela, para consultar um termo "
-            + "sem perder o lugar. P troca de cadeira antes de a sprint "
-            + "começar."
+            + "sem perder o lugar, e O abre as configurações, com o volume "
+            + "da música, dos efeitos e das vozes. P troca de cadeira antes "
+            + "de a sprint começar."
     },
     {
         titulo: "Pontos e conquistas",

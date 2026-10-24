@@ -32,6 +32,7 @@ import {MedidoresHUD} from "../ui/MedidoresHUD.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {CaixaDialogo} from "../ui/CaixaDialogo.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
+import {tocarEfeito} from "../ui/som.js";
 
 export class CenaEscritorio extends Phaser.Scene {
 
@@ -165,8 +166,12 @@ export class CenaEscritorio extends Phaser.Scene {
             item.sprite.setVisible(presente);
             item.nome.setVisible(presente);
             item.bloqueio.body.enable = presente;
+            if (acao && !item.aviso.visible && this.presencasMontadas) {
+                tocarEfeito(this, "aviso", 1200);
+            }
             item.aviso.setVisible(Boolean(acao));
         }, this);
+        this.presencasMontadas = true;
     }
 
     criarJogador() {
@@ -355,6 +360,12 @@ export class CenaEscritorio extends Phaser.Scene {
     atualizarPainelDaSprint() {
         const dia = diaDaSprint(this.registry, this.cadeiraAtual);
 
+        // o sino só toca na volta de um compromisso que fez o dia andar
+        if (this.diaMostrado && dia > this.diaMostrado) {
+            tocarEfeito(this, "dia", 300);
+        }
+        this.diaMostrado = dia;
+
         this.textoSprint.setText("SPRINT " + (sprintsConcluidas(this.registry, this.cadeiraAtual) + 1));
         this.textoDia.setText("DIA " + dia + " DE " + DIAS_DA_SPRINT);
         this.medidores.atualizar(medidoresDaCadeira(this.registry, this.cadeiraAtual));
@@ -395,7 +406,7 @@ export class CenaEscritorio extends Phaser.Scene {
     }
 
     linhaDeAjuda() {
-        const base = "setas ou WASD andam, ENTER interage, G glossário, ESC menu";
+        const base = "setas andam, ENTER interage, G glossário, O configurações, ESC menu";
 
         if (DEPURACAO.trocaDeCadeiraLivre || !this.sprintComecou()) {
             return base + ", P troca de cadeira";

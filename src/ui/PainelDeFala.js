@@ -1,10 +1,13 @@
 // Painel de fala da sala de reunião
 //
-// A faixa do princípio ágil aparece só quando o mentor comenta uma decisão
+// A faixa do princípio ágil aparece só quando o mentor comenta uma decisão.
+// Enquanto o texto aparece, a voz de quem fala acompanha as letras.
 
 import {quadroDaExpressao} from "../dados/expressoes.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {personalizar} from "../dados/texto.js";
+import {silabasDoTexto} from "../dados/voz.js";
+import {tocarSilaba} from "./som.js";
 
 export const PAINEL = {
     x: 24,
@@ -16,6 +19,17 @@ export const PAINEL = {
 const LARGURA_DO_RETRATO = 72;
 const ALTURA_DO_RETRATO = 96;
 const VELOCIDADE = 34;
+
+// a sílaba da última letra nova que tiver uma; num quadro lento, várias
+// letras aparecem juntas, e tocar todas embolaria o som
+export function falarLetras(cena, voz, silabas, de, ate) {
+    for (let i = ate - 1; i >= de; i--) {
+        if (silabas[i]) {
+            tocarSilaba(cena, voz.timbre, silabas[i]);
+            return;
+        }
+    }
+}
 
 export class PainelDeFala {
 
@@ -105,6 +119,8 @@ export class PainelDeFala {
         this.nome.setColor(personagem.cor);
 
         this.textoCompleto = personalizar(this.cena.registry, texto);
+        this.voz = personagem.voz || null;
+        this.silabas = silabasDoTexto(this.textoCompleto, this.voz);
         this.textoRevelado = "";
         this.acumulador = 0;
         this.revelando = true;
@@ -155,11 +171,13 @@ export class PainelDeFala {
 
         this.acumulador += delta;
         const intervalo = 1000 / VELOCIDADE;
+        const antes = this.textoRevelado.length;
         while (this.acumulador >= intervalo && !this.terminouDeRevelar) {
             this.acumulador -= intervalo;
             this.textoRevelado = this.textoCompleto.slice(0, this.textoRevelado.length + 1);
         }
         this.texto.setText(this.textoRevelado);
+        falarLetras(this.cena, this.voz, this.silabas, antes, this.textoRevelado.length);
 
         if (this.terminouDeRevelar) {
             this.revelando = false;

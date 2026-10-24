@@ -6,6 +6,7 @@
 
 import {COLUNAS, ETIQUETA_DE_BLOQUEIO} from "../dados/quadro.js";
 import {COR, COR_HEX, FONTE, TIPO_DE_ITEM} from "../dados/tema.js";
+import {tocarEfeito} from "./som.js";
 
 const MOLDURA = {x: 150, y: 86, largura: 660, altura: 248};
 const MARGEM = 12;
@@ -45,6 +46,14 @@ export class QuadroReduzido {
         this.montarCartoes(antes, depois);
         this.contadores = this.montarColunas(antes);
         this.animar(depois);
+
+        // o sopro acompanha os cartões; o parado toca quando o destaque aparece
+        if (this.alterados.length > 0) {
+            tocarEfeito(cena, "cartao", ESPERA);
+        }
+        if (this.parados.length > 0) {
+            tocarEfeito(cena, "parado", this.alterados.length > 0 ? ESPERA + DURACAO : 0);
+        }
 
         // Nada andou: o quadro já abre no fim, com o cartão parado em destaque
         if (this.alterados.length === 0) {

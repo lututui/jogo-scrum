@@ -12,6 +12,7 @@ import {aplicarNoQuadro} from "../dados/estadoDoQuadro.js";
 import {expressaoDaAvaliacao} from "../dados/expressoes.js";
 import {registrarAcaoResolvida, registrarContextualResolvido, registrarDecisao} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {vozDoJogador} from "../dados/perfil.js";
 import {nomeDaCadeira, nomeDoJogador} from "../dados/texto.js";
 import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
@@ -104,7 +105,8 @@ export class CenaEventoContextual extends Phaser.Scene {
                 chaveDoRetrato: "jogador_" + cadeira,
                 nome: nomeDoJogador(this.registry),
                 papel: nomeDaCadeira(this.registry, cadeira),
-                cor: CADEIRAS[cadeira].cor
+                cor: CADEIRAS[cadeira].cor,
+                voz: vozDoJogador(this.registry)
             };
         }
 
@@ -120,7 +122,8 @@ export class CenaEventoContextual extends Phaser.Scene {
             chaveDoRetrato: npc.chave,
             nome: npc.nome,
             papel: npc.papel,
-            cor: npc.cor
+            cor: npc.cor,
+            voz: npc.voz
         };
     }
 

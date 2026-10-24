@@ -23,6 +23,7 @@ import {
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ALTURA_CARTAO, CartaoKanban, LARGURA_CARTAO} from "../ui/CartaoKanban.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
+import {tocarEfeito} from "../ui/som.js";
 
 const MARGEM = 20;
 const LARGURA_DA_COLUNA = 218;
@@ -421,6 +422,7 @@ export class CenaKanban extends Phaser.Scene {
         item.coluna = idColuna;
         item.diaDoUltimoPasso = diaDaSprint(this.registry, this.cadeira);
         this.reordenar(item, posicao);
+        tocarEfeito(this, "cartao");
         registrarMovimentoNoQuadro(this.registry, this.cadeira);
         return true;
     }
@@ -546,6 +548,7 @@ export class CenaKanban extends Phaser.Scene {
     }
 
     voltarAoEscritorio() {
+        tocarEfeito(this, "voltar");
         this.scene.stop();
         this.scene.resume("CenaEscritorio");
     }

@@ -1,7 +1,7 @@
 // Dados do elenco presente na cena do escritório
 //
 // "expressoes" acompanha "falas" na mesma ordem: uma expressão de retrato
-// por fala (neutro, tenso ou aprovacao).
+// por fala (neutro, tenso ou aprovacao). "voz" segue dados/voz.js.
 
 export const ELENCO = [
     {
@@ -9,6 +9,7 @@ export const ELENCO = [
         nome: "Márcia",
         papel: "Product Owner",
         cor: "#c0392b",
+        voz: {timbre: "clara", altura: 1, melodia: 1, ritmo: 1},
         x: 440,
         y: 466,
         expressoes: ["aprovacao", "tenso", "neutro"],
@@ -23,6 +24,7 @@ export const ELENCO = [
         nome: "Renan",
         papel: "Scrum Master",
         cor: "#1f6f8b",
+        voz: {timbre: "suave", altura: -2, melodia: 1, ritmo: 0},
         x: 600,
         y: 466,
         expressoes: ["aprovacao", "neutro", "neutro"],
@@ -37,6 +39,7 @@ export const ELENCO = [
         nome: "Bia",
         papel: "Desenvolvedora sênior",
         cor: "#7a4bb5",
+        voz: {timbre: "redonda", altura: 1, melodia: 2, ritmo: 1},
         x: 80,
         y: 316,
         expressoes: ["neutro", "neutro", "tenso"],
@@ -51,6 +54,7 @@ export const ELENCO = [
         nome: "Caio",
         papel: "Desenvolvedor",
         cor: "#e08a3c",
+        voz: {timbre: "clara", altura: 2, melodia: 3, ritmo: 2},
         x: 230,
         y: 316,
         expressoes: ["aprovacao", "aprovacao", "aprovacao"],
@@ -65,6 +69,7 @@ export const ELENCO = [
         nome: "Lu",
         papel: "Design e desenvolvimento",
         cor: "#8795a8",
+        voz: {timbre: "soprada", altura: 3, melodia: 2, ritmo: 1},
         x: 155,
         y: 466,
         expressoes: ["aprovacao", "neutro", "tenso"],
@@ -79,6 +84,7 @@ export const ELENCO = [
         nome: "Gustavo",
         papel: "Dono da Catavento",
         cor: "#6b7a90",
+        voz: {timbre: "redonda", altura: -4, melodia: 1, ritmo: 0},
         x: 754,
         y: 466,
         expressoes: ["aprovacao", "neutro", "aprovacao"],
@@ -93,6 +99,7 @@ export const ELENCO = [
         nome: "Estela",
         papel: "Diretora da escola",
         cor: "#c9a96a",
+        voz: {timbre: "suave", altura: 2, melodia: 1, ritmo: 1},
         teste: true,
         x: 765,
         y: 312,
@@ -107,6 +114,7 @@ export const ELENCO = [
         nome: "Hélio",
         papel: "Professor",
         cor: "#3f7a52",
+        voz: {timbre: "nasal", altura: -1, melodia: 2, ritmo: 2},
         teste: true,
         x: 818,
         y: 312,
@@ -121,6 +129,7 @@ export const ELENCO = [
         nome: "Sandra",
         papel: "Secretaria da escola",
         cor: "#a87fc4",
+        voz: {timbre: "soprada", altura: 0, melodia: 1, ritmo: 1},
         teste: true,
         x: 871,
         y: 312,

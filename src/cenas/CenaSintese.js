@@ -19,6 +19,7 @@ import {
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira, personalizar} from "../dados/texto.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
+import {tocarEfeito} from "../ui/som.js";
 
 const MARGEM = 24;
 const LARGURA_DA_COLUNA = 440;
@@ -47,6 +48,11 @@ export class CenaSintese extends Phaser.Scene {
         this.montarParaRevisar();
         this.montarRodape();
         this.criarControles();
+
+        tocarEfeito(this, "vinheta");
+        if (this.sprint.conquistas.length > 0) {
+            tocarEfeito(this, "conquista", 1300);
+        }
     }
 
     // ---------------------------------------------------------

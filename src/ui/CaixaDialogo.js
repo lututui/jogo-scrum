@@ -4,6 +4,8 @@ import {DEPURACAO} from "../dados/depuracao.js";
 import {TOTAL_DE_EXPRESSOES, quadroDaExpressao} from "../dados/expressoes.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {personalizar} from "../dados/texto.js";
+import {silabasDoTexto} from "../dados/voz.js";
+import {falarLetras} from "./PainelDeFala.js";
 
 
 export class CaixaDialogo {
@@ -85,6 +87,7 @@ export class CaixaDialogo {
             return personalizar(registry, fala);
         });
         this.expressoes = interlocutor.expressoes || [];
+        this.voz = interlocutor.voz || null;
         this.indiceFala = 0;
         this.aoFechar = aoFechar || null;
 
@@ -128,6 +131,7 @@ export class CaixaDialogo {
         }
         this.textoRevelado = "";
         this.acumulador = 0;
+        this.silabas = silabasDoTexto(this.falaCompleta, this.voz);
         this.textoCorpo.setText("");
         this.textoDica.setText("ENTER para continuar");
     }
@@ -179,11 +183,13 @@ export class CaixaDialogo {
         }
         this.acumulador += delta;
         const intervalo = 1000 / this.velocidade;
+        const antes = this.textoRevelado.length;
         while (this.acumulador >= intervalo && !this.revelacaoTerminou) {
             this.acumulador -= intervalo;
             this.textoRevelado = this.falaCompleta.slice(0, this.textoRevelado.length + 1);
         }
         this.textoCorpo.setText(this.textoRevelado);
+        falarLetras(this.cena, this.voz, this.silabas, antes, this.textoRevelado.length);
         if (this.revelacaoTerminou) {
             this.atualizarDica();
         }

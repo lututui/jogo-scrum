@@ -1,6 +1,6 @@
 // Editor de personagem
 //
-// Nome, tratamento e aparência do jogador. A prévia mostra o personagem
+// Nome, tratamento, aparência e voz do jogador. A prévia mostra o personagem
 // parado, com expressão neutra e sem crachá, sobre listras, numa textura
 // própria: nada muda no jogo até o CONFIRMAR, e ESC volta sem gravar.
 // CONFIRMAR só vale com nome válido e tratamento escolhido.
@@ -9,7 +9,11 @@
 // quadrados, com um último conta-gotas para a cor livre; nos óculos, o
 // primeiro é um X, sem óculos. ENTER na linha do nome abre o campo de texto;
 // numa linha de cor, o conta-gotas. O nome e o seletor de cor são campos do
-// HTML por cima do jogo.
+// HTML por cima do jogo. As linhas vêm em grupos (quem é, corpo, roupas,
+// voz), separados por um respiro. O timbre da voz fica em quadrados
+// numerados, com um alto-falante no fim que toca a amostra; altura, melodia
+// e ritmo são réguas, que respondem a clique e a arrastar. Mudar a voz também
+// toca a amostra.
 
 import {
     APARENCIA_PADRAO,
@@ -28,10 +32,14 @@ import {
     normalizarNome,
     perfilDoJogador,
     perfilValido,
-    salvarPerfil
+    salvarPerfil,
+    vozDoJogador
 } from "../dados/perfil.js";
+import {ALTURAS, MELODIAS, NOMES_DA_VOZ, RITMOS, TIMBRES, VOZ_PADRAO, sortearVoz} from "../dados/voz.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {Regua} from "../ui/Regua.js";
 import {aplicarPerfil, montarPrevia} from "../ui/montarJogador.js";
+import {falarAmostra, pararAmostra, tocarEfeito} from "../ui/som.js";
 
 const NOMES = {
     masculino: "Masculino",
@@ -72,12 +80,17 @@ const COLUNA_DA_OUTRA_SETA = 846;
 
 // quadrados das paletas
 const COLUNA_DOS_QUADRADOS = 600;
-const LADO_DO_QUADRADO = 20;
-const PASSO_DO_QUADRADO = 25;
+const LADO_DO_QUADRADO = 18;
+const PASSO_DO_QUADRADO = 23;
 const TOPO_DA_LISTA = 56;
-const ALTURA_DA_LINHA = 28;
+const ALTURA_DA_LINHA = 22;
 const ESPACO_ENTRE_LINHAS = 2;
-const TOPO_DOS_BOTOES = 452;
+// respiro entre grupos de linhas, com um fio no meio
+const ESPACO_ENTRE_GRUPOS = 10;
+
+// réguas da voz
+const LARGURA_DA_REGUA = 160;
+const TOPO_DOS_BOTOES = 470;
 const LARGURA_DO_BOTAO = 172;
 const ALTURA_DO_BOTAO = 34;
 
@@ -110,6 +123,22 @@ const DESENHO_DO_CONTA_GOTAS = [
     "............"
 ];
 
+// alto-falante, no mesmo estilo
+const DESENHO_DO_ALTO_FALANTE = [
+    "............",
+    "......#.....",
+    ".....##...#.",
+    "....###.#..#",
+    "#######..#.#",
+    "#######..#.#",
+    "#######..#.#",
+    "#######..#.#",
+    "....###.#..#",
+    ".....##...#.",
+    "......#.....",
+    "............"
+];
+
 const LARGURA_DO_CAMPO = 150;
 const COLUNA_DO_ERRO = COLUNA_DO_VALOR + LARGURA_DO_CAMPO + 10;
 
@@ -121,9 +150,10 @@ function copiar(aparencia) {
     return Object.assign({}, aparencia);
 }
 
-// marcas dos quadrados especiais de uma paleta
+// marcas dos quadrados especiais de uma paleta e do timbre
 const NENHUMA = "nenhuma";
 const CONTA_GOTAS = "conta-gotas";
+const ALTO_FALANTE = "alto-falante";
 
 // as cores da aparência que não estão entre as sugeridas, por categoria
 function coresLivres(aparencia) {
@@ -178,12 +208,16 @@ function criarTexturas(cena) {
         });
     });
 
-    // o contorno claro deixa o ícone visível sobre qualquer cor
-    const desenho = DESENHO_DO_CONTA_GOTAS;
+    criarIcone(cena, "conta_gotas", DESENHO_DO_CONTA_GOTAS);
+    criarIcone(cena, "alto_falante", DESENHO_DO_ALTO_FALANTE);
+}
+
+// o contorno claro deixa o ícone visível sobre qualquer cor
+function criarIcone(cena, chave, desenho) {
     const cheio = function (x, y) {
         return desenho[y] !== undefined && desenho[y][x] === "#";
     };
-    criarTexturaDePixels(cena, "conta_gotas", desenho[0].length, desenho.length, function (x, y) {
+    criarTexturaDePixels(cena, chave, desenho[0].length, desenho.length, function (x, y) {
         if (cheio(x, y)) {
             return COR_HEX.contorno;
         }
@@ -208,6 +242,7 @@ export class CenaEditor extends Phaser.Scene {
         const perfil = perfilDoJogador(this.registry);
 
         this.aparencia = copiar(perfil ? perfil.aparencia : APARENCIA_PADRAO);
+        this.voz = copiar(vozDoJogador(this.registry));
         this.nome = perfil ? perfil.nome : "";
         this.pronome = perfil ? perfil.pronome : null;
         this.personalizadas = coresLivres(this.aparencia);
@@ -225,6 +260,27 @@ export class CenaEditor extends Phaser.Scene {
         this.montarCampos();
         this.criarControles();
         this.atualizar();
+
+        // as configurações podem abrir por cima; os campos do HTML ficariam
+        // na frente delas
+        this.events.on("pause", this.esconderCampos, this);
+        this.events.on("resume", this.mostrarCampos, this);
+        this.events.once("shutdown", function () {
+            pararAmostra();
+            this.events.off("pause", this.esconderCampos, this);
+            this.events.off("resume", this.mostrarCampos, this);
+        }, this);
+    }
+
+    esconderCampos() {
+        this.campoDoNome.blur();
+        this.domDoNome.setVisible(false);
+        this.ancoraDoSeletor.setVisible(false);
+    }
+
+    mostrarCampos() {
+        this.domDoNome.setVisible(true);
+        this.ancoraDoSeletor.setVisible(true);
     }
 
     // ------------------------------------------------------------------
@@ -245,6 +301,24 @@ export class CenaEditor extends Phaser.Scene {
                 },
                 gravar: function (valor) {
                     cena.aparencia[campo] = valor;
+                }
+            };
+        };
+        // réguas da voz, recuadas sob "Voz"; "texto" escreve o valor
+        const regua = function (id, rotulo, valores, campo, texto) {
+            return {
+                id: id,
+                rotulo: rotulo,
+                tipo: "regua",
+                valores: valores,
+                daVoz: true,
+                recuo: true,
+                texto: texto,
+                ler: function () {
+                    return cena.voz[campo];
+                },
+                gravar: function (valor) {
+                    cena.voz[campo] = valor;
                 }
             };
         };
@@ -279,10 +353,10 @@ export class CenaEditor extends Phaser.Scene {
                     cena.pronome = valor;
                 }
             },
-            paleta("pele", "Pele", "pele", {cores: TONS_DE_PELE, comSeletor: false}),
+            paleta("pele", "Pele", "pele", {cores: TONS_DE_PELE, comSeletor: false, separa: true}),
             opcao("estilo", "Cabelo", ESTILOS_DE_CABELO, "estiloDeCabelo"),
             paleta("cabelo", "Cor do cabelo", "cabelo"),
-            opcao("cima", "Parte de cima", Object.keys(PECAS_DE_CIMA), "pecaDeCima"),
+            Object.assign(opcao("cima", "Parte de cima", Object.keys(PECAS_DE_CIMA), "pecaDeCima"), {separa: true}),
             paleta("superior", "Cor primária", "superior", {recuo: true}),
             paleta("interna", "Cor secundária", "interna", {
                 recuo: true,
@@ -293,8 +367,25 @@ export class CenaEditor extends Phaser.Scene {
             opcao("baixo", "Parte de baixo", Object.keys(PECAS_DE_BAIXO), "pecaDeBaixo"),
             paleta("inferior", "Cor primária", "inferior", {recuo: true}),
             paleta("oculos", "Óculos", "oculos", {comNenhum: true}),
+            {id: "voz", rotulo: "Voz", tipo: "timbre", daVoz: true, separa: true},
+            regua("altura", "Altura", ALTURAS, "altura", function (valor) {
+                return valor < 0 ? "grave" : valor > 0 ? "aguda" : "média";
+            }),
+            regua("melodia", "Melodia", MELODIAS, "melodia", function (valor) {
+                return NOMES_DA_VOZ.melodia[valor].toLowerCase();
+            }),
+            regua("ritmo", "Ritmo", RITMOS, "ritmo", function (valor) {
+                return NOMES_DA_VOZ.ritmo[valor].toLowerCase();
+            }),
             {id: "botoes", tipo: "botoes"}
         ];
+
+        // a altura de cada linha, com os respiros dos grupos
+        let respiros = 0;
+        this.linhas.forEach(function (linha, indice) {
+            respiros += linha.separa ? 1 : 0;
+            linha.y = TOPO_DA_LISTA + indice * (ALTURA_DA_LINHA + ESPACO_ENTRE_LINHAS) + respiros * ESPACO_ENTRE_GRUPOS;
+        });
     }
 
     linhaAtiva(linha) {
@@ -305,6 +396,9 @@ export class CenaEditor extends Phaser.Scene {
         const valor = linha.ler();
         if (linha.id === "pronome" && valor === null) {
             return "escolha com ← →";
+        }
+        if (linha.texto) {
+            return linha.texto(valor);
         }
         return NOMES[valor] || String(valor);
     }
@@ -363,11 +457,31 @@ export class CenaEditor extends Phaser.Scene {
                 ? (passo > 0 ? 0 : linha.valores.length - 1)
                 : (atual + passo + linha.valores.length) % linha.valores.length;
             linha.gravar(linha.valores[proximo]);
+        } else if (linha.tipo === "timbre") {
+            const atual = TIMBRES.indexOf(this.voz.timbre);
+            this.voz.timbre = TIMBRES[(atual + passo + TIMBRES.length) % TIMBRES.length];
+        } else if (linha.tipo === "regua") {
+            const atual = linha.valores.indexOf(linha.ler());
+            const proximo = Phaser.Math.Clamp(atual + passo, 0, linha.valores.length - 1);
+            if (proximo === atual) {
+                return;
+            }
+            linha.gravar(linha.valores[proximo]);
         } else if (linha.tipo === "botoes") {
             this.botao = Phaser.Math.Clamp(this.botao + passo, 0, BOTOES.length - 1);
         }
 
+        if (linha.daVoz) {
+            this.falarAmostra();
+        } else {
+            tocarEfeito(this, "cursor");
+        }
         this.atualizar();
+    }
+
+    falarAmostra() {
+        const nome = normalizarNome(this.nome);
+        falarAmostra(this, this.voz, nome ? "Oi, eu sou " + nome + ". Tudo certo por aí?" : "Oi! Tudo certo por aí?");
     }
 
     // ENTER numa linha
@@ -378,6 +492,8 @@ export class CenaEditor extends Phaser.Scene {
             this.abrirSeletor(linha);
         } else if (linha.tipo === "opcao") {
             this.trocar(linha, 1);
+        } else if (linha.daVoz) {
+            this.falarAmostra();
         } else if (linha.tipo === "botoes") {
             this.apertar(BOTOES[this.botao].id);
         }
@@ -393,6 +509,7 @@ export class CenaEditor extends Phaser.Scene {
 
         if (proximo >= 0 && proximo < this.linhas.length) {
             this.indice = proximo;
+            tocarEfeito(this, "cursor");
             this.atualizar();
         }
     }
@@ -401,6 +518,7 @@ export class CenaEditor extends Phaser.Scene {
     // botões
 
     apertar(id) {
+        tocarEfeito(this, "confirmar");
         if (id === "sortear") {
             this.sortear();
         } else if (id === "reset") {
@@ -410,12 +528,12 @@ export class CenaEditor extends Phaser.Scene {
         }
     }
 
-    // aparência ao acaso, entre as opções e as cores sugeridas, e um nome
-    // sugerido; o nome segue o tratamento escolhido, que o sorteio não muda
+    // aparência ao acaso, entre as opções e as cores sugeridas, um
+    // tratamento e um nome sugerido para esse tratamento
     sortear() {
         const sortear = Phaser.Utils.Array.GetRandom;
-        const nomes = (this.pronome ? NOMES_SUGERIDOS[this.pronome]
-            : NOMES_SUGERIDOS.masculino.concat(NOMES_SUGERIDOS.feminino)).filter(function (nome) {
+        this.pronome = sortear(PRONOMES);
+        const nomes = NOMES_SUGERIDOS[this.pronome].filter(function (nome) {
             return nome !== this.nome;
         }, this);
 
@@ -436,12 +554,15 @@ export class CenaEditor extends Phaser.Scene {
             inferior: cor("inferior"),
             oculos: Math.random() < CHANCE_DE_OCULOS ? cor("oculos") : null
         };
+        this.voz = sortearVoz();
         this.atualizar();
+        this.falarAmostra();
     }
 
     // o personagem padrão, sem nome e sem tratamento
     restaurar() {
         this.aparencia = copiar(APARENCIA_PADRAO);
+        this.voz = copiar(VOZ_PADRAO);
         this.personalizadas = coresLivres(this.aparencia);
         this.nome = "";
         this.pronome = null;
@@ -466,7 +587,12 @@ export class CenaEditor extends Phaser.Scene {
     }
 
     perfilEditado() {
-        return {nome: normalizarNome(this.nome), pronome: this.pronome, aparencia: copiar(this.aparencia)};
+        return {
+            nome: normalizarNome(this.nome),
+            pronome: this.pronome,
+            aparencia: copiar(this.aparencia),
+            voz: copiar(this.voz)
+        };
     }
 
     // só sai para o jogo com perfil completo: nome válido, tratamento escolhido
@@ -508,7 +634,7 @@ export class CenaEditor extends Phaser.Scene {
         this.add.text(936, 13, "ESC VOLTA SEM SALVAR", estilo).setOrigin(1, 0);
 
         this.add.text(480, 516,
-            "↑ ↓ escolhem, ← → trocam, ENTER edita o nome ou abre o conta-gotas", {
+            "↑ ↓ escolhem, ← → trocam, ENTER edita o nome, abre o conta-gotas ou toca a voz", {
                 fontFamily: FONTE,
                 fontSize: "12px",
                 color: COR.textoSecundario
@@ -545,9 +671,14 @@ export class CenaEditor extends Phaser.Scene {
                 return null;
             }
 
-            const y = TOPO_DA_LISTA + indice * (ALTURA_DA_LINHA + ESPACO_ENTRE_LINHAS);
+            const y = linha.y;
             const meio = y + ALTURA_DA_LINHA / 2;
             const texto = {fontFamily: FONTE, fontSize: "13px", color: COR.texto};
+
+            if (linha.separa) {
+                this.add.rectangle(ESQUERDA_DA_LISTA, y - ESPACO_ENTRE_GRUPOS / 2 - 1, LARGURA_DA_LISTA, 1,
+                    COR_HEX.contornoSuave).setOrigin(0, 0.5);
+            }
 
             const fundo = this.add.rectangle(ESQUERDA_DA_LISTA, y, LARGURA_DA_LISTA, ALTURA_DA_LINHA,
                 COR_HEX.painel).setOrigin(0, 0).setInteractive({useHandCursor: true});
@@ -575,10 +706,21 @@ export class CenaEditor extends Phaser.Scene {
 
             visual.valor = this.add.text(COLUNA_DO_VALOR, meio, "", texto).setOrigin(0, 0.5);
 
-            if (linha.tipo === "paleta") {
-                visual.quadrados = this.montarQuadrados(linha, indice, meio);
+            if (linha.tipo === "paleta" || linha.tipo === "timbre") {
+                visual.quadrados = linha.tipo === "paleta"
+                    ? this.montarQuadrados(linha, indice, meio)
+                    : this.montarTimbres(indice, meio);
                 visual.anel = this.add.rectangle(0, meio, LADO_DO_QUADRADO + 6, LADO_DO_QUADRADO + 6)
                     .setStrokeStyle(2, COR_HEX.destaque);
+                if (linha.tipo === "timbre") {
+                    visual.valor.setX(COLUNA_DOS_QUADRADOS + (TIMBRES.length + 1) * PASSO_DO_QUADRADO + 8);
+                }
+                return visual;
+            }
+
+            if (linha.tipo === "regua") {
+                visual.regua = this.montarRegua(linha, indice, meio);
+                visual.valor.setX(COLUNA_DOS_QUADRADOS + LARGURA_DA_REGUA + 18);
                 return visual;
             }
 
@@ -588,6 +730,60 @@ export class CenaEditor extends Phaser.Scene {
             ];
             return visual;
         }, this);
+    }
+
+    // um quadrado por timbre, numerado, e o alto-falante no fim
+    montarTimbres(indice, meio) {
+        return TIMBRES.concat([ALTO_FALANTE]).map(function (timbre, posicao) {
+            const x = COLUNA_DOS_QUADRADOS + posicao * PASSO_DO_QUADRADO + LADO_DO_QUADRADO / 2;
+            const fundo = this.add.rectangle(x, meio, LADO_DO_QUADRADO, LADO_DO_QUADRADO, COR_HEX.painel)
+                .setStrokeStyle(1, COR_HEX.contorno).setInteractive({useHandCursor: true});
+            const marca = timbre === ALTO_FALANTE
+                ? this.add.image(x, meio, "alto_falante")
+                : this.add.text(x, meio, String(posicao + 1), {
+                    fontFamily: FONTE,
+                    fontSize: "12px",
+                    color: COR.texto
+                }).setOrigin(0.5, 0.5);
+
+            fundo.on("pointerdown", function () {
+                this.selecionarLinha(indice);
+                if (timbre === ALTO_FALANTE) {
+                    this.falarAmostra();
+                    return;
+                }
+                this.voz.timbre = timbre;
+                this.falarAmostra();
+                this.atualizar();
+            }, this);
+
+            return {quadrado: timbre, x: x, fundo: fundo, partes: [fundo, marca]};
+        }, this);
+    }
+
+    // régua da voz: muda ao clicar e ao arrastar; a amostra toca quando o
+    // ponteiro solta, para não falar a cada marca
+    montarRegua(linha, indice, meio) {
+        const cena = this;
+        return new Regua(this, {
+            x: COLUNA_DOS_QUADRADOS,
+            meio: meio,
+            largura: LARGURA_DA_REGUA,
+            quantidade: linha.valores.length,
+            indice: linha.valores.indexOf(linha.ler()),
+            aoPegar: function () {
+                cena.selecionarLinha(indice);
+            },
+            aoMudar: function (posicao) {
+                linha.gravar(linha.valores[posicao]);
+                cena.atualizar();
+            },
+            aoSoltar: function (mudou) {
+                if (mudou) {
+                    cena.falarAmostra();
+                }
+            }
+        });
     }
 
     // um quadrado por cor; o X e o conta-gotas têm desenho próprio
@@ -678,7 +874,7 @@ export class CenaEditor extends Phaser.Scene {
         const linhaDoNome = this.linhas.findIndex(function (linha) {
             return linha.tipo === "nome";
         });
-        const meio = TOPO_DA_LISTA + linhaDoNome * (ALTURA_DA_LINHA + ESPACO_ENTRE_LINHAS) + ALTURA_DA_LINHA / 2;
+        const meio = this.linhas[linhaDoNome].y + ALTURA_DA_LINHA / 2;
 
         const campo = document.createElement("input");
         campo.type = "text";
@@ -698,7 +894,7 @@ export class CenaEditor extends Phaser.Scene {
             font: "13px " + FONTE,
             outline: "none"
         });
-        this.add.dom(COLUNA_DO_VALOR, meio, campo).setOrigin(0, 0.5);
+        this.domDoNome = this.add.dom(COLUNA_DO_VALOR, meio, campo).setOrigin(0, 0.5);
         this.campoDoNome = campo;
 
         campo.addEventListener("input", function () {
@@ -760,7 +956,7 @@ export class CenaEditor extends Phaser.Scene {
         this.campoDoSeletor = linha.campo;
         this.seletor.value = this.personalizadas[linha.campo] || this.aparencia[linha.campo] || linha.cores[0];
         this.ancoraDoSeletor.setPosition(quadrados[quadrados.length - 1].x,
-            TOPO_DA_LISTA + indice * (ALTURA_DA_LINHA + ESPACO_ENTRE_LINHAS) + ALTURA_DA_LINHA);
+            linha.y + ALTURA_DA_LINHA);
 
         try {
             this.seletor.showPicker();
@@ -816,6 +1012,19 @@ export class CenaEditor extends Phaser.Scene {
 
             if (linha.tipo === "paleta") {
                 this.atualizarQuadrados(linha, visual, ativa);
+                return;
+            }
+
+            if (linha.tipo === "timbre") {
+                const atual = TIMBRES.indexOf(this.voz.timbre);
+                visual.anel.setX(visual.quadrados[atual].x);
+                visual.valor.setText(NOMES_DA_VOZ.timbre[this.voz.timbre]);
+                return;
+            }
+
+            if (linha.tipo === "regua") {
+                visual.regua.definir(linha.valores.indexOf(linha.ler()));
+                visual.valor.setText(linha.texto(linha.ler()));
                 return;
             }
 

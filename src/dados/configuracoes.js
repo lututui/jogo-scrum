@@ -6,7 +6,13 @@
 
 const CHAVE_NO_NAVEGADOR = "jogo-scrum:configuracoes";
 
+// volumes de 0 a 10
+export const VOLUME_MAXIMO = 10;
+
 const PADRAO = {
+    volumeMusica: 5,
+    volumeEfeitos: 8,
+    volumeVozes: 8,
     mostrarFps: false
 };
 

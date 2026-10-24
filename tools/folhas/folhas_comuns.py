@@ -3,7 +3,8 @@ import re
 
 from PIL import Image, ImageDraw, ImageFont
 
-RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# raiz do projeto: este arquivo fica em tools/folhas
+RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ARQUIVO_DO_ELENCO = os.path.join(RAIZ, "src", "dados", "elenco.js")
 DIR_FIGURAS = os.path.join(RAIZ, "figuras")
 

@@ -1,7 +1,8 @@
 // Perfil do jogador
 //
-// Nome, pronome de tratamento e aparência, criados no editor de personagem.
-// Fica dentro do progresso, então é gravado junto e Nova partida o apaga.
+// Nome, pronome de tratamento, aparência e voz, criados no editor de
+// personagem. Fica dentro do progresso, então é gravado junto e Nova partida
+// o apaga. A voz é opcional: um perfil de antes dela fala com a voz padrão.
 //
 // Um progresso salvo antes do editor não tem perfil; um perfil incompleto ou
 // com valor fora do catálogo também conta como ausente, e o jogador passa
@@ -16,6 +17,7 @@ import {
     TONS_DE_PELE
 } from "./aparencia.js";
 import {lerProgresso, salvarProgresso} from "./progresso.js";
+import {VOZ_PADRAO, vozValida} from "./voz.js";
 
 export const PRONOMES = ["masculino", "feminino"];
 
@@ -99,7 +101,8 @@ export function salvarPerfil(registry, perfil) {
     const limpo = {
         nome: normalizarNome(perfil.nome),
         pronome: perfil.pronome,
-        aparencia: Object.assign({}, perfil.aparencia)
+        aparencia: Object.assign({}, perfil.aparencia),
+        voz: Object.assign({}, vozValida(perfil.voz) ? perfil.voz : VOZ_PADRAO)
     };
 
     if (!perfilValido(limpo)) {
@@ -111,6 +114,13 @@ export function salvarPerfil(registry, perfil) {
     salvarProgresso(registry, progresso);
 
     return true;
+}
+
+// a voz do perfil, ou a padrão
+export function vozDoJogador(registry) {
+    const perfil = perfilDoJogador(registry);
+
+    return perfil && vozValida(perfil.voz) ? perfil.voz : VOZ_PADRAO;
 }
 
 // a aparência do perfil, ou a padrão enquanto não houver perfil

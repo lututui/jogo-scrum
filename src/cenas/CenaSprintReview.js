@@ -15,6 +15,7 @@ import {
 } from "../dados/estadoDoQuadro.js";
 import {registrarEntrega} from "../dados/progresso.js";
 import {CenaReuniao} from "./CenaReuniao.js";
+import {tocarEfeito} from "../ui/som.js";
 
 const COLUNA_CONCLUIDO = "concluido";
 const COLUNA_EM_REVISAO = "revisao";
@@ -33,6 +34,7 @@ export class CenaSprintReview extends CenaReuniao {
 
         const entrega = entregaDaSprint(this.registry, this.cadeira());
         registrarEntrega(this.registry, this.cadeira(), entrega);
+        tocarEfeito(this, "vinheta");
 
         const cena = this;
         this.falar(this.chaveDoMentor(), "Antes de começar, o quadro: " + descreverEntrega(entrega), function () {

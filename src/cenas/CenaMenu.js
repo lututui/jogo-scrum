@@ -71,7 +71,7 @@ export class CenaMenu extends Phaser.Scene {
             color: COR.alerta
         }).setOrigin(0.5, 0);
 
-        this.add.text(480, 516, "setas escolhem, ENTER confirma", {
+        this.add.text(480, 516, "setas escolhem, ENTER confirma; O abre as configurações em qualquer tela", {
             fontFamily: FONTE,
             fontSize: "12px",
             color: COR.textoSecundario

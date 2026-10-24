@@ -18,6 +18,7 @@ import {CenaGuia} from "./cenas/CenaGuia.js";
 import {CenaMenu} from "./cenas/CenaMenu.js";
 import {CenaConfiguracoes} from "./cenas/CenaConfiguracoes.js";
 import {CenaFPS} from "./cenas/CenaFPS.js";
+import {CenaGlobal} from "./cenas/CenaGlobal.js";
 import {CenaFim} from "./cenas/CenaFim.js";
 import {CenaEditor} from "./cenas/CenaEditor.js";
 
@@ -61,7 +62,8 @@ const configuracao = {
         CenaGlossario,
         CenaGuia,
         CenaConfiguracoes,
-        CenaFPS
+        CenaFPS,
+        CenaGlobal
     ]
 };
 

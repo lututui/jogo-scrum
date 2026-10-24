@@ -8,6 +8,7 @@
 
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {personalizar} from "../dados/texto.js";
+import {tocarEfeito} from "../ui/som.js";
 
 const ALTURA_DA_LINHA = 40;
 const ESPACO_ENTRE_LINHAS = 6;
@@ -244,7 +245,11 @@ export class ListaDeOpcoes {
             return;
         }
 
+        const antes = this.indice;
         this.indice = Phaser.Math.Clamp(this.indice + passo, 0, this.opcoes.length - 1);
+        if (this.indice !== antes) {
+            tocarEfeito(this.cena, "cursor");
+        }
         if (this.ajustarDeslocamento()) {
             this.desenhar();
             return;
@@ -275,6 +280,7 @@ export class ListaDeOpcoes {
         if (!opcao || !this.aoConfirmar) {
             return;
         }
+        tocarEfeito(this.cena, "confirmar");
         this.aoConfirmar(opcao, this.indice);
     }
 

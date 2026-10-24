@@ -8,6 +8,7 @@ import {CONQUISTAS} from "../dados/conquistas.js";
 import {MEDIDORES, conquistasDoJogo, conquistasPorId, ultimaSprint} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira, personalizar} from "../dados/texto.js";
+import {tocarEfeito} from "../ui/som.js";
 
 const MARGEM = 24;
 const TOPO_DA_TABELA = 150;
@@ -25,6 +26,7 @@ export class CenaFim extends Phaser.Scene {
         this.montarTabela();
         this.montarConquistas();
         this.criarControles();
+        tocarEfeito(this, "vinheta");
     }
 
     montarMoldura() {

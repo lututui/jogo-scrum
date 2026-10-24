@@ -3,6 +3,8 @@
 // A cena de baixo fica pausada e volta exatamente onde estava. As teclas são
 // soltas antes de pausar: uma seta segurada continuaria apertada na volta.
 
+import {tocarEfeito} from "../ui/som.js";
+
 export function abrirPorCima(cena, chave, dados) {
     cena.input.keyboard.resetKeys();
     cena.scene.pause();
@@ -11,6 +13,7 @@ export function abrirPorCima(cena, chave, dados) {
 }
 
 export function fecharPorCima(cena) {
+    tocarEfeito(cena, "voltar");
     cena.scene.stop();
     cena.scene.resume(cena.retorno);
 }
