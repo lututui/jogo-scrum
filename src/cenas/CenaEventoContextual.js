@@ -10,7 +10,7 @@ import {CADEIRAS} from "../dados/cadeiras.js";
 import {ELENCO} from "../dados/elenco.js";
 import {aplicarNoQuadro} from "../dados/estadoDoQuadro.js";
 import {expressaoDaAvaliacao} from "../dados/expressoes.js";
-import {registrarContextualResolvido, registrarDecisao} from "../dados/progresso.js";
+import {registrarAcaoResolvida, registrarContextualResolvido, registrarDecisao} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira, nomeDoJogador} from "../dados/texto.js";
 import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
@@ -207,8 +207,10 @@ export class CenaEventoContextual extends Phaser.Scene {
         return CADEIRAS[this.cadeira()].titular;
     }
 
+    // Ação do escritório não conta como compromisso do calendário
     encerrar() {
-        registrarContextualResolvido(this.registry, this.cadeira(), this.evento.id);
+        const registrar = this.evento.doEscritorio ? registrarAcaoResolvida : registrarContextualResolvido;
+        registrar(this.registry, this.cadeira(), this.evento.id);
         this.scene.stop();
         this.scene.resume("CenaEscritorio");
     }

@@ -141,6 +141,9 @@ function cartaoPlanejado(cadeira, item) {
 //   {noSprintBacklog, aumenta: n} o mesmo, no item do Sprint Backlog que
 //                             o time está fazendo
 //   {coluna: id, avancam: n}  até n cartões do time saem da coluna
+//   {naRevisao, ...}          o mesmo que {cartao}, num cartão do time que
+//                             está na REVISÃO (do Sprint Backlog, se houver)
+//   {cartao: id, volta}       da REVISÃO o cartão volta para EM PROGRESSO
 //   {cartao: id, continuaParado} nada muda, mas o quadro mostra que o cartão
 //                             segue parado: é o custo de não destravar
 // Devolve a mudança, {antes, depois, texto, parados}, ou null se não há o
@@ -190,6 +193,9 @@ export function descreverMudanca(antes, depois) {
 
         if (!anterior) {
             return item.titulo + " entra em " + coluna;
+        }
+        if (anterior.coluna === "revisao" && item.coluna === "progresso") {
+            return item.titulo + " volta para EM PROGRESSO, com " + esforcoDe(item) + " pt";
         }
         if (anterior.coluna !== item.coluna) {
             return item.titulo + (anterior.bloqueado && !item.bloqueado ? " destrava e vai para " : " vai para ") + coluna;
@@ -249,7 +255,9 @@ function aplicarEfeito(itens, efeito, cadeira, quando) {
         return;
     }
 
-    const item = efeito.noSprintBacklog ? itemDoTimeNoPlano(itens) : buscar(itens, efeito.cartao);
+    const item = efeito.noSprintBacklog ? itemDoTimeNoPlano(itens)
+        : efeito.naRevisao ? cartaoDoTimeNaRevisao(itens)
+        : buscar(itens, efeito.cartao);
     if (!item) {
         return;
     }
@@ -273,6 +281,10 @@ function aplicarEfeito(itens, efeito, cadeira, quando) {
     if (efeito.avanca) {
         avancar(itens, item, dia);
     }
+    if (efeito.volta && item.coluna === "revisao") {
+        item.coluna = "progresso";
+        item.diaDoUltimoPasso = dia;
+    }
 }
 
 // O item do Sprint Backlog que o time está fazendo; se ainda não começou
@@ -286,6 +298,15 @@ function itemDoTimeNoPlano(itens) {
     }) || doTime.find(function (item) {
         return item.coluna === "afazer";
     });
+}
+
+function cartaoDoTimeNaRevisao(itens) {
+    const naRevisao = itens.filter(function (item) {
+        return !item.doJogador && !item.sprintAnterior && item.coluna === "revisao";
+    });
+    return naRevisao.find(function (item) {
+        return item.planejado;
+    }) || naRevisao[0];
 }
 
 function buscar(itens, id) {

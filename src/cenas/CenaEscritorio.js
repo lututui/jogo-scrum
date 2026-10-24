@@ -6,6 +6,7 @@ import {SPRINT_REVIEW} from "../dados/eventos.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {entregaDaSprint, lerItensDoQuadro, proximoPassoDoJogador} from "../dados/estadoDoQuadro.js";
 import {falasDoEscritorio} from "../dados/falasDoEscritorio.js";
+import {acaoPendente} from "../dados/acoesDoEscritorio.js";
 import {COLUNAS} from "../dados/quadro.js";
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {
@@ -88,20 +89,37 @@ export class CenaEscritorio extends Phaser.Scene {
         this.npcs = this.physics.add.staticGroup();
         this.marcarAreaDeTeste();
 
-        this.elencoDoEscritorio().forEach(function (npc) {
+        ELENCO.forEach(function (npc) {
             const sprite = this.npcs.create(npc.x, npc.y, "corpo_" + npc.chave, 0);
             sprite.setDepth(npc.y);
             sprite.body.setSize(18, 12);
             sprite.body.setOffset(7, 19);
             sprite.refreshBody();
-            this.interativos.push({dados: npc, sprite: sprite, alturaRotulo: 24});
+            const aviso = this.add.text(npc.x, npc.y - 20, "!", {
+                fontFamily: FONTE,
+                fontSize: "16px",
+                fontStyle: "bold",
+                color: COR.alerta
+            }).setOrigin(0.5, 1).setDepth(npc.y + 1).setVisible(false);
+            this.interativos.push({dados: npc, sprite: sprite, aviso: aviso, alturaRotulo: 24});
         }, this);
     }
 
-    elencoDoEscritorio() {
-        return ELENCO.filter(function (npc) {
-            return !npc.teste || DEPURACAO.npcsDeTeste;
-        });
+    // Visitantes só aparecem quando têm algo a tratar com o jogador (ou na
+    // depuração); quem tem uma ação pendente ganha um "!"
+    atualizarPresencas() {
+        this.interativos.forEach(function (item) {
+            if (!item.aviso) {
+                return;
+            }
+            const acao = acaoPendente(this.registry, this.cadeiraAtual, item.dados.chave);
+            const presente = !item.dados.teste || DEPURACAO.npcsDeTeste || Boolean(acao);
+
+            item.ausente = !presente;
+            item.sprite.setVisible(presente);
+            item.sprite.body.enable = presente;
+            item.aviso.setVisible(Boolean(acao));
+        }, this);
     }
 
     marcarAreaDeTeste() {
@@ -320,6 +338,7 @@ export class CenaEscritorio extends Phaser.Scene {
         this.textoProximoPasso.setText(this.proximoPasso());
         this.textoDicaDoQuadro.setText(this.dicaDoQuadro());
         this.textoAjuda.setText(this.linhaDeAjuda());
+        this.atualizarPresencas();
     }
 
     // Na cadeira de Dev, avisa quando o cartão do jogador pode andar; nas
@@ -456,6 +475,9 @@ export class CenaEscritorio extends Phaser.Scene {
         let menorDistancia = this.alcanceInteracao;
 
         this.interativos.forEach(function (item) {
+            if (item.ausente) {
+                return;
+            }
             const distancia = Phaser.Math.Distance.Between(
                 this.jogador.x, this.jogador.y + 8,
                 item.sprite.x, item.sprite.y + 8
@@ -499,6 +521,12 @@ export class CenaEscritorio extends Phaser.Scene {
     }
 
     iniciarDialogo(alvo) {
+        const acao = acaoPendente(this.registry, this.cadeiraAtual, alvo.dados.chave);
+        if (acao) {
+            this.abrirAcao(acao);
+            return;
+        }
+
         this.emDialogo = true;
         this.rotulo.setVisible(false);
         this.jogador.setVelocity(0, 0);
@@ -508,6 +536,19 @@ export class CenaEscritorio extends Phaser.Scene {
         this.caixa.abrir(daSprint ? Object.assign({}, alvo.dados, daSprint) : alvo.dados, function () {
             cena.emDialogo = false;
         });
+    }
+
+    // A ação abre como evento contextual, no dia de hoje
+    abrirAcao(acao) {
+        this.rotulo.setVisible(false);
+        this.jogador.setVelocity(0, 0);
+        this.jogador.anims.play("jogador_" + this.cadeiraAtual + "_parado", true);
+
+        this.scene.pause();
+        this.scene.launch("CenaEventoContextual", {
+            evento: Object.assign({}, acao, {dia: diaDaSprint(this.registry, this.cadeiraAtual), doEscritorio: true})
+        });
+        this.scene.bringToTop("CenaEventoContextual");
     }
 
     // O que as falas do escritório precisam saber da sprint

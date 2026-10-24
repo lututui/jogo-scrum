@@ -50,6 +50,7 @@ function sprintVazia() {
         decisoesSozinho: 0,
         eventosConcluidos: [],
         contextuaisResolvidos: [],
+        acoesResolvidas: [],
         marcas: {},
         conquistas: [],
         paraRevisar: {},
@@ -325,6 +326,25 @@ export function eventosConcluidos(registry, cadeira) {
 // Eventos contextuais já vividos naquela cadeira
 export function contextuaisResolvidos(registry, cadeira) {
     return sprintDaCadeira(registry, cadeira).contextuaisResolvidos;
+}
+
+// Ações do escritório já tratadas; sprint salva antes delas não tem a lista
+export function acoesResolvidas(registry, cadeira) {
+    return sprintDaCadeira(registry, cadeira).acoesResolvidas || [];
+}
+
+export function registrarAcaoResolvida(registry, cadeira, id) {
+    const progresso = lerProgresso(registry);
+    const sprint = progresso.sprints[cadeira];
+    sprint.acoesResolvidas = sprint.acoesResolvidas || [];
+
+    if (sprint.acoesResolvidas.indexOf(id) < 0) {
+        sprint.acoesResolvidas.push(id);
+    }
+
+    atualizarConquistas(progresso, cadeira, false);
+
+    return salvarProgresso(registry, progresso);
 }
 
 export function registrarContextualResolvido(registry, cadeira, id) {
