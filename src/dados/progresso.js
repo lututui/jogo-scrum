@@ -19,6 +19,10 @@ import {ITENS_INICIAIS} from "./quadro.js";
 import {anotar} from "./diario.js";
 
 export const CHAVE_DO_PROGRESSO = "progresso";
+
+// avisado no registry quando uma decisão rende conquista, com a lista das
+// que vieram: {id, novaNoJogo}
+export const EVENTO_DE_CONQUISTA = "conquistaObtida";
 const CHAVE_NO_NAVEGADOR = "jogo-scrum:progresso";
 
 // Muda quando o formato salvo muda; salvamento de outra versão é descartado
@@ -369,9 +373,19 @@ export function registrarDecisao(registry, decisao) {
         sprint.paraRevisar[decisao.conceito] = (sprint.paraRevisar[decisao.conceito] || 0) + 1;
     }
 
+    const antes = sprint.conquistas.slice();
     atualizarConquistas(progresso, decisao.cadeira, false);
+    const obtidas = sprint.conquistas.filter(function (id) {
+        return antes.indexOf(id) < 0;
+    }).map(function (id) {
+        return {id: id, novaNoJogo: (sprint.conquistasNovas || []).indexOf(id) >= 0};
+    });
 
-    return salvarProgresso(registry, progresso);
+    const salvo = salvarProgresso(registry, progresso);
+    if (obtidas.length > 0 && registry.events) {
+        registry.events.emit(EVENTO_DE_CONQUISTA, obtidas);
+    }
+    return salvo;
 }
 
 export function medidoresDaCadeira(registry, cadeira) {
@@ -524,11 +538,13 @@ function atualizarConquistas(progresso, cadeira, fechando) {
         }
 
         sprint.conquistas.push(conquista.id);
+        const novaNoJogo = progresso.conquistas.indexOf(conquista.id) < 0;
 
-        if (progresso.conquistas.indexOf(conquista.id) < 0) {
+        if (novaNoJogo) {
             progresso.conquistas.push(conquista.id);
             sprint.conquistasNovas = (sprint.conquistasNovas || []).concat([conquista.id]);
         }
+        anotar("conquista", {cadeira: cadeira, id: conquista.id, novaNoJogo: novaNoJogo});
 
         // progresso salvo antes desta lista começa sem ela
         progresso.conquistasPorCadeira = progresso.conquistasPorCadeira || {};
