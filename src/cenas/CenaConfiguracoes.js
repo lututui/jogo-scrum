@@ -3,12 +3,16 @@
 // Abre por cima de qualquer tela: pelo menu principal ou pela tecla O (ver
 // CenaGlobal). Volumes ficam em réguas, como as da voz no criador de
 // personagem: andam com ← →, pelas setas ‹ › ou clicando e arrastando, sem
-// dar a volta. As opções de ligar e desligar mudam com ENTER.
+// dar a volta. As opções de ligar e desligar mudam com ENTER. No fim, as
+// ações da avaliação: exportar os dados e limpar tudo, que pede um segundo
+// ENTER.
 
 import {VOLUME_MAXIMO, lerConfiguracoes, salvarConfiguracao} from "../dados/configuracoes.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
 import {Regua} from "../ui/Regua.js";
+import {anotar} from "../dados/diario.js";
+import {baixarExportacao, limparTudo} from "../dados/exportacao.js";
 import {vozDoJogador} from "../dados/perfil.js";
 import {aplicarVolumeDaMusica, falarAmostra, tocarEfeito} from "../ui/som.js";
 import {aplicarFps} from "./CenaFPS.js";
@@ -49,6 +53,20 @@ const OPCOES = [
         tipo: "alternar",
         titulo: "Mostrar FPS",
         detalhe: "Quadros por segundo no canto da tela, para medir o desempenho"
+    },
+    {
+        id: "exportar",
+        tipo: "acao",
+        titulo: "Exportar dados",
+        detalhe: "Baixa um arquivo com o personagem, o resumo das cadeiras e o diário",
+        sufixo: "ENTER"
+    },
+    {
+        id: "limpar",
+        tipo: "acao",
+        titulo: "Limpar tudo",
+        detalhe: "Apaga progresso, personagem, diário e configurações deste navegador",
+        sufixo: "ENTER"
     }
 ];
 
@@ -67,6 +85,7 @@ export class CenaConfiguracoes extends Phaser.Scene {
     }
 
     create() {
+        this.confirmandoLimpeza = false;
         this.montarMoldura();
         this.montarLista();
         this.montarReguas();
@@ -88,7 +107,15 @@ export class CenaConfiguracoes extends Phaser.Scene {
         this.add.text(24, 13, "CONFIGURAÇÕES", estilo);
         this.add.text(936, 13, "ESC PARA VOLTAR", estilo).setOrigin(1, 0);
 
-        this.add.text(480, 516, "↑ ↓ escolhem, ← → mudam o volume (ou clique e arraste a régua), ENTER liga e desliga", {
+        this.aviso = this.add.text(480, 480, "", {
+            fontFamily: FONTE,
+            fontSize: "12px",
+            color: COR.textoSecundario,
+            align: "center",
+            wordWrap: {width: 760}
+        }).setOrigin(0.5, 0);
+
+        this.add.text(480, 516, "↑ ↓ escolhem, ← → mudam o volume (ou clique e arraste a régua), ENTER confirma", {
             fontFamily: FONTE,
             fontSize: "12px",
             color: COR.textoSecundario
@@ -99,6 +126,9 @@ export class CenaConfiguracoes extends Phaser.Scene {
         const atuais = lerConfiguracoes();
 
         return OPCOES.map(function (opcao) {
+            if (opcao.tipo === "acao") {
+                return Object.assign({}, opcao);
+            }
             const sufixo = opcao.tipo === "volume"
                 ? atuais[opcao.id] * 10 + "%"
                 : (atuais[opcao.id] ? "LIGADO" : "DESLIGADO");
@@ -122,15 +152,49 @@ export class CenaConfiguracoes extends Phaser.Scene {
         });
     }
 
-    // ENTER ou clique: liga e desliga; nos volumes, quem muda são as setas
+    // ENTER ou clique: liga e desliga, ou executa a ação; nos volumes, quem
+    // muda são as setas
     acionar(opcao) {
         if (opcao.tipo === "volume") {
             return;
         }
+        if (opcao.id === "exportar") {
+            this.cancelarLimpeza();
+            anotar("exportacao", {});
+            this.avisar("dados exportados: " + baixarExportacao(this.registry), false);
+            return;
+        }
+        if (opcao.id === "limpar") {
+            this.pedirLimpeza();
+            return;
+        }
+        this.cancelarLimpeza();
 
         salvarConfiguracao(opcao.id, !lerConfiguracoes()[opcao.id]);
         aplicarFps(this);
         this.atualizar();
+    }
+
+    // o segundo ENTER na mesma linha apaga; mudar de linha ou sair cancela
+    pedirLimpeza() {
+        if (this.confirmandoLimpeza) {
+            limparTudo();
+            return;
+        }
+        this.confirmandoLimpeza = true;
+        this.avisar("Apaga progresso, personagem, diário e configurações. "
+            + "ENTER de novo confirma; mudar de linha cancela.", true);
+    }
+
+    cancelarLimpeza() {
+        if (this.confirmandoLimpeza) {
+            this.confirmandoLimpeza = false;
+            this.avisar("", false);
+        }
+    }
+
+    avisar(texto, alerta) {
+        this.aviso.setText(texto).setColor(alerta ? COR.alerta : COR.textoSecundario);
     }
 
     // ← → só mexem nos volumes, sem dar a volta
@@ -272,8 +336,10 @@ export class CenaConfiguracoes extends Phaser.Scene {
         if (apertou(this.teclas.sair)) {
             this.fechar();
         } else if (apertou(this.teclas.cima)) {
+            this.cancelarLimpeza();
             this.lista.mover(-1);
         } else if (apertou(this.teclas.baixo)) {
+            this.cancelarLimpeza();
             this.lista.mover(1);
         } else if (apertou(this.teclas.esquerda)) {
             this.ajustar(-1);

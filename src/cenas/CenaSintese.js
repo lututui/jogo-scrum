@@ -20,6 +20,7 @@ import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira, personalizar} from "../dados/texto.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 import {tocarEfeito} from "../ui/som.js";
+import {anotar} from "../dados/diario.js";
 
 const MARGEM = 24;
 const LARGURA_DA_COLUNA = 440;
@@ -35,6 +36,15 @@ export class CenaSintese extends Phaser.Scene {
     create() {
         this.cadeira = this.registry.get("cadeira") || "po";
         this.sprint = fecharSprint(this.registry, this.cadeira);
+        anotar("sintese", {
+            cadeira: this.cadeira,
+            pontos: this.sprint.pontos,
+            decisoes: this.sprint.decisoes,
+            decisoesSozinho: this.sprint.decisoesSozinho,
+            medidores: this.sprint.medidores,
+            entrega: this.sprint.entrega || null,
+            conquistas: this.sprint.conquistas
+        });
         this.progresso = lerProgresso(this.registry);
         this.fechouTodas = cadeirasConcluidas(this.registry).length === ORDEM_DAS_CADEIRAS.length;
 

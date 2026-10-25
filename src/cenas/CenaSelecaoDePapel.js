@@ -13,6 +13,7 @@ import {cadeirasConcluidas, definirCadeiraEmAndamento} from "../dados/progresso.
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira} from "../dados/texto.js";
 import {abrirGuia} from "./CenaGuia.js";
+import {anotar} from "../dados/diario.js";
 
 const MARGEM = 24;
 const TOPO_DOS_CARTOES = 150;
@@ -280,6 +281,7 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
         this.registry.set("cadeira", this.cartoes[this.indice].chave);
         this.registry.set(CADEIRA_RECEM_ESCOLHIDA, true);
         definirCadeiraEmAndamento(this.registry, this.cartoes[this.indice].chave);
+        anotar("cadeira", {cadeira: this.cartoes[this.indice].chave});
         this.scene.stop();
 
         if (this.scene.isPaused("CenaEscritorio")) {

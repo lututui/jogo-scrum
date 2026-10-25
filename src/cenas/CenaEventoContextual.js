@@ -18,6 +18,7 @@ import {ListaDeOpcoes, embaralhar} from "../ui/ListaDeOpcoes.js";
 import {PAINEL, PainelDeFala} from "../ui/PainelDeFala.js";
 import {QuadroReduzido} from "../ui/QuadroReduzido.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
+import {agora} from "../dados/diario.js";
 
 const TOPO_DAS_OPCOES = 32;
 const ALTURA_DA_LINHA = 34;
@@ -140,6 +141,7 @@ export class CenaEventoContextual extends Phaser.Scene {
 
     perguntar() {
         const cena = this;
+        this.inicioDaPergunta = agora();
         this.esperandoFala = false;
         this.painel.mostrarApenasFundo();
         this.ajuda.setText("setas escolhem, ENTER responde  ·  G abre o glossário");
@@ -173,6 +175,10 @@ export class CenaEventoContextual extends Phaser.Scene {
         const cena = this;
 
         registrarDecisao(this.registry, {
+            onde: this.evento.id,
+            pergunta: this.evento.pergunta || null,
+            opcao: opcao.titulo,
+            ms: agora() - this.inicioDaPergunta,
             cadeira: this.cadeira(),
             avaliacao: opcao.avaliacao,
             medidores: opcao.medidores,

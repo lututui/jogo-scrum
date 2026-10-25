@@ -25,6 +25,7 @@ import {ALTURA_CARTAO, CartaoKanban, LARGURA_CARTAO} from "../ui/CartaoKanban.js
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
 import {tocarEfeito} from "../ui/som.js";
 import {abrirDicaUmaVez} from "./CenaDica.js";
+import {anotar} from "../dados/diario.js";
 
 const MARGEM = 20;
 const LARGURA_DA_COLUNA = 218;
@@ -54,6 +55,7 @@ export class CenaKanban extends Phaser.Scene {
         this.cadeira = this.registry.get("cadeira") || "po";
         this.soLeitura = !CADEIRAS[this.cadeira].moveCartoes;
         registrarVisitaAoQuadro(this.registry, this.cadeira);
+        anotar("quadro", {cadeira: this.cadeira, dia: diaDaSprint(this.registry, this.cadeira)});
         this.deslocamentos = {};
         this.itens = this.carregarItens();
         this.cartoes = [];

@@ -16,6 +16,7 @@ import {proximoCompromisso} from "./calendario.js";
 import {ORDEM_DAS_CADEIRAS} from "./cadeiras.js";
 import {CONQUISTAS} from "./conquistas.js";
 import {ITENS_INICIAIS} from "./quadro.js";
+import {anotar} from "./diario.js";
 
 export const CHAVE_DO_PROGRESSO = "progresso";
 const CHAVE_NO_NAVEGADOR = "jogo-scrum:progresso";
@@ -312,7 +313,21 @@ function limitar(valor) {
 // Cada decisão soma pontos e move os medidores que ela toca, na sprint da
 // cadeira em que foi tomada. Uma decisão sem avaliação declarada não pontua:
 // o placar mede escolha, não clique
+// "onde", "pergunta", "opcao", "marcadas" e "ms" (tempo para decidir) só
+// servem ao diário da avaliação
 export function registrarDecisao(registry, decisao) {
+    anotar("decisao", {
+        cadeira: decisao.cadeira,
+        dia: diaDaSprint(registry, decisao.cadeira),
+        onde: decisao.onde || null,
+        pergunta: decisao.pergunta || null,
+        opcao: decisao.opcao || null,
+        marcadas: decisao.marcadas || undefined,
+        avaliacao: decisao.avaliacao || null,
+        semMentor: Boolean(decisao.semMentor),
+        ms: decisao.ms === undefined ? null : decisao.ms
+    });
+
     const progresso = lerProgresso(registry);
     const sprint = progresso.sprints[decisao.cadeira];
     const peso = PESO_DA_AVALIACAO[decisao.avaliacao];

@@ -13,13 +13,14 @@
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {DEPURACAO, marcarDepuracao} from "../dados/depuracao.js";
 import {agendaDaCadeira} from "../dados/calendario.js";
-import {compromissoDaVez, contextuaisResolvidos, eventosConcluidos} from "../dados/progresso.js";
+import {compromissoDaVez, contextuaisResolvidos, diaDaSprint, eventosConcluidos} from "../dados/progresso.js";
 import {PAPEIS_DOS_EVENTOS} from "../dados/eventosPorPapel.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira} from "../dados/texto.js";
 import {tocarEfeito} from "../ui/som.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
 import {TECLA_DO_GLOSSARIO, abrirGlossario} from "./CenaGlossario.js";
+import {anotar} from "../dados/diario.js";
 
 const MARGEM = 24;
 const TOPO_DA_LISTA = 116;
@@ -207,6 +208,11 @@ export class CenaAgenda extends Phaser.Scene {
     // O escritório segue pausado atrás dos dois e é para ele que o evento volta
     abrirEvento(compromisso) {
         const chave = compromisso.reuniao ? compromisso.chave : "CenaEventoContextual";
+        anotar("compromisso", {
+            cadeira: this.cadeira(),
+            dia: diaDaSprint(this.registry, this.cadeira()),
+            onde: compromisso.reuniao ? compromisso.chave : compromisso.evento.id
+        });
         if (!compromisso.reuniao) {
             tocarEfeito(this, "imprevisto", 120);
         }

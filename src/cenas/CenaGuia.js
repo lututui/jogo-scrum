@@ -10,6 +10,7 @@ import {GUIA} from "../dados/guia.js";
 import {marcarGuiaVisto} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {abrirPorCima, fecharPorCima} from "./sobreposicao.js";
+import {agora, anotar} from "../dados/diario.js";
 
 const PAINEL = {x: 120, y: 72, largura: 720, altura: 392};
 const RECUO = 24;
@@ -42,6 +43,8 @@ export class CenaGuia extends Phaser.Scene {
     }
 
     create() {
+        this.abertoEm = agora();
+        this.paginasVistas = 1;
         this.montarMoldura();
         this.montarPainel();
         this.montarPontos();
@@ -159,6 +162,7 @@ export class CenaGuia extends Phaser.Scene {
         }
 
         this.pagina += 1;
+        this.paginasVistas = Math.max(this.paginasVistas, this.pagina + 1);
         this.mostrarPagina();
     }
 
@@ -172,6 +176,11 @@ export class CenaGuia extends Phaser.Scene {
     }
 
     fechar() {
+        anotar("guia", {
+            completo: !this.depois,
+            paginas: this.paginasVistas + " de " + this.paginas.length,
+            ms: agora() - this.abertoEm
+        });
         marcarGuiaVisto(this.registry);
 
         if (this.depois) {

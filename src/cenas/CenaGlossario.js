@@ -7,6 +7,7 @@ import {GLOSSARIO, GRUPOS} from "../dados/glossario.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
 import {abrirPorCima, fecharPorCima} from "./sobreposicao.js";
+import {agora, anotar} from "../dados/diario.js";
 
 const MARGEM = 24;
 const TOPO = 60;
@@ -50,6 +51,8 @@ export class CenaGlossario extends Phaser.Scene {
     }
 
     create() {
+        this.abertoEm = agora();
+        this.termosVistos = [];
         this.montarMoldura();
         this.montarPainel();
         this.montarLista();
@@ -145,6 +148,9 @@ export class CenaGlossario extends Phaser.Scene {
         }
 
         const entrada = opcao.entrada;
+        if (this.termosVistos.indexOf(entrada.termo) < 0) {
+            this.termosVistos.push(entrada.termo);
+        }
         this.textoDoGrupo.setText(GRUPOS[entrada.grupo]);
         this.textoDoTermo.setText(entrada.termo);
         this.textoDaDefinicao.setText(entrada.definicao);
@@ -177,6 +183,7 @@ export class CenaGlossario extends Phaser.Scene {
     }
 
     fechar() {
+        anotar("glossario", {de: this.retorno, termos: this.termosVistos, ms: agora() - this.abertoEm});
         fecharPorCima(this);
     }
 }

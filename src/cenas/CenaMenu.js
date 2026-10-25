@@ -19,6 +19,7 @@ import {aplicarPerfil} from "../ui/montarJogador.js";
 import {abrirConfiguracoes} from "./CenaConfiguracoes.js";
 import {abrirGlossario} from "./CenaGlossario.js";
 import {abrirGuia, comecarPeloGuia} from "./CenaGuia.js";
+import {anotar} from "../dados/diario.js";
 
 const LARGURA_DA_LISTA = 420;
 const TOPO_DA_LISTA = 196;
@@ -110,6 +111,7 @@ export class CenaMenu extends Phaser.Scene {
         }
 
         if (opcao.id === "comecar") {
+            anotar("partida", {apagouAnterior: false});
             this.comecarPartida();
         } else if (opcao.id === "continuar") {
             this.continuarPartida();
@@ -129,6 +131,7 @@ export class CenaMenu extends Phaser.Scene {
     // O segundo ENTER na mesma linha confirma; mudar de linha ou ESC cancela
     pedirNovaPartida() {
         if (this.confirmandoNovaPartida) {
+            anotar("partida", {apagouAnterior: true});
             apagarProgresso(this.registry);
             aplicarPerfil(this);
             this.registry.set("cadeira", null);
@@ -148,6 +151,7 @@ export class CenaMenu extends Phaser.Scene {
 
     continuarPartida() {
         const cadeira = cadeiraEmAndamento(this.registry);
+        anotar("continuar", {cadeira: cadeira});
         const destino = cadeira ? "CenaEscritorio" : "CenaSelecaoDePapel";
 
         if (cadeira) {

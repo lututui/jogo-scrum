@@ -9,6 +9,7 @@
 
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {registrarDecisao, registrarEventoConcluido} from "../dados/progresso.js";
+import {agora} from "../dados/diario.js";
 import {ELENCO} from "../dados/elenco.js";
 import {aplicarNoQuadro} from "../dados/estadoDoQuadro.js";
 import {expressaoDaAvaliacao} from "../dados/expressoes.js";
@@ -372,7 +373,17 @@ export class CenaReuniao extends Phaser.Scene {
     // do evento ou da sequência de decisões da cadeira. Devolve o que a
     // escolha mudou no quadro
     pontuar(opcao) {
+        const multipla = this.lista && this.lista.multipla;
         registrarDecisao(this.registry, {
+            onde: this.evento.chave,
+            pergunta: this.perguntaAtual,
+            opcao: opcao.titulo || null,
+            marcadas: multipla ? this.lista.opcoes.filter(function (outra) {
+                return outra.marcada;
+            }).map(function (outra) {
+                return outra.titulo;
+            }) : undefined,
+            ms: this.inicioDaPergunta === undefined ? null : agora() - this.inicioDaPergunta,
             cadeira: this.cadeira(),
             avaliacao: opcao.avaliacao,
             medidores: opcao.medidores,
@@ -478,6 +489,8 @@ export class CenaReuniao extends Phaser.Scene {
     // As opções são as falas que o jogador pode dizer
     perguntar(config) {
         this.esperandoFala = false;
+        this.perguntaAtual = config.pergunta || null;
+        this.inicioDaPergunta = agora();
         this.painel.mostrarApenasFundo();
         this.definirAjuda(config.ajuda || "setas escolhem, ENTER responde");
 

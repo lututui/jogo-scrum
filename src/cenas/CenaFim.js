@@ -9,6 +9,7 @@ import {MEDIDORES, conquistasDoJogo, conquistasPorId, ultimaSprint} from "../dad
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira, personalizar} from "../dados/texto.js";
 import {tocarEfeito} from "../ui/som.js";
+import {anotar} from "../dados/diario.js";
 
 const MARGEM = 24;
 const TOPO_DA_TABELA = 150;
@@ -22,6 +23,7 @@ export class CenaFim extends Phaser.Scene {
     }
 
     create() {
+        anotar("fim", {});
         this.montarMoldura();
         this.montarTabela();
         this.montarConquistas();

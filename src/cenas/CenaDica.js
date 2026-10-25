@@ -8,6 +8,7 @@ import {dicaVista, registrarDica} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {personalizar} from "../dados/texto.js";
 import {abrirPorCima, fecharPorCima} from "./sobreposicao.js";
+import {agora, anotar} from "../dados/diario.js";
 
 // largura fixa; a altura acompanha o texto, e o painel fica no meio da área
 // abaixo da barra do alto, que não escurece (é onde ficam os medidores)
@@ -33,7 +34,9 @@ export class CenaDica extends Phaser.Scene {
 
     init(dados) {
         this.retorno = dados.retorno;
+        this.id = dados.id;
         this.dica = DICAS[dados.id];
+        this.abertaEm = agora();
     }
 
     create() {
@@ -81,6 +84,7 @@ export class CenaDica extends Phaser.Scene {
     }
 
     fechar() {
+        anotar("dica", {id: this.id, ms: agora() - this.abertaEm});
         fecharPorCima(this);
     }
 
