@@ -102,10 +102,10 @@ def conferir_roupa_e_cabeca():
 
 
 def aparencias():
-    combinacoes = itertools.product(PECAS_DE_CIMA, PECAS_DE_BAIXO, ESTILOS_DE_CABELO, (None, ARMACAO_DE_TESTE))
-    for cima, baixo, estilo, oculos in combinacoes:
+    combinacoes = itertools.product(PECAS_DE_CIMA, PECAS_DE_BAIXO, ESTILOS_DE_CABELO, (None, ARMACAO_DE_TESTE, "cristal"))
+    for indice, (cima, baixo, estilo, oculos) in enumerate(combinacoes):
         yield dict(CORES_DE_TESTE, peca_de_cima=cima, peca_de_baixo=baixo,
-                   estilo_de_cabelo=estilo, oculos=oculos)
+                   estilo_de_cabelo=estilo, oculos=oculos, acessorio="fone" if indice % 2 else None)
 
 
 # braços: colunas e linhas do ombro até a ponta da mão; pernas: do quadril
@@ -164,5 +164,5 @@ def conferir_combinacoes():
             if problemas:
                 falhas.append("%s + %s, %s, óculos %s, quadro %d, %s: %s" % (
                     aparencia["peca_de_cima"], aparencia["peca_de_baixo"], aparencia["estilo_de_cabelo"],
-                    "sim" if aparencia["oculos"] else "não", frame, expressao, "; ".join(problemas)))
+                    (aparencia["oculos"] or "não"), frame, expressao, "; ".join(problemas)))
     return casos, falhas

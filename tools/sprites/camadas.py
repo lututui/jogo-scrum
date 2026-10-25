@@ -9,7 +9,7 @@ import os
 
 from PIL import Image, ImageDraw
 
-from .acessorios import desenhar_cracha
+from .acessorios import desenhar_cracha, desenhar_fone
 from .corpo import PECAS_POR_FOLHA, camada_corpo
 from .elenco import ESTILOS_DE_CABELO, EXPRESSOES
 from .medidas import ALTURA_SPRITE, LARGURA_SPRITE, QUADROS
@@ -24,7 +24,7 @@ from .paleta import (
     TOM_DE_PELE,
     TRANSPARENTE,
 )
-from .rosto import desenhar_cabelo, desenhar_oculos, desenhar_olhos
+from .rosto import desenhar_cabelo, desenhar_oculos, desenhar_oculos_cristal, desenhar_olhos
 
 MARCADOR = "#ff00ff"
 MARCADOR_SECUNDARIO = "#00ffff"
@@ -51,6 +51,9 @@ def folhas_de_camada():
         "corpo": (camada_corpo, ("pele",)),
         "oculos": (lambda d, frame, cor: desenhar_oculos(d, cor), ("oculos",)),
         "cracha": (lambda d, frame, cor: desenhar_cracha(d, cor), ("cracha",)),
+        # desbloqueáveis de cor fixa, sem marcador
+        "oculos_cristal": (lambda d, frame: desenhar_oculos_cristal(d), ()),
+        "fone": (lambda d, frame: desenhar_fone(d), ()),
     }
 
     folhas.update(PECAS_POR_FOLHA)

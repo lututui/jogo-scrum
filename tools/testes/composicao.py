@@ -75,11 +75,16 @@ def compor_jogador(folhas, aparencia, frame=0, expressao="neutro", cadeira=None)
         empilhar_peca(img, folhas, nome, frame, aparencia)
     empilhar(img, folhas["cabelo_" + aparencia["estilo_de_cabelo"]], frame, cabelo)
 
-    if aparencia["oculos"]:
+    if aparencia["oculos"] == "cristal":
+        empilhar(img, folhas["oculos_cristal"], frame)
+    elif aparencia["oculos"]:
         empilhar(img, folhas["oculos"], frame, aparencia["oculos"])
 
     fundo = fundo_da_sobrancelha(img, pele)
     empilhar(img, folhas["olhos_" + expressao], frame, cor_da_sobrancelha(cabelo, fundo))
+
+    if aparencia.get("acessorio") == "fone":
+        empilhar(img, folhas["fone"], frame)
 
     if cadeira:
         empilhar(img, folhas["cracha"], frame, COR_DE_CRACHA[cadeira])

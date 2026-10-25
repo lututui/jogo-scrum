@@ -10,11 +10,12 @@
 // do jogo sem parar a caminhada.
 //
 // A ordem é a de tools/sprites/personagem.py: corpo, as duas peças, cabelo,
-// óculos, olhos e crachá.
+// óculos, olhos, fone e crachá.
 
 import {
     MARCADORES,
     MEDIDAS,
+    OCULOS_CRISTAL,
     SOBRANCELHA,
     folhasDeCamada,
     ordemDasPecas
@@ -54,9 +55,10 @@ export function montarJogador(cena, aparencia) {
 }
 
 // a prévia do editor: parado, expressão neutra e sem crachá, numa textura
-// própria, para o jogador de verdade só mudar quando o perfil for confirmado
-export function montarPrevia(cena, aparencia) {
-    gravarTextura(cena, "previa",
+// própria, para o jogador de verdade só mudar quando o perfil for confirmado.
+// Outra chave dá outra prévia, como a do visualizador de conquistas
+export function montarPrevia(cena, aparencia, chave) {
+    gravarTextura(cena, chave || "previa",
         comporQuadro(cena, aparencia, 0, EXPRESSOES[0], null), MEDIDAS.largura, MEDIDAS.altura);
 }
 
@@ -113,13 +115,19 @@ export function comporQuadro(cena, aparencia, quadro, expressao, cadeira) {
     });
     empilhar("cabelo_" + aparencia.estiloDeCabelo, [aparencia.cabelo]);
 
-    if (aparencia.oculos) {
+    if (aparencia.oculos === OCULOS_CRISTAL) {
+        empilhar("oculos_cristal", []);
+    } else if (aparencia.oculos) {
         empilhar("oculos", [aparencia.oculos]);
     }
 
     // a sobrancelha depende do que já está embaixo dela
     const fundo = fundoDaSobrancelha(tela, aparencia.pele);
     empilhar("olhos_" + expressao, [corDaSobrancelha(aparencia.cabelo, fundo)]);
+
+    if (aparencia.acessorio === "fone") {
+        empilhar("fone", []);
+    }
 
     if (cadeira) {
         empilhar("cracha", [CADEIRAS[cadeira].cor]);

@@ -3,13 +3,18 @@
 // Abre por cima do menu, como o glossário. Lista as conquistas do jogo, as
 // obtidas com ✓. Das que faltam, só o nome: a descrição diz a conduta, e
 // mostrá-la antes entregaria a resposta. Todas dizem em que cadeiras podem
-// ser obtidas.
+// ser obtidas e o item que liberam no editor, com o cadeado fechado ou
+// aberto, e mostram o personagem do jogador usando esse item.
 
 import {CONQUISTAS} from "../dados/conquistas.js";
+import {desbloqueiosDaConquista} from "../dados/desbloqueios.js";
+import {aparenciaDoJogador} from "../dados/perfil.js";
 import {cadeirasDaConquista, conquistasDoJogo} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira} from "../dados/texto.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
+import {ESCALA_DO_CADEADO, chaveDoCadeado, criarCadeados} from "../ui/icones.js";
+import {montarPrevia} from "../ui/montarJogador.js";
 import {abrirPorCima, fecharPorCima} from "./sobreposicao.js";
 import {agora, anotar} from "../dados/diario.js";
 
@@ -21,6 +26,12 @@ const ESPACO_ENTRE_LINHAS = 4;
 
 const PAINEL = {x: 384, y: TOPO, largura: 552, altura: 418};
 const RECUO = 16;
+
+// o personagem com o item, num quadro abaixo da linha do item
+const CHAVE_DA_PREVIA = "previa_da_conquista";
+const ESCALA_DA_PREVIA = 4;
+const LADO_DO_QUADRO = 144;
+const TOPO_DO_QUADRO = 232;
 
 export function abrirConquistas(cena) {
     abrirPorCima(cena, "CenaConquistas", {});
@@ -106,6 +117,20 @@ export class CenaConquistas extends Phaser.Scene {
             wordWrap: {width: largura}
         });
 
+        criarCadeados(this);
+        this.cadeadoDoItem = this.add.image(x + 8, PAINEL.y + 212, "cadeado_fechado").setScale(ESCALA_DO_CADEADO);
+        this.textoDoItem = this.add.text(x + 24, PAINEL.y + 212, "", {
+            fontFamily: FONTE,
+            fontSize: "12px",
+            color: COR.texto
+        }).setOrigin(0, 0.5);
+
+        this.quadroDaPrevia = this.add.rectangle(x, PAINEL.y + TOPO_DO_QUADRO, LADO_DO_QUADRO, LADO_DO_QUADRO,
+            COR_HEX.painelSuave).setOrigin(0, 0).setStrokeStyle(1, COR_HEX.contornoSuave);
+        montarPrevia(this, aparenciaDoJogador(this.registry), CHAVE_DA_PREVIA);
+        this.previa = this.add.image(x + LADO_DO_QUADRO / 2, PAINEL.y + TOPO_DO_QUADRO + LADO_DO_QUADRO / 2,
+            CHAVE_DA_PREVIA, 0).setScale(ESCALA_DA_PREVIA);
+
         this.add.text(x, PAINEL.y + PAINEL.altura - RECUO,
             "As conquistas marcam condutas, não quantidade.", {
                 fontFamily: FONTE,
@@ -174,6 +199,25 @@ export class CenaConquistas extends Phaser.Scene {
         }
         linhas.push("Pode ser obtida como: " + this.nomesDasCadeiras(conquista.cadeiras));
         this.textoDasCadeiras.setText(linhas.join("\n"));
+
+        const itens = desbloqueiosDaConquista(conquista.id);
+        this.cadeadoDoItem.setVisible(itens.length > 0).setTexture(chaveDoCadeado(opcao.obtida));
+        this.textoDoItem.setText(itens.length > 0 ? "Libera no editor: " + itens.map(function (item) {
+            return item.nome;
+        }).join(", ") : "");
+        this.mostrarPrevia(itens);
+    }
+
+    // a aparência do jogador com os itens da conquista vestidos
+    mostrarPrevia(itens) {
+        const aparencia = Object.assign({}, aparenciaDoJogador(this.registry));
+
+        itens.forEach(function (item) {
+            aparencia[item.campo] = item.valor;
+        });
+        montarPrevia(this, aparencia, CHAVE_DA_PREVIA);
+        this.quadroDaPrevia.setVisible(itens.length > 0);
+        this.previa.setVisible(itens.length > 0);
     }
 
     criarControles() {

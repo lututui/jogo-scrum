@@ -1,7 +1,14 @@
 # Cabelo, óculos, olhos e sobrancelha
 
 from .medidas import CABECA_X, CABECA_Y, r
-from .paleta import COR_DA_ARMACAO, COR_DA_LENTE, COR_DA_SOBRANCELHA_CLARA, CONTORNO
+from .paleta import (
+    COR_DA_ARMACAO,
+    COR_DA_ARMACAO_CRISTAL,
+    COR_DA_LENTE,
+    COR_DA_SOBRANCELHA_CLARA,
+    COR_DO_BRILHO_DA_LENTE,
+    CONTORNO,
+)
 
 LINHA_DA_SOBRANCELHA = 8
 COLUNA_DE_AMOSTRA_DA_SOBRANCELHA = 13
@@ -39,6 +46,18 @@ def desenhar_oculos(d, cor_da_armacao=COR_DA_ARMACAO):
         r(d, x, 10, 1, 2, cor_da_armacao)
         r(d, x + 3, 10, 1, 2, cor_da_armacao)
     r(d, 16, 9, 1, 1, cor_da_armacao)
+
+
+# a armação redonda de cor fixa, desbloqueável: sem os cantos e com brilho
+def desenhar_oculos_cristal(d):
+    for x in (12, 17):
+        r(d, x, 10, 4, 2, COR_DA_LENTE)
+        r(d, x + 2, 10, 1, 1, COR_DO_BRILHO_DA_LENTE)
+        r(d, x + 1, 9, 2, 1, COR_DA_ARMACAO_CRISTAL)
+        r(d, x + 1, 12, 2, 1, COR_DA_ARMACAO_CRISTAL)
+        r(d, x, 10, 1, 2, COR_DA_ARMACAO_CRISTAL)
+        r(d, x + 3, 10, 1, 2, COR_DA_ARMACAO_CRISTAL)
+    r(d, 16, 10, 1, 1, COR_DA_ARMACAO_CRISTAL)
 
 
 def luminancia(cor):

@@ -1,13 +1,27 @@
 # Corpo e roupas
 #
 # Cada função pinta um quadro da folha de corpo com as cores que recebe.
-# Com o crachá do jogador por cima, o centro do peito (x 13 a 18, y 16 a 21)
-# fica coberto; o que distingue as peças está nas mangas, na gola e na barra.
+# O crachá do jogador fica na cintura, à direita (x 19 a 21), e deixa o
+# centro do peito livre para as estampas das peças desbloqueáveis.
 
 from functools import partial
 
 from .medidas import CABECA_X, CABECA_Y, r
-from .paleta import COR_DE_SAPATO
+from .paleta import (
+    COR_DA_CAMISETA_CATAVENTO,
+    COR_DA_DOBRA_DO_POST_IT,
+    COR_DA_FAIXA_REFLETIVA,
+    COR_DA_LINHA_DO_POST_IT,
+    COR_DE_SAPATO,
+    COR_DO_ALVO,
+    COR_DO_ALVO_CLARO,
+    COR_DO_COLETE,
+    COR_DO_CONTORNO_DO_VISTO,
+    COR_DO_POST_IT,
+    COR_DO_SELO,
+    COR_DO_VISTO,
+    COR_DO_X_DO_SELO,
+)
 
 
 # quadro 1 levanta o pé esquerdo e balança o braço direito; quadro 2, o
@@ -84,6 +98,96 @@ def camada_jaqueta(d, frame, cor, cor_interna):
 
 
 # ------------------------------------------------------------------
+# peças desbloqueáveis
+
+# um desenho em letras; cada letra é uma cor, "." é vazio
+def estampa(d, x, y, linhas, cores):
+    for dy, linha in enumerate(linhas):
+        for dx, letra in enumerate(linha):
+            if letra != ".":
+                r(d, x + dx, y + dy, 1, 1, cores[letra])
+
+
+ALVO = (
+    "..RRR..",
+    ".RBBBR.",
+    "RBRRRBR",
+    "RBRBRBR",
+    "RBRRRBR",
+    ".RBBBR.",
+    "..RRR..",
+)
+# com contorno claro, para não sumir numa camiseta da mesma cor
+VISTO = (
+    ".......C.",
+    "......CVC",
+    ".C...CVVC",
+    "CVC.CVVC.",
+    "CVVCVVC..",
+    ".CVVVC...",
+    "..CVC....",
+    "...C.....",
+)
+POST_IT = (
+    "AAAAAA",
+    "ALLLLA",
+    "AAAAAA",
+    "ALLLAA",
+    "AAAAAD",
+    "AAAAD.",
+)
+# o quadrado de papel cortado nas diagonais, antes de virar catavento; a
+# moldura é a própria camiseta preta
+SELO = (
+    "BBBPBBB",
+    "BXBBBXB",
+    "BBXBXBB",
+    "PBBPBBP",
+    "BBXBXBB",
+    "BXBBBXB",
+    "BBBPBBB",
+)
+
+
+# metade da esquerda numa cor, a da direita na outra, mangas junto
+def camada_meio_a_meio(d, frame, cor, cor_direita, altura=ALTURA_DO_TRONCO):
+    r(d, 10, 15, 6, altura, cor)
+    r(d, 16, 15, 6, altura, cor_direita)
+    r(d, 8, 15, 2, 4, cor)
+    r(d, 22, 15, 2, 4, cor_direita)
+
+
+# por cima da camiseta, aberto no meio, com duas faixas refletivas
+def camada_colete(d, frame, cor, altura=ALTURA_DO_TRONCO):
+    camada_camiseta(d, frame, cor, altura)
+    for x in (10, 17):
+        r(d, x, 15, 5, altura, COR_DO_COLETE)
+        r(d, x, 19, 5, 1, COR_DA_FAIXA_REFLETIVA)
+        r(d, x, 21, 5, 1, COR_DA_FAIXA_REFLETIVA)
+
+
+def camada_camiseta_alvo(d, frame, cor, altura=ALTURA_DO_TRONCO):
+    camada_camiseta(d, frame, cor, altura)
+    estampa(d, 12, 16, ALVO, {"R": COR_DO_ALVO, "B": COR_DO_ALVO_CLARO})
+
+
+def camada_camiseta_visto(d, frame, cor, altura=ALTURA_DO_TRONCO):
+    camada_camiseta(d, frame, cor, altura)
+    estampa(d, 11, 15, VISTO, {"V": COR_DO_VISTO, "C": COR_DO_CONTORNO_DO_VISTO})
+
+
+def camada_camiseta_post_it(d, frame, cor, altura=ALTURA_DO_TRONCO):
+    camada_camiseta(d, frame, cor, altura)
+    estampa(d, 13, 16, POST_IT, {"A": COR_DO_POST_IT[0], "L": COR_DA_LINHA_DO_POST_IT, "D": COR_DA_DOBRA_DO_POST_IT})
+
+
+# preta, de cor fixa: não recebe cor do editor
+def camada_camiseta_catavento(d, frame, altura=ALTURA_DO_TRONCO):
+    camada_camiseta(d, frame, COR_DA_CAMISETA_CATAVENTO, altura)
+    estampa(d, 12, 16, SELO, {"B": COR_DO_SELO, "X": COR_DO_X_DO_SELO, "P": COR_DA_CAMISETA_CATAVENTO})
+
+
+# ------------------------------------------------------------------
 # parte de baixo
 
 # o sapato do pé levantado sobe junto
@@ -137,6 +241,12 @@ PECAS_DE_CIMA = {
     "camiseta": (camada_camiseta, ("superior",)),
     "moletom": (camada_moletom, ("superior",)),
     "jaqueta": (camada_jaqueta, ("superior", "interna")),
+    "meio_a_meio": (camada_meio_a_meio, ("superior", "interna")),
+    "colete": (camada_colete, ("superior",)),
+    "camiseta_alvo": (camada_camiseta_alvo, ("superior",)),
+    "camiseta_visto": (camada_camiseta_visto, ("superior",)),
+    "camiseta_post_it": (camada_camiseta_post_it, ("superior",)),
+    "camiseta_catavento": (camada_camiseta_catavento, ()),
 }
 
 PECAS_DE_BAIXO = {
@@ -148,10 +258,11 @@ PECAS_DE_BAIXO = {
 
 # com saia, a peça de cima vai por dentro e não aparece dos lados da cintura;
 # a jaqueta fica por fora e não tem essa versão
-POR_DENTRO_DA_SAIA = {
-    "camiseta": (partial(camada_camiseta, altura=ALTURA_POR_DENTRO), ("superior",)),
-    "moletom": (partial(camada_moletom, altura=ALTURA_POR_DENTRO), ("superior",)),
-}
+POR_DENTRO_DA_SAIA = dict(
+    (nome, (partial(desenhar, altura=ALTURA_POR_DENTRO), categorias))
+    for nome, (desenhar, categorias) in PECAS_DE_CIMA.items()
+    if nome != "jaqueta"
+)
 
 # as mesmas peças pelo nome da folha de camada
 PECAS_POR_FOLHA = dict(

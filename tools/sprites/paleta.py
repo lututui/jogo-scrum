@@ -50,6 +50,9 @@ COR_DE_SAPATO = "#20283a"
 
 COR_DA_ARMACAO = "#7b88a5"
 COR_DA_LENTE = "#eef4fb"
+# óculos cristal: armação redonda, quase incolor, com um brilho na lente
+COR_DA_ARMACAO_CRISTAL = "#b9d2e4"
+COR_DO_BRILHO_DA_LENTE = "#ffffff"
 
 COR_DA_SOBRANCELHA_CLARA = "#e8edf5"
 
@@ -125,3 +128,18 @@ COR_DA_MACANETA = "#5f7ba8"
 # horário; o contorno de cada pá sai da cor dela
 
 CORES_DO_CATAVENTO = ("#ffffff", "#c20505")
+
+# ------------------------------------------------------------------
+# peças desbloqueáveis: o que nelas tem cor fixa
+
+COR_DO_COLETE = "#ef7d22"
+COR_DA_FAIXA_REFLETIVA = "#f6f2c8"
+COR_DO_ALVO = "#c20505"
+COR_DO_ALVO_CLARO = "#ffffff"
+COR_DO_VISTO = "#3f7a52"
+COR_DO_CONTORNO_DO_VISTO = "#ffffff"
+COR_DA_LINHA_DO_POST_IT = "#b89a3a"
+COR_DA_DOBRA_DO_POST_IT = "#c9a640"
+COR_DA_CAMISETA_CATAVENTO = "#16171b"
+COR_DO_SELO = "#ffffff"
+COR_DO_X_DO_SELO = "#c20505"

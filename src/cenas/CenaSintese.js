@@ -1,13 +1,17 @@
 // Síntese da sprint
 //
 // Fecha a sprint de uma cadeira. O que foi decidido, como ficaram os três
-// medidores, as conquistas obtidas e os conceitos que valem revisar.
+// medidores, as conquistas obtidas e os conceitos que valem revisar. A
+// conquista nova no jogo mostra, com o cadeado aberto, o item que ela libera
+// no editor de personagem.
 //
 // Tudo o que aparece aqui é da sprint que acabou de fechar, e não do jogo
 // inteiro; a cadeira já volta ao começo quando a cena abre.
 
 import {CADEIRAS, ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
 import {CONQUISTAS} from "../dados/conquistas.js";
+import {desbloqueiosDaConquista} from "../dados/desbloqueios.js";
+import {ESCALA_DO_CADEADO, criarCadeados} from "../ui/icones.js";
 import {
     MEDIDORES,
     cadeirasConcluidas,
@@ -196,15 +200,31 @@ export class CenaSintese extends Phaser.Scene {
             return;
         }
 
+        const novas = this.sprint.conquistasNovas || [];
+        criarCadeados(this);
+
         // Nome e descrição em duas linhas, para caber na coluna da esquerda
         obtidas.slice(0, 6).forEach(function (conquista, posicao) {
             const linha = y + 28 + posicao * 28;
 
-            this.add.text(MARGEM, linha, conquista.nome, {
+            const nome = this.add.text(MARGEM, linha, conquista.nome, {
                 fontFamily: FONTE,
                 fontSize: "12px",
                 color: COR.destaque
             });
+
+            const itens = novas.indexOf(conquista.id) >= 0 ? desbloqueiosDaConquista(conquista.id) : [];
+            if (itens.length > 0) {
+                const x = MARGEM + nome.width + 18;
+                this.add.image(x, linha + 7, "cadeado_aberto").setScale(ESCALA_DO_CADEADO);
+                this.add.text(x + 14, linha + 1, itens.map(function (item) {
+                    return item.nome;
+                }).join(", ") + " no editor", {
+                    fontFamily: FONTE,
+                    fontSize: "11px",
+                    color: COR.textoSecundario
+                });
+            }
 
             this.add.text(MARGEM, linha + 14, conquista.descricao, {
                 fontFamily: FONTE,

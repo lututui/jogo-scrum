@@ -83,12 +83,13 @@ def comparar_aparencia_padrao():
     return casos, falhas
 
 
-# toda peça de cima com toda peça de baixo, cada cabelo, com e sem óculos
+# toda peça de cima com toda peça de baixo, cada cabelo, sem óculos, com
+# armação colorida e com os óculos cristal; o fone em metade dos casos
 def aparencias_de_teste():
-    combinacoes = itertools.product(PECAS_DE_CIMA, PECAS_DE_BAIXO, ESTILOS_DE_CABELO, (None, ARMACAO_DE_TESTE))
-    for cima, baixo, estilo, oculos in combinacoes:
+    combinacoes = itertools.product(PECAS_DE_CIMA, PECAS_DE_BAIXO, ESTILOS_DE_CABELO, (None, ARMACAO_DE_TESTE, "cristal"))
+    for indice, (cima, baixo, estilo, oculos) in enumerate(combinacoes):
         yield dict(CORES_DE_TESTE, peca_de_cima=cima, peca_de_baixo=baixo,
-                   estilo_de_cabelo=estilo, oculos=oculos)
+                   estilo_de_cabelo=estilo, oculos=oculos, acessorio="fone" if indice % 2 else None)
 
 
 # camadas recoloridas contra montar_jogador(), feito de uma vez
@@ -103,7 +104,7 @@ def comparar_combinacoes(folhas):
             if not iguais(compor_jogador(folhas, aparencia, frame, expressao, cadeira), esperado):
                 falhas.append("%s + %s, %s, óculos %s, quadro %d, %s" % (
                     aparencia["peca_de_cima"], aparencia["peca_de_baixo"],
-                    aparencia["estilo_de_cabelo"], "sim" if aparencia["oculos"] else "não",
+                    aparencia["estilo_de_cabelo"], (aparencia["oculos"] or "não"),
                     frame, expressao))
     return casos, falhas
 

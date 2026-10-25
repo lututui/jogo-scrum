@@ -14,15 +14,31 @@
 // numerados, com um alto-falante no fim que toca a amostra; altura, melodia
 // e ritmo são réguas, que respondem a clique e a arrastar. Mudar a voz também
 // toca a amostra.
+//
+// Os itens desbloqueáveis (dados/desbloqueios.js) entram na rotação com um
+// cadeado: fechado enquanto falta a conquista, aberto depois dela. O
+// bloqueado pode ser provado na prévia, que diz a conquista que o libera,
+// mas o CONFIRMAR pede para trocá-lo; o SORTEAR não o escolhe. Os óculos
+// cristal são um quadrado da paleta dos óculos, antes do conta-gotas.
 
 import {
+    ACESSORIOS,
     APARENCIA_PADRAO,
     CORES_PADRAO,
     ESTILOS_DE_CABELO,
+    OCULOS_CRISTAL,
     PECAS_DE_BAIXO,
     PECAS_DE_CIMA,
+    ROTULOS_DAS_CORES,
     TONS_DE_PELE
 } from "../dados/aparencia.js";
+import {CONQUISTAS} from "../dados/conquistas.js";
+import {
+    NOMES_DOS_DESBLOQUEAVEIS,
+    itemDesbloqueavel,
+    itemLiberado,
+    itensBloqueados
+} from "../dados/desbloqueios.js";
 import {
     NOMES_SUGERIDOS,
     PRONOMES,
@@ -38,10 +54,11 @@ import {
 import {ALTURAS, MELODIAS, NOMES_DA_VOZ, RITMOS, TIMBRES, VOZ_PADRAO, sortearVoz} from "../dados/voz.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {Regua} from "../ui/Regua.js";
+import {ESCALA_DO_CADEADO, chaveDoCadeado, criarCadeados, criarIcone, criarTexturaDePixels} from "../ui/icones.js";
 import {aplicarPerfil, montarPrevia} from "../ui/montarJogador.js";
 import {falarAmostra, pararAmostra, tocarEfeito} from "../ui/som.js";
 
-const NOMES = {
+const NOMES = Object.assign({
     masculino: "Masculino",
     feminino: "Feminino",
     curto_liso: "Curto liso",
@@ -58,7 +75,9 @@ const NOMES = {
     shorts: "Shorts",
     saia_curta: "Saia curta",
     saia_longa: "Saia longa"
-};
+}, NOMES_DOS_DESBLOQUEAVEIS);
+
+const ROTULOS_PADRAO = ["Cor primária", "Cor secundária"];
 
 const BOTOES = [
     {id: "sortear", titulo: "SORTEAR"},
@@ -66,8 +85,9 @@ const BOTOES = [
     {id: "confirmar", titulo: "CONFIRMAR"}
 ];
 
-// chance de o sorteio pôr óculos
+// chance de o sorteio pôr óculos e acessório
 const CHANCE_DE_OCULOS = 1 / 3;
+const CHANCE_DE_ACESSORIO = 1 / 3;
 
 // colunas e linhas da lista, à direita
 const ESQUERDA_DA_LISTA = 380;
@@ -83,8 +103,8 @@ const COLUNA_DOS_QUADRADOS = 600;
 const LADO_DO_QUADRADO = 18;
 const PASSO_DO_QUADRADO = 23;
 const TOPO_DA_LISTA = 56;
-const ALTURA_DA_LINHA = 22;
-const ESPACO_ENTRE_LINHAS = 2;
+const ALTURA_DA_LINHA = 21;
+const ESPACO_ENTRE_LINHAS = 1;
 // respiro entre grupos de linhas, com um fio no meio
 const ESPACO_ENTRE_GRUPOS = 10;
 
@@ -139,6 +159,22 @@ const DESENHO_DO_ALTO_FALANTE = [
     "............"
 ];
 
+// óculos redondos, no quadrado do cristal
+const DESENHO_DOS_OCULOS = [
+    ".###....###.",
+    "#...#..#...#",
+    "#...####...#",
+    "#...#..#...#",
+    ".###....###."
+];
+const COR_DO_QUADRADO_CRISTAL = 0xdbe9f4;
+
+// faixa da prévia que diz o que libera o item bloqueado
+const ALTURA_DA_LINHA_DA_FAIXA = 15;
+const COR_DA_FAIXA = 0xfff8e8;
+const COR_DA_BORDA_DA_FAIXA = 0xe6c88c;
+const COR_DO_TEXTO_DA_FAIXA = "#6e501e";
+
 const LARGURA_DO_CAMPO = 150;
 const COLUNA_DO_ERRO = COLUNA_DO_VALOR + LARGURA_DO_CAMPO + 10;
 
@@ -163,7 +199,7 @@ function coresLivres(aparencia) {
         const sugerida = CORES_PADRAO[categoria].some(function (item) {
             return item.cor === cor;
         });
-        livres[categoria] = cor && !sugerida ? cor : null;
+        livres[categoria] = cor && cor.charAt(0) === "#" && !sugerida ? cor : null;
     });
     return livres;
 }
@@ -176,30 +212,6 @@ function juntar(partes) {
     return partes.slice(0, -1).join(", ") + " e " + partes[partes.length - 1];
 }
 
-function corCss(cor) {
-    return "#" + cor.toString(16).padStart(6, "0");
-}
-
-// desenha pixel a pixel, para as diagonais saírem nítidas
-function criarTexturaDePixels(cena, chave, largura, altura, corDoPixel) {
-    if (cena.textures.exists(chave)) {
-        return;
-    }
-
-    const textura = cena.textures.createCanvas(chave, largura, altura);
-    const contexto = textura.getContext();
-    for (let y = 0; y < altura; y++) {
-        for (let x = 0; x < largura; x++) {
-            const cor = corDoPixel(x, y);
-            if (cor !== null) {
-                contexto.fillStyle = corCss(cor);
-                contexto.fillRect(x, y, 1, 1);
-            }
-        }
-    }
-    textura.refresh();
-}
-
 function criarTexturas(cena) {
     Object.keys(LISTRAS).forEach(function (chave) {
         const listra = LISTRAS[chave];
@@ -210,20 +222,15 @@ function criarTexturas(cena) {
 
     criarIcone(cena, "conta_gotas", DESENHO_DO_CONTA_GOTAS);
     criarIcone(cena, "alto_falante", DESENHO_DO_ALTO_FALANTE);
+    criarIcone(cena, "oculos_redondos", DESENHO_DOS_OCULOS);
+    criarCadeados(cena);
 }
 
-// o contorno claro deixa o ícone visível sobre qualquer cor
-function criarIcone(cena, chave, desenho) {
-    const cheio = function (x, y) {
-        return desenho[y] !== undefined && desenho[y][x] === "#";
-    };
-    criarTexturaDePixels(cena, chave, desenho[0].length, desenho.length, function (x, y) {
-        if (cheio(x, y)) {
-            return COR_HEX.contorno;
-        }
-        const vizinho = cheio(x - 1, y) || cheio(x + 1, y) || cheio(x, y - 1) || cheio(x, y + 1);
-        return vizinho ? COR_HEX.painel : null;
+function nomeDaConquista(id) {
+    const conquista = CONQUISTAS.find(function (item) {
+        return item.id === id;
     });
+    return conquista ? conquista.nome : id;
 }
 
 export class CenaEditor extends Phaser.Scene {
@@ -241,7 +248,7 @@ export class CenaEditor extends Phaser.Scene {
     create() {
         const perfil = perfilDoJogador(this.registry);
 
-        this.aparencia = copiar(perfil ? perfil.aparencia : APARENCIA_PADRAO);
+        this.aparencia = Object.assign({}, APARENCIA_PADRAO, perfil ? perfil.aparencia : {});
         this.voz = copiar(vozDoJogador(this.registry));
         this.nome = perfil ? perfil.nome : "";
         this.pronome = perfil ? perfil.pronome : null;
@@ -295,6 +302,7 @@ export class CenaEditor extends Phaser.Scene {
                 id: id,
                 rotulo: rotulo,
                 tipo: "opcao",
+                campo: campo,
                 valores: valores,
                 ler: function () {
                     return cena.aparencia[campo];
@@ -357,16 +365,24 @@ export class CenaEditor extends Phaser.Scene {
             opcao("estilo", "Cabelo", ESTILOS_DE_CABELO, "estiloDeCabelo"),
             paleta("cabelo", "Cor do cabelo", "cabelo"),
             Object.assign(opcao("cima", "Parte de cima", Object.keys(PECAS_DE_CIMA), "pecaDeCima"), {separa: true}),
-            paleta("superior", "Cor primária", "superior", {recuo: true}),
-            paleta("interna", "Cor secundária", "interna", {
+            paleta("superior", ROTULOS_PADRAO[0], "superior", {
                 recuo: true,
+                daPecaDeCima: 0,
+                ativa: function () {
+                    return (PECAS_DE_CIMA[cena.aparencia.pecaDeCima] || []).length > 0;
+                }
+            }),
+            paleta("interna", ROTULOS_PADRAO[1], "interna", {
+                recuo: true,
+                daPecaDeCima: 1,
                 ativa: function () {
                     return (PECAS_DE_CIMA[cena.aparencia.pecaDeCima] || []).length > 1;
                 }
             }),
             opcao("baixo", "Parte de baixo", Object.keys(PECAS_DE_BAIXO), "pecaDeBaixo"),
             paleta("inferior", "Cor primária", "inferior", {recuo: true}),
-            paleta("oculos", "Óculos", "oculos", {comNenhum: true}),
+            paleta("oculos", "Óculos", "oculos", {comNenhum: true, especiais: [OCULOS_CRISTAL]}),
+            opcao("acessorio", "Acessório", [null].concat(ACESSORIOS), "acessorio"),
             {id: "voz", rotulo: "Voz", tipo: "timbre", daVoz: true, separa: true},
             regua("altura", "Altura", ALTURAS, "altura", function (valor) {
                 return valor < 0 ? "grave" : valor > 0 ? "aguda" : "média";
@@ -400,14 +416,17 @@ export class CenaEditor extends Phaser.Scene {
         if (linha.texto) {
             return linha.texto(valor);
         }
+        if (valor === null) {
+            return "Nenhum";
+        }
         return NOMES[valor] || String(valor);
     }
 
     // quadrados de uma paleta, da esquerda para a direita: nenhum (o X),
-    // as cores sugeridas e o conta-gotas
+    // as cores sugeridas, os especiais (o cristal) e o conta-gotas
     quadrados(linha) {
         const lista = linha.comNenhum ? [NENHUMA] : [];
-        return lista.concat(linha.cores, linha.comSeletor ? [CONTA_GOTAS] : []);
+        return lista.concat(linha.cores, linha.especiais || [], linha.comSeletor ? [CONTA_GOTAS] : []);
     }
 
     // o quadrado da cor atual; uma cor fora das sugeridas é o conta-gotas
@@ -531,7 +550,16 @@ export class CenaEditor extends Phaser.Scene {
     // aparência ao acaso, entre as opções e as cores sugeridas, um
     // tratamento e um nome sugerido para esse tratamento
     sortear() {
+        const cena = this;
         const sortear = Phaser.Utils.Array.GetRandom;
+        const liberados = function (campo, valores) {
+            return valores.filter(function (valor) {
+                return itemLiberado(cena.registry, campo, valor);
+            });
+        };
+        const coresDosOculos = CORES_PADRAO.oculos.map(function (item) {
+            return item.cor;
+        }).concat([OCULOS_CRISTAL]);
         this.pronome = sortear(PRONOMES);
         const nomes = NOMES_SUGERIDOS[this.pronome].filter(function (nome) {
             return nome !== this.nome;
@@ -547,12 +575,13 @@ export class CenaEditor extends Phaser.Scene {
             pele: sortear(TONS_DE_PELE),
             estiloDeCabelo: sortear(ESTILOS_DE_CABELO),
             cabelo: cor("cabelo"),
-            pecaDeCima: sortear(Object.keys(PECAS_DE_CIMA)),
+            pecaDeCima: sortear(liberados("pecaDeCima", Object.keys(PECAS_DE_CIMA))),
             superior: cor("superior"),
             interna: cor("interna"),
             pecaDeBaixo: sortear(Object.keys(PECAS_DE_BAIXO)),
             inferior: cor("inferior"),
-            oculos: Math.random() < CHANCE_DE_OCULOS ? cor("oculos") : null
+            oculos: Math.random() < CHANCE_DE_OCULOS ? sortear(liberados("oculos", coresDosOculos)) : null,
+            acessorio: Math.random() < CHANCE_DE_ACESSORIO ? sortear(liberados("acessorio", ACESSORIOS)) || null : null
         };
         this.voz = sortearVoz();
         this.atualizar();
@@ -582,6 +611,9 @@ export class CenaEditor extends Phaser.Scene {
         }
         if (!aparenciaValida(this.aparencia)) {
             faltam.push("corrigir a aparência");
+        }
+        if (itensBloqueados(this.registry, this.aparencia).length > 0) {
+            faltam.push("trocar o que está com cadeado");
         }
         return faltam;
     }
@@ -663,6 +695,43 @@ export class CenaEditor extends Phaser.Scene {
             fontSize: "16px",
             color: COR.texto
         }).setOrigin(0.5, 0.5);
+
+        // no pé das listras, a conquista que libera o item bloqueado
+        this.baseDaFaixa = TOPO_DA_LISTA + alturaDasListras - 1;
+        this.fundoDaFaixa = this.add.rectangle(ESQUERDA_DA_PREVIA + 1, this.baseDaFaixa, LARGURA_DA_PREVIA - 2,
+            ALTURA_DA_LINHA_DA_FAIXA, COR_DA_FAIXA).setOrigin(0, 1).setStrokeStyle(1, COR_DA_BORDA_DA_FAIXA);
+        this.cadeadoDaFaixa = this.add.image(ESQUERDA_DA_PREVIA + 20, 0, "cadeado_fechado")
+            .setOrigin(0.5, 0).setScale(ESCALA_DO_CADEADO);
+        this.textoDaFaixa = this.add.text(ESQUERDA_DA_PREVIA + 38, 0, "", {
+            fontFamily: FONTE,
+            fontSize: "12px",
+            color: COR_DO_TEXTO_DA_FAIXA,
+            lineSpacing: 3
+        }).setOrigin(0, 0);
+    }
+
+    // uma linha por conquista que falta, com um título em cima
+    atualizarFaixa() {
+        const bloqueados = itensBloqueados(this.registry, this.aparencia);
+        const partes = [this.fundoDaFaixa, this.cadeadoDaFaixa, this.textoDaFaixa];
+
+        partes.forEach(function (parte) {
+            parte.setVisible(bloqueados.length > 0);
+        });
+        if (bloqueados.length === 0) {
+            return;
+        }
+
+        const linhas = [bloqueados.length > 1 ? "Obtidos com as conquistas" : "Obtido com a conquista"]
+            .concat(bloqueados.map(function (item) {
+                return nomeDaConquista(item.conquista);
+            }));
+        const altura = linhas.length * ALTURA_DA_LINHA_DA_FAIXA + 10;
+        const topo = this.baseDaFaixa - altura;
+
+        this.fundoDaFaixa.setSize(LARGURA_DA_PREVIA - 2, altura);
+        this.textoDaFaixa.setText(linhas.join("\n")).setY(topo + 6);
+        this.cadeadoDaFaixa.setY(topo + 6);
     }
 
     montarLinhas() {
@@ -724,6 +793,7 @@ export class CenaEditor extends Phaser.Scene {
                 return visual;
             }
 
+            visual.cadeado = this.add.image(0, meio, "cadeado_fechado").setScale(ESCALA_DO_CADEADO).setVisible(false);
             visual.setas = [
                 this.criarSeta(COLUNA_DA_SETA, meio, "‹", linha, indice, -1),
                 this.criarSeta(COLUNA_DA_OUTRA_SETA, meio, "›", linha, indice, 1)
@@ -786,18 +856,24 @@ export class CenaEditor extends Phaser.Scene {
         });
     }
 
-    // um quadrado por cor; o X e o conta-gotas têm desenho próprio
+    // um quadrado por cor; o X, o cristal e o conta-gotas têm desenho próprio
     montarQuadrados(linha, indice, meio) {
         return this.quadrados(linha).map(function (quadrado, posicao) {
             const x = COLUNA_DOS_QUADRADOS + posicao * PASSO_DO_QUADRADO + LADO_DO_QUADRADO / 2;
             const lado = LADO_DO_QUADRADO;
             const partes = [];
+            const especial = quadrado === NENHUMA || quadrado === CONTA_GOTAS || quadrado === OCULOS_CRISTAL;
             const fundo = this.add.rectangle(x, meio, lado, lado,
-                quadrado === NENHUMA || quadrado === CONTA_GOTAS ? COR_HEX.painel : corNumerica(quadrado));
+                quadrado === OCULOS_CRISTAL ? COR_DO_QUADRADO_CRISTAL : (especial ? COR_HEX.painel : corNumerica(quadrado)));
             partes.push(fundo);
 
             let listras = null;
-            if (quadrado === CONTA_GOTAS) {
+            let cadeado = null;
+            if (quadrado === OCULOS_CRISTAL) {
+                // o cadeado no canto, por cima dos óculos e da borda
+                cadeado = this.add.image(x + lado / 2 - 1, meio - lado / 2 + 1, "cadeado_fechado").setDepth(1);
+                partes.push(this.add.image(x, meio, "oculos_redondos"), cadeado);
+            } else if (quadrado === CONTA_GOTAS) {
                 listras = this.add.tileSprite(x, meio, lado, lado, "listras_do_quadrado");
                 partes.push(listras, this.add.image(x, meio, "conta_gotas"));
             } else if (quadrado === NENHUMA) {
@@ -822,7 +898,7 @@ export class CenaEditor extends Phaser.Scene {
                 }
             }, this);
 
-            return {quadrado: quadrado, x: x, fundo: fundo, listras: listras, partes: partes};
+            return {quadrado: quadrado, x: x, fundo: fundo, listras: listras, cadeado: cadeado, partes: partes};
         }, this);
     }
 
@@ -987,6 +1063,7 @@ export class CenaEditor extends Phaser.Scene {
             montarPrevia(this, this.aparencia);
         }
         this.rotuloDoNome.setText(normalizarNome(this.nome) || "sem nome");
+        this.atualizarFaixa();
         this.atualizarLinhas();
         this.atualizarBotoes();
     }
@@ -1010,6 +1087,11 @@ export class CenaEditor extends Phaser.Scene {
                 return;
             }
 
+            if (linha.daPecaDeCima !== undefined) {
+                const rotulos = ROTULOS_DAS_CORES[this.aparencia.pecaDeCima] || ROTULOS_PADRAO;
+                visual.rotulo.setText(rotulos[linha.daPecaDeCima] || ROTULOS_PADRAO[linha.daPecaDeCima]);
+            }
+
             if (linha.tipo === "paleta") {
                 this.atualizarQuadrados(linha, visual, ativa);
                 return;
@@ -1028,8 +1110,16 @@ export class CenaEditor extends Phaser.Scene {
                 return;
             }
 
+            // o desbloqueável leva o cadeado logo depois do nome; o bloqueado, apagado
+            const valor = linha.ler();
+            const desbloqueavel = Boolean(linha.campo) && itemDesbloqueavel(linha.campo, valor);
+            const liberado = !desbloqueavel || itemLiberado(this.registry, linha.campo, valor);
+            const apagado = (linha.id === "pronome" && !this.pronome) || !liberado;
             visual.valor.setText(this.textoDoValor(linha));
-            visual.valor.setColor(linha.id === "pronome" && !this.pronome ? COR.textoSecundario : COR.texto);
+            visual.valor.setColor(apagado ? COR.textoSecundario : COR.texto);
+            visual.cadeado.setVisible(desbloqueavel)
+                .setTexture(chaveDoCadeado(liberado))
+                .setX(COLUNA_DO_VALOR + visual.valor.width + 16);
         }, this);
     }
 
@@ -1045,6 +1135,9 @@ export class CenaEditor extends Phaser.Scene {
             });
             if (posicao === this.quadradoAtual(linha)) {
                 visual.anel.setX(item.x);
+            }
+            if (item.cadeado) {
+                item.cadeado.setTexture(chaveDoCadeado(itemLiberado(this.registry, linha.campo, item.quadrado)));
             }
             if (item.quadrado === CONTA_GOTAS) {
                 const livre = this.personalizadas[linha.campo];

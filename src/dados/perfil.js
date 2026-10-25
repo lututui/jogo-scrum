@@ -7,15 +7,19 @@
 // Um progresso salvo antes do editor não tem perfil; um perfil incompleto ou
 // com valor fora do catálogo também conta como ausente, e o jogador passa
 // pelo editor de novo. O RESET do editor volta à aparência padrão e limpa
-// nome e pronome.
+// nome e pronome. Um item desbloqueável sem a conquista volta ao padrão na
+// hora de montar o jogador.
 
 import {
+    ACESSORIOS,
     APARENCIA_PADRAO,
     ESTILOS_DE_CABELO,
+    OCULOS_CRISTAL,
     PECAS_DE_BAIXO,
     PECAS_DE_CIMA,
     TONS_DE_PELE
 } from "./aparencia.js";
+import {semBloqueados} from "./desbloqueios.js";
 import {lerProgresso, salvarProgresso} from "./progresso.js";
 import {VOZ_PADRAO, vozValida} from "./voz.js";
 
@@ -75,7 +79,8 @@ export function aparenciaValida(aparencia) {
         && ["cabelo", "superior", "interna", "inferior"].every(function (categoria) {
             return COR.test(aparencia[categoria]);
         })
-        && (aparencia.oculos === null || COR.test(aparencia.oculos));
+        && (aparencia.oculos === null || aparencia.oculos === OCULOS_CRISTAL || COR.test(aparencia.oculos))
+        && (!aparencia.acessorio || ACESSORIOS.indexOf(aparencia.acessorio) >= 0);
 }
 
 export function perfilValido(perfil) {
@@ -123,9 +128,10 @@ export function vozDoJogador(registry) {
     return perfil && vozValida(perfil.voz) ? perfil.voz : VOZ_PADRAO;
 }
 
-// a aparência do perfil, ou a padrão enquanto não houver perfil
+// a aparência do perfil, sem o que estiver bloqueado, ou a padrão enquanto
+// não houver perfil; um perfil de antes do acessório fica sem ele
 export function aparenciaDoJogador(registry) {
     const perfil = perfilDoJogador(registry);
 
-    return perfil ? perfil.aparencia : APARENCIA_PADRAO;
+    return perfil ? semBloqueados(registry, Object.assign({}, APARENCIA_PADRAO, perfil.aparencia)) : APARENCIA_PADRAO;
 }

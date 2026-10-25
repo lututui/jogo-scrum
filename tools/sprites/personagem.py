@@ -6,7 +6,7 @@
 
 from PIL import Image, ImageDraw
 
-from .acessorios import desenhar_acessorio, desenhar_cracha
+from .acessorios import desenhar_acessorio, desenhar_cracha, desenhar_fone
 from .corpo import PECAS_POR_FOLHA, camada_calca, camada_camiseta, camada_corpo, ordem_das_pecas
 from .elenco import EXPRESSOES
 from .medidas import (
@@ -18,7 +18,14 @@ from .medidas import (
     RECORTE_RETRATO,
 )
 from .paleta import COR_DE_CABELO, COR_DE_CALCA, COR_DE_CRACHA, COR_DE_ROUPA, TOM_DE_PELE, TRANSPARENTE
-from .rosto import cor_da_sobrancelha, desenhar_cabelo, desenhar_oculos, desenhar_olhos, fundo_da_sobrancelha
+from .rosto import (
+    cor_da_sobrancelha,
+    desenhar_cabelo,
+    desenhar_oculos,
+    desenhar_oculos_cristal,
+    desenhar_olhos,
+    fundo_da_sobrancelha,
+)
 
 
 def montar(spec, frame=0, expressao="neutro", cadeira=None):
@@ -49,7 +56,7 @@ def pintar_peca(d, frame, peca, aparencia):
     desenhar(d, frame, *[aparencia[categoria] for categoria in categorias])
 
 
-# o jogador a partir da aparência do editor; sem acessório de mão
+# o jogador a partir da aparência do editor; o único acessório é o fone
 def montar_jogador(aparencia, frame=0, expressao="neutro", cadeira=None):
     pele = aparencia["pele"]
     cabelo = aparencia["cabelo"]
@@ -61,10 +68,14 @@ def montar_jogador(aparencia, frame=0, expressao="neutro", cadeira=None):
     for folha in ordem_das_pecas(aparencia):
         pintar_peca(d, frame, PECAS_POR_FOLHA[folha], aparencia)
     desenhar_cabelo(d, aparencia["estilo_de_cabelo"], cabelo)
-    if aparencia["oculos"]:
+    if aparencia["oculos"] == "cristal":
+        desenhar_oculos_cristal(d)
+    elif aparencia["oculos"]:
         desenhar_oculos(d, aparencia["oculos"])
     fundo = fundo_da_sobrancelha(img, pele)
     desenhar_olhos(d, expressao, cor_da_sobrancelha(cabelo, fundo))
+    if aparencia.get("acessorio") == "fone":
+        desenhar_fone(d)
     if cadeira:
         desenhar_cracha(d, COR_DE_CRACHA[cadeira])
     return img

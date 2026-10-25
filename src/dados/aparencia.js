@@ -8,11 +8,27 @@
 // da peça, a segunda para a segunda
 export const MARCADORES = ["#ff00ff", "#00ffff"];
 
-// peça -> categorias de cor, na ordem dos marcadores
+// peça -> categorias de cor, na ordem dos marcadores; sem categoria, a peça
+// tem cor fixa. As depois da jaqueta são desbloqueáveis (dados/desbloqueios.js)
 export const PECAS_DE_CIMA = {
     camiseta: ["superior"],
     moletom: ["superior"],
-    jaqueta: ["superior", "interna"]
+    jaqueta: ["superior", "interna"],
+    meio_a_meio: ["superior", "interna"],
+    colete: ["superior"],
+    camiseta_alvo: ["superior"],
+    camiseta_visto: ["superior"],
+    camiseta_post_it: ["superior"],
+    camiseta_catavento: []
+};
+
+// o que cada cor pinta, quando não é "primária" e "secundária"
+export const ROTULOS_DAS_CORES = {
+    meio_a_meio: ["Cor da esquerda", "Cor da direita"],
+    colete: ["Cor da camiseta"],
+    camiseta_alvo: ["Cor da camiseta"],
+    camiseta_visto: ["Cor da camiseta"],
+    camiseta_post_it: ["Cor da camiseta"]
 };
 
 export const PECAS_DE_BAIXO = {
@@ -24,7 +40,14 @@ export const PECAS_DE_BAIXO = {
 
 // as saias vão por cima da peça de cima, que entra por dentro delas
 export const POR_CIMA_DO_TORSO = ["saia_curta", "saia_longa"];
-export const POR_DENTRO_DA_SAIA = ["camiseta", "moletom"];
+export const POR_DENTRO_DA_SAIA = Object.keys(PECAS_DE_CIMA).filter(function (nome) {
+    return nome !== "jaqueta";
+});
+
+// óculos de cor fixa, no lugar da cor da armação
+export const OCULOS_CRISTAL = "cristal";
+
+export const ACESSORIOS = ["fone"];
 
 export const ESTILOS_DE_CABELO = [
     "curto_liso", "franja_reta", "raspado", "coque_alto",
@@ -80,7 +103,7 @@ export const CORES_PADRAO = {
 };
 
 // o avatar de antes do editor, para onde o RESET volta; oculos é a cor da
-// armação ou null, sem óculos
+// armação, "cristal" ou null, sem óculos; acessorio é "fone" ou null
 export const APARENCIA_PADRAO = {
     pele: "#dcab85",
     estiloDeCabelo: "curto_liso",
@@ -90,7 +113,8 @@ export const APARENCIA_PADRAO = {
     interna: "#aab4c4",
     pecaDeBaixo: "calca",
     inferior: "#39465c",
-    oculos: null
+    oculos: null,
+    acessorio: null
 };
 
 // regra de contraste da sobrancelha, a mesma de tools/sprites/rosto.py
@@ -112,7 +136,7 @@ export const MEDIDAS = {
 
 // nomes das folhas em assets/camadas, como tools/sprites/camadas.py gera
 export function folhasDeCamada(expressoes) {
-    const folhas = ["corpo", "oculos", "cracha"];
+    const folhas = ["corpo", "oculos", "oculos_cristal", "fone", "cracha"];
 
     Object.keys(PECAS_DE_BAIXO).forEach(function (nome) {
         folhas.push("inferior_" + nome);

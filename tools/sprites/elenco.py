@@ -18,7 +18,8 @@ ELENCO = {
 AVATAR_DO_JOGADOR = ("curto_liso", "castanho", "branco", None, "media")
 
 # o mesmo avatar como o editor de personagem vai guardar: peças por nome,
-# cores em #rrggbb com a chave da categoria; oculos é a cor da armação ou None
+# cores em #rrggbb com a chave da categoria; oculos é a cor da armação,
+# "cristal" ou None; acessorio é "fone" ou None
 APARENCIA_PADRAO = {
     "pele": TOM_DE_PELE["media"],
     "estilo_de_cabelo": "curto_liso",
@@ -29,6 +30,7 @@ APARENCIA_PADRAO = {
     "peca_de_baixo": "calca",
     "inferior": COR_DE_CALCA,
     "oculos": None,
+    "acessorio": None,
 }
 
 # as três expressões de retrato, na ordem em que entram nas folhas

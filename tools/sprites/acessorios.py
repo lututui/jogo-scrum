@@ -63,9 +63,7 @@ def desenhar_acessorio(d, acessorio):
         ACESSORIOS[acessorio](d)
 
 
+# preso na cintura, à direita, para o peito ficar livre para as estampas
 def desenhar_cracha(d, cor):
-    r(d, 13, 15, 1, 1, CONTORNO)
-    r(d, 18, 15, 1, 1, CONTORNO)
-    r(d, 13, 16, 6, 6, CONTORNO)
-    r(d, 14, 17, 4, 4, cor)
-    r(d, 14, 17, 4, 1, COR_DO_OBJETO_NA_MAO)
+    r(d, 19, 20, 3, 4, CONTORNO)
+    r(d, 20, 21, 1, 2, cor)

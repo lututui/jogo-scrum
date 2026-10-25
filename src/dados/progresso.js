@@ -54,6 +54,7 @@ function sprintVazia() {
         acoesResolvidas: [],
         marcas: {},
         conquistas: [],
+        conquistasNovas: [],
         paraRevisar: {},
         quadro: quadroInicial(),
         movimentosNoQuadro: 0,
@@ -504,7 +505,8 @@ export function sprintsConcluidas(registry, cadeira) {
 // A condição olha o estado da sprint inteira, então nenhuma conquista depende
 // da ordem em que as coisas aconteceram. As marcadas como de fechamento só
 // são avaliadas quando a sprint acaba. Cada sprint guarda as que mereceu,
-// mesmo que já tenham sido obtidas antes; o jogo guarda a união de todas
+// mesmo que já tenham sido obtidas antes, e à parte as que foram novas no
+// jogo, que são as que desbloqueiam itens; o jogo guarda a união de todas
 function atualizarConquistas(progresso, cadeira, fechando) {
     const sprint = progresso.sprints[cadeira];
 
@@ -525,6 +527,7 @@ function atualizarConquistas(progresso, cadeira, fechando) {
 
         if (progresso.conquistas.indexOf(conquista.id) < 0) {
             progresso.conquistas.push(conquista.id);
+            sprint.conquistasNovas = (sprint.conquistasNovas || []).concat([conquista.id]);
         }
 
         // progresso salvo antes desta lista começa sem ela
