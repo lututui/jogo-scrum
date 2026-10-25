@@ -293,6 +293,27 @@ export function viuOQuadroHoje(registry, cadeira) {
 // ---------------------------------------------------------
 // registro das decisões
 
+// O que a decisão vale: os pontos e quanto ela move cada medidor que toca.
+// Sem avaliação declarada, não vale nada
+export function efeitoDaDecisao(decisao) {
+    const peso = PESO_DA_AVALIACAO[decisao.avaliacao];
+
+    if (!peso) {
+        return null;
+    }
+
+    const multiplicador = decisao.semMentor ? 2 : 1;
+    const alvos = decisao.medidores || Object.keys(MEDIDORES);
+
+    return {
+        pontos: peso.pontos * multiplicador,
+        dobro: Boolean(decisao.semMentor),
+        medidores: alvos.map(function (chave) {
+            return {chave: chave, variacao: peso.medidores};
+        })
+    };
+}
+
 function limitar(valor) {
     return Math.min(Math.max(valor, MEDIDOR_MINIMO), MEDIDOR_MAXIMO);
 }
@@ -317,23 +338,21 @@ export function registrarDecisao(registry, decisao) {
 
     const progresso = lerProgresso(registry);
     const sprint = progresso.sprints[decisao.cadeira];
-    const peso = PESO_DA_AVALIACAO[decisao.avaliacao];
+    const efeito = efeitoDaDecisao(decisao);
 
-    if (!sprint || !peso) {
+    if (!sprint || !efeito) {
         return progresso;
     }
 
-    const multiplicador = decisao.semMentor ? 2 : 1;
-    sprint.pontos += peso.pontos * multiplicador;
+    sprint.pontos += efeito.pontos;
     sprint.decisoes[decisao.avaliacao] += 1;
 
     if (decisao.semMentor && decisao.avaliacao === "boa") {
         sprint.decisoesSozinho += 1;
     }
 
-    const alvos = decisao.medidores || Object.keys(MEDIDORES);
-    alvos.forEach(function (chave) {
-        sprint.medidores[chave] = limitar(sprint.medidores[chave] + peso.medidores);
+    efeito.medidores.forEach(function (medidor) {
+        sprint.medidores[medidor.chave] = limitar(sprint.medidores[medidor.chave] + medidor.variacao);
     });
 
     if (decisao.marca) {

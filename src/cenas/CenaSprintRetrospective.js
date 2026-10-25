@@ -121,14 +121,15 @@ export class CenaSprintRetrospective extends CenaReuniao {
     }
 
     // Observações que não tocam o que travou a sprint contam como decisão
-    // própria, além da ação escolhida
+    // própria, além da ação escolhida; pontuadas na ordem em que o mentor
+    // comenta
     escolherAcao(acao) {
         const cena = this;
-        this.pontuar(acao);
 
         if (!this.escolheuRelevante) {
             this.pontuar({avaliacao: "ruim", conceito: this.evento.semObservacaoRelevante.conceito});
         }
+        this.pontuar(acao);
 
         this.responder(acao.titulo, function () {
             if (!cena.escolheuRelevante) {

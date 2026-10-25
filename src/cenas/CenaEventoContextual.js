@@ -10,7 +10,12 @@ import {CADEIRAS} from "../dados/cadeiras.js";
 import {ELENCO} from "../dados/elenco.js";
 import {aplicarNoQuadro} from "../dados/estadoDoQuadro.js";
 import {expressaoDaAvaliacao} from "../dados/expressoes.js";
-import {registrarAcaoResolvida, registrarContextualResolvido, registrarDecisao} from "../dados/progresso.js";
+import {
+    efeitoDaDecisao,
+    registrarAcaoResolvida,
+    registrarContextualResolvido,
+    registrarDecisao
+} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {vozDoJogador} from "../dados/perfil.js";
 import {nomeDaCadeira, nomeDoJogador} from "../dados/texto.js";
@@ -174,7 +179,7 @@ export class CenaEventoContextual extends Phaser.Scene {
     responder(opcao) {
         const cena = this;
 
-        registrarDecisao(this.registry, {
+        const decisao = {
             onde: this.evento.id,
             pergunta: this.evento.pergunta || null,
             opcao: opcao.titulo,
@@ -185,7 +190,8 @@ export class CenaEventoContextual extends Phaser.Scene {
             marca: opcao.marca,
             conceito: opcao.conceito,
             semMentor: Boolean(this.evento.semMentor)
-        });
+        };
+        registrarDecisao(this.registry, decisao);
         const mudanca = aplicarNoQuadro(this.registry, this.cadeira(), opcao.quadro);
 
         this.falar("jogador", opcao.titulo, function () {
@@ -193,6 +199,7 @@ export class CenaEventoContextual extends Phaser.Scene {
                 cena.falar(cena.mentor(), opcao.feedback, function () {
                     cena.encerrar();
                 }, opcao.principio, expressaoDaAvaliacao(opcao.avaliacao));
+                cena.painel.definirEfeito(efeitoDaDecisao(decisao));
             });
         });
     }

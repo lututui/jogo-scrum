@@ -1,9 +1,11 @@
 // Painel de fala da sala de reunião
 //
-// A faixa do princípio ágil aparece só quando o mentor comenta uma decisão.
+// A faixa do princípio ágil aparece só quando o mentor comenta uma decisão,
+// e o que a decisão valeu fica no alto, à direita do nome.
 // Enquanto o texto aparece, a voz de quem fala acompanha as letras.
 
 import {quadroDaExpressao} from "../dados/expressoes.js";
+import {MEDIDORES} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {personalizar} from "../dados/texto.js";
 import {silabasDoTexto} from "../dados/voz.js";
@@ -31,6 +33,13 @@ export function falarLetras(cena, voz, silabas, de, ate) {
     }
 }
 
+function textoDosPontos(efeito) {
+    if (efeito.pontos === 0) {
+        return "0 pontos";
+    }
+    return "+" + efeito.pontos + " pontos" + (efeito.dobro ? " (o dobro, sem mentor)" : "");
+}
+
 export class PainelDeFala {
 
     constructor(cena) {
@@ -39,6 +48,7 @@ export class PainelDeFala {
         this.textoCompleto = "";
         this.textoRevelado = "";
         this.acumulador = 0;
+        this.efeito = [];
         this.montar();
     }
 
@@ -127,6 +137,7 @@ export class PainelDeFala {
         this.texto.setText("");
 
         this.definirPrincipio(principio);
+        this.definirEfeito(null);
         this.elementos.forEach(function (elemento) {
             elemento.setVisible(true);
         });
@@ -140,8 +151,40 @@ export class PainelDeFala {
         this.linhaDoPrincipio.setVisible(Boolean(principio));
     }
 
+    // Pontos e o sentido de cada medidor movido, montados da direita para a
+    // esquerda; a seta leva a cor de quem sobe ou desce
+    definirEfeito(efeito) {
+        this.efeito.forEach(function (objeto) {
+            objeto.destroy();
+        });
+        this.efeito = [];
+
+        if (!efeito) {
+            return;
+        }
+
+        const partes = [[textoDosPontos(efeito), COR.texto]];
+        efeito.medidores.forEach(function (medidor) {
+            const sobe = medidor.variacao > 0;
+            partes.push(["  ·  " + MEDIDORES[medidor.chave].nome.split(" ")[0].toLowerCase(), COR.textoSecundario]);
+            partes.push([sobe ? " ▲" : " ▼", sobe ? COR.destaque : COR.alerta]);
+        });
+
+        let x = PAINEL.x + PAINEL.largura - 16;
+        for (let i = partes.length - 1; i >= 0; i--) {
+            const texto = this.cena.add.text(x, PAINEL.y + 16, partes[i][0], {
+                fontFamily: FONTE,
+                fontSize: "11px",
+                color: partes[i][1]
+            }).setOrigin(1, 0).setDepth(802);
+            x -= texto.width;
+            this.efeito.push(texto);
+        }
+    }
+
     // Fundo sem fala: usado quando o painel vira lista de respostas
     mostrarApenasFundo() {
+        this.definirEfeito(null);
         this.elementos.forEach(function (elemento) {
             elemento.setVisible(false);
         });
@@ -149,6 +192,7 @@ export class PainelDeFala {
     }
 
     esconder() {
+        this.definirEfeito(null);
         this.elementos.forEach(function (elemento) {
             elemento.setVisible(false);
         });

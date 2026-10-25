@@ -31,7 +31,8 @@ export const DICAS = {
             + "descem quando não segue.\n\n"
             + "Cada decisão também vale pontos: mais quando segue o princípio, menos "
             + "quando tem custo, nenhum quando vai contra. As tomadas sem o mentor "
-            + "por perto valem o dobro. No fim da sprint, a síntese mostra o que "
+            + "por perto valem o dobro. O comentário do mentor mostra, no alto, o "
+            + "que cada decisão valeu. No fim da sprint, a síntese mostra o que "
             + "você decidiu e as conquistas."
     }
 };

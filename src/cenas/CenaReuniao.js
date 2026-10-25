@@ -8,7 +8,7 @@
 // Cada evento herda daqui e implementa a própria mecânica.
 
 import {CADEIRAS} from "../dados/cadeiras.js";
-import {registrarDecisao, registrarEventoConcluido} from "../dados/progresso.js";
+import {efeitoDaDecisao, registrarDecisao, registrarEventoConcluido} from "../dados/progresso.js";
 import {agora} from "../dados/diario.js";
 import {ELENCO} from "../dados/elenco.js";
 import {aplicarNoQuadro} from "../dados/estadoDoQuadro.js";
@@ -52,6 +52,8 @@ export class CenaReuniao extends Phaser.Scene {
         this.aviso = null;
         this.emAndamento = false;
         this.avaliacoesDaReuniao = [];
+        // o que cada decisão valeu, na ordem em que o mentor vai comentar
+        this.efeitosPendentes = [];
         this.quadroReduzido = null;
 
         this.montarSala();
@@ -279,9 +281,11 @@ export class CenaReuniao extends Phaser.Scene {
         this.painel.mostrar(this.personagem(this.chaveDoMentor()), texto, principio, expressao);
     }
 
-    // O mentor reage à decisão que comenta: aprova, fica neutro ou tenso
+    // O mentor reage à decisão que comenta: aprova, fica neutro ou tenso.
+    // Se houver decisão pontuada à espera, o painel mostra o que ela valeu
     comentarDecisao(avaliacao, texto, principio, aoTerminar) {
         this.falarComoMentor(texto, principio, aoTerminar, expressaoDaAvaliacao(avaliacao));
+        this.painel.definirEfeito(this.efeitosPendentes.shift() || null);
     }
 
     // Encadeia falas de pessoas diferentes
@@ -374,7 +378,7 @@ export class CenaReuniao extends Phaser.Scene {
     // escolha mudou no quadro
     pontuar(opcao) {
         const multipla = this.lista && this.lista.multipla;
-        registrarDecisao(this.registry, {
+        const decisao = {
             onde: this.evento.chave,
             pergunta: this.perguntaAtual,
             opcao: opcao.titulo || null,
@@ -389,7 +393,12 @@ export class CenaReuniao extends Phaser.Scene {
             medidores: opcao.medidores,
             marca: opcao.marca,
             conceito: opcao.conceito
-        });
+        };
+        registrarDecisao(this.registry, decisao);
+        const efeito = efeitoDaDecisao(decisao);
+        if (efeito) {
+            this.efeitosPendentes.push(efeito);
+        }
         const mudanca = aplicarNoQuadro(this.registry, this.cadeira(), opcao.quadro);
 
         if (opcao.avaliacao) {
