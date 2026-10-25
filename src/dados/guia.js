@@ -6,9 +6,9 @@
 // O guia vem antes do editor de personagem, então não usa nome nem marca de
 // gênero do jogador: "Boas-vindas", e a cadeira de desenvolvimento é "Dev".
 //
-// No começo da partida só aparecem as páginas de "entrada"; o resto o
-// jogador aprende no caminho (o mentor na chegada, as dicas de dados/dicas.js)
-// e encontra completo pelo menu ou pela tecla H.
+// Na primeira partida neste navegador, só aparecem as páginas de "entrada";
+// o resto o jogador aprende no caminho (o mentor na chegada, as dicas de
+// dados/dicas.js) e encontra completo pelo menu ou pela tecla H.
 
 export const GUIA = [
     {

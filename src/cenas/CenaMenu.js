@@ -4,15 +4,18 @@
 // direto; com progresso, dá para continuar ou começar outra, e começar outra
 // pede confirmação, porque apaga o que foi salvo.
 //
-// Começar e Nova partida seguem guia, editor de personagem e escolha de
-// cadeira. Continuar volta à cadeira em andamento, direto no escritório, com
-// o mentor recebendo; sem cadeira em andamento (a última sprint fechou), vai
-// à escolha. Sem perfil no save, passa antes pelo editor. PERSONAGEM edita o
-// perfil e volta ao menu; a sprint em andamento continua onde estava.
+// Começar e Nova partida seguem guia (só na primeira vez neste navegador),
+// editor de personagem e escolha de cadeira. Continuar volta à cadeira em
+// andamento, direto no escritório, com o mentor recebendo; sem cadeira em
+// andamento, vai à escolha, ou à tela de fim se as três cadeiras já fecharam.
+// Sem perfil no save, passa antes pelo editor. PERSONAGEM edita o perfil e
+// volta ao menu; a sprint em andamento continua onde estava.
 
 import {temPerfil} from "../dados/perfil.js";
 import {CADEIRA_RECEM_ESCOLHIDA} from "../dados/boasVindas.js";
-import {apagarProgresso, cadeiraEmAndamento, temProgresso} from "../dados/progresso.js";
+import {ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
+import {guiaJaVisto} from "../dados/configuracoes.js";
+import {apagarProgresso, cadeiraEmAndamento, cadeirasConcluidas, temProgresso} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
 import {aplicarPerfil} from "../ui/montarJogador.js";
@@ -146,13 +149,19 @@ export class CenaMenu extends Phaser.Scene {
     // guia, editor e escolha de cadeira; ESC no editor volta ao menu sem
     // criar nada
     comecarPartida() {
-        comecarPeloGuia(this, "CenaEditor", {depois: "CenaSelecaoDePapel", voltar: "CenaMenu"});
+        const editor = {depois: "CenaSelecaoDePapel", voltar: "CenaMenu"};
+        if (guiaJaVisto()) {
+            this.scene.start("CenaEditor", editor);
+            return;
+        }
+        comecarPeloGuia(this, "CenaEditor", editor);
     }
 
     continuarPartida() {
         const cadeira = cadeiraEmAndamento(this.registry);
         anotar("continuar", {cadeira: cadeira});
-        const destino = cadeira ? "CenaEscritorio" : "CenaSelecaoDePapel";
+        const fechouTodas = cadeirasConcluidas(this.registry).length === ORDEM_DAS_CADEIRAS.length;
+        const destino = cadeira ? "CenaEscritorio" : (fechouTodas ? "CenaFim" : "CenaSelecaoDePapel");
 
         if (cadeira) {
             this.registry.set("cadeira", cadeira);

@@ -89,7 +89,6 @@ function progressoVazio() {
             return 0;
         }),
         conquistas: [],
-        guiaVisto: false,
         dicasVistas: [],
         cadeiraEmAndamento: null,
         perfil: null
@@ -158,18 +157,6 @@ export function apagarProgresso(registry) {
     return limpo;
 }
 
-// O guia abre sozinho até ser visto uma vez; apagar o progresso o traz de
-// volta, para o próximo jogador da mesma máquina
-export function guiaJaVisto(registry) {
-    return Boolean(lerProgresso(registry).guiaVisto);
-}
-
-export function marcarGuiaVisto(registry) {
-    const progresso = lerProgresso(registry);
-    progresso.guiaVisto = true;
-
-    return salvarProgresso(registry, progresso);
-}
 
 // A cadeira escolhida fica até a sprint dela fechar na síntese; só então, ou
 // numa partida nova, o jogador escolhe outra

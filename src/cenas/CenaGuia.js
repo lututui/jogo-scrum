@@ -1,13 +1,14 @@
 // Guia introdutório
 //
-// Abre de dois jeitos. Como primeiro passo de uma partida nova, ocupa a tela,
-// mostra só as páginas de entrada e, ao fechar, segue para a próxima cena (o
-// editor de personagem). Pelo menu ou pela tecla H, abre completo, por cima
-// da cena de onde veio, que volta ao fechar.
-// Fechar, pelo fim ou por ESC, marca o guia como visto.
+// Abre de dois jeitos. Como primeiro passo da primeira partida neste
+// navegador, ocupa a tela, mostra só as páginas de entrada e, ao fechar,
+// segue para a próxima cena (o editor de personagem). Pelo menu ou pela tecla
+// H, abre completo, por cima da cena de onde veio, que volta ao fechar.
+// Fechar, pelo fim ou por ESC, marca o guia como visto; só o "Limpar tudo"
+// das configurações desfaz a marca.
 
 import {GUIA} from "../dados/guia.js";
-import {marcarGuiaVisto} from "../dados/progresso.js";
+import {marcarGuiaVisto} from "../dados/configuracoes.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {abrirPorCima, fecharPorCima} from "./sobreposicao.js";
 import {agora, anotar} from "../dados/diario.js";
@@ -181,7 +182,7 @@ export class CenaGuia extends Phaser.Scene {
             paginas: this.paginasVistas + " de " + this.paginas.length,
             ms: agora() - this.abertoEm
         });
-        marcarGuiaVisto(this.registry);
+        marcarGuiaVisto();
 
         if (this.depois) {
             this.scene.start(this.depois, this.dadosDepois);

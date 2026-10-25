@@ -161,6 +161,7 @@ export const DAILY_SCRUM = {
     objetivo: "Fazer a Daily servir aos desenvolvedores em quinze minutos e "
         + "transformar impedimento declarado em impedimento tratado.",
     participantes: ["renan", "bia", "caio", "lu"],
+    // a resposta boa de cada rodada é curta; duas das longas estouram o tempo
     duracaoEmMinutos: 15,
     rodadas: [
         {
@@ -179,16 +180,16 @@ export const DAILY_SCRUM = {
                 },
                 {
                     titulo: "Deixar ele terminar o raciocínio",
-                    custo: 6,
+                    custo: 8,
                     avaliacao: "media",
                     conceito: "Daily Scrum",
-                    feedback: "Seis minutos foram para um assunto de duas pessoas. "
+                    feedback: "Oito minutos foram para um assunto de duas pessoas. "
                         + "Sobrou pouco tempo para o resto do time.",
                     principio: "Tempo fixo é o que mantém a Daily viável todos os dias."
                 },
                 {
                     titulo: "Resolver o problema dele ali mesmo",
-                    custo: 7,
+                    custo: 9,
                     avaliacao: "ruim",
                     conceito: "Autogestão",
                     feedback: "Você assumiu a tarefa em vez de facilitar. O time "
@@ -223,7 +224,7 @@ export const DAILY_SCRUM = {
                 },
                 {
                     titulo: "Sugerir que ela tente por outro caminho",
-                    custo: 4,
+                    custo: 7,
                     avaliacao: "media",
                     conceito: "Impedimento",
                     feedback: "Você propôs solução sem conhecer a causa. Pode ser "
@@ -248,7 +249,7 @@ export const DAILY_SCRUM = {
                 },
                 {
                     titulo: "Aceitar o relato e anotar",
-                    custo: 2,
+                    custo: 3,
                     avaliacao: "media",
                     conceito: "Daily Scrum",
                     feedback: "Funciona hoje e ensina o padrão errado: o time passa "
@@ -257,7 +258,7 @@ export const DAILY_SCRUM = {
                 },
                 {
                     titulo: "Cobrar prazo para as telas",
-                    custo: 5,
+                    custo: 7,
                     avaliacao: "ruim",
                     conceito: "Transparência",
                     feedback: "A cobrança transforma a reunião em prestação de "

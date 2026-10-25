@@ -1,9 +1,8 @@
 // Medidores na barra do topo
 //
 // Três barras curtas com o estado do valor entregue, da confiança do cliente
-// e da saúde do time.
-//
-// Qualquer estratégia que maximize um deles derruba os outros.
+// e da saúde do time. Cada decisão mexe nos medidores que declara: sobem
+// quando ela segue o princípio e descem quando tem custo ou vai contra.
 
 import {MEDIDORES} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
