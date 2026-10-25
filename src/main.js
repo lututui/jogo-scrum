@@ -15,6 +15,7 @@ import {CenaSprintRetrospective} from "./cenas/CenaSprintRetrospective.js";
 import {CenaEventoContextual} from "./cenas/CenaEventoContextual.js";
 import {CenaSintese} from "./cenas/CenaSintese.js";
 import {CenaGlossario} from "./cenas/CenaGlossario.js";
+import {CenaConquistas} from "./cenas/CenaConquistas.js";
 import {CenaGuia} from "./cenas/CenaGuia.js";
 import {CenaDica} from "./cenas/CenaDica.js";
 import {CenaMenu} from "./cenas/CenaMenu.js";
@@ -62,6 +63,7 @@ const configuracao = {
         CenaSintese,
         CenaFim,
         CenaGlossario,
+        CenaConquistas,
         CenaGuia,
         CenaDica,
         CenaConfiguracoes,

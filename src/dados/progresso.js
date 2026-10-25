@@ -89,6 +89,9 @@ function progressoVazio() {
             return 0;
         }),
         conquistas: [],
+        conquistasPorCadeira: porCadeira(function () {
+            return [];
+        }),
         dicasVistas: [],
         cadeiraEmAndamento: null,
         perfil: null
@@ -523,9 +526,26 @@ function atualizarConquistas(progresso, cadeira, fechando) {
         if (progresso.conquistas.indexOf(conquista.id) < 0) {
             progresso.conquistas.push(conquista.id);
         }
+
+        // progresso salvo antes desta lista começa sem ela
+        progresso.conquistasPorCadeira = progresso.conquistasPorCadeira || {};
+        const daCadeira = progresso.conquistasPorCadeira[cadeira] || [];
+        if (daCadeira.indexOf(conquista.id) < 0) {
+            daCadeira.push(conquista.id);
+        }
+        progresso.conquistasPorCadeira[cadeira] = daCadeira;
     });
 
     return progresso;
+}
+
+// Em que cadeiras o jogador obteve a conquista, na ordem das cadeiras
+export function cadeirasDaConquista(registry, id) {
+    const porCadeira = lerProgresso(registry).conquistasPorCadeira || {};
+
+    return ORDEM_DAS_CADEIRAS.filter(function (cadeira) {
+        return (porCadeira[cadeira] || []).indexOf(id) >= 0;
+    });
 }
 
 export function conquistasPorId(ids) {

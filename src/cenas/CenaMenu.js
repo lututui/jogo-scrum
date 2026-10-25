@@ -9,7 +9,8 @@
 // andamento, direto no escritório, com o mentor recebendo; sem cadeira em
 // andamento, vai à escolha, ou à tela de fim se as três cadeiras já fecharam.
 // Sem perfil no save, passa antes pelo editor. PERSONAGEM edita o perfil e
-// volta ao menu; a sprint em andamento continua onde estava.
+// volta ao menu; a sprint em andamento continua onde estava. CONQUISTAS abre
+// o visualizador por cima do menu.
 
 import {temPerfil} from "../dados/perfil.js";
 import {CADEIRA_RECEM_ESCOLHIDA} from "../dados/boasVindas.js";
@@ -18,8 +19,10 @@ import {guiaJaVisto} from "../dados/configuracoes.js";
 import {apagarProgresso, cadeiraEmAndamento, cadeirasConcluidas, temProgresso} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
+import {LADO_DA_LOGO, desenharLogo} from "../ui/logo.js";
 import {aplicarPerfil} from "../ui/montarJogador.js";
 import {abrirConfiguracoes} from "./CenaConfiguracoes.js";
+import {abrirConquistas} from "./CenaConquistas.js";
 import {abrirGlossario} from "./CenaGlossario.js";
 import {abrirGuia, comecarPeloGuia} from "./CenaGuia.js";
 import {anotar} from "../dados/diario.js";
@@ -29,11 +32,16 @@ const TOPO_DA_LISTA = 196;
 
 const ALTURA_DA_LINHA = 34;
 
+// a logo e o nome da empresa, lado a lado, acima do título
+const TOPO_DA_LOGO = 24;
+const ESPACO_DA_LOGO = 14;
+
 const OPCOES = {
     comecar: {id: "comecar", titulo: "COMEÇAR"},
     continuar: {id: "continuar", titulo: "CONTINUAR"},
     novaPartida: {id: "novaPartida", titulo: "NOVA PARTIDA"},
     personagem: {id: "personagem", titulo: "PERSONAGEM"},
+    conquistas: {id: "conquistas", titulo: "CONQUISTAS"},
     guia: {id: "guia", titulo: "GUIA"},
     glossario: {id: "glossario", titulo: "GLOSSÁRIO"},
     configuracoes: {id: "configuracoes", titulo: "CONFIGURAÇÕES"}
@@ -56,16 +64,19 @@ export class CenaMenu extends Phaser.Scene {
     montarMoldura() {
         this.add.rectangle(0, 0, 960, 540, COR_HEX.fundo).setOrigin(0, 0);
 
-        this.add.text(480, 92, "Protótipo de jogo sério para o ensino de Scrum", {
+        const empresa = this.add.text(0, TOPO_DA_LOGO + LADO_DA_LOGO / 2, "Catavento Software", {
+            fontFamily: FONTE,
+            fontSize: "16px",
+            color: COR.texto
+        }).setOrigin(0, 0.5);
+        const esquerda = Math.round(480 - (LADO_DA_LOGO + ESPACO_DA_LOGO + empresa.width) / 2);
+        desenharLogo(this, esquerda, TOPO_DA_LOGO);
+        empresa.setX(esquerda + LADO_DA_LOGO + ESPACO_DA_LOGO);
+
+        this.add.text(480, 112, "Protótipo de jogo sério para o ensino de Scrum", {
             fontFamily: FONTE,
             fontSize: "22px",
             color: COR.texto
-        }).setOrigin(0.5, 0);
-
-        this.add.text(480, 132, "Catavento Software", {
-            fontFamily: FONTE,
-            fontSize: "13px",
-            color: COR.textoSecundario
         }).setOrigin(0.5, 0);
 
         this.add.rectangle(480 - LARGURA_DA_LISTA / 2, 166, LARGURA_DA_LISTA, 1, COR_HEX.contornoSuave)
@@ -89,7 +100,7 @@ export class CenaMenu extends Phaser.Scene {
             ? [OPCOES.continuar, OPCOES.novaPartida]
             : [OPCOES.comecar];
 
-        return inicio.concat([OPCOES.personagem, OPCOES.guia, OPCOES.glossario, OPCOES.configuracoes]);
+        return inicio.concat([OPCOES.personagem, OPCOES.conquistas, OPCOES.guia, OPCOES.glossario, OPCOES.configuracoes]);
     }
 
     montarLista() {
@@ -122,6 +133,8 @@ export class CenaMenu extends Phaser.Scene {
             this.scene.start("CenaEditor", {depois: "CenaMenu", voltar: "CenaMenu"});
         } else if (opcao.id === "novaPartida") {
             this.pedirNovaPartida();
+        } else if (opcao.id === "conquistas") {
+            abrirConquistas(this);
         } else if (opcao.id === "guia") {
             abrirGuia(this);
         } else if (opcao.id === "glossario") {

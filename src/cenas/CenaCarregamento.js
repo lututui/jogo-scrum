@@ -2,6 +2,7 @@
 
 import {ELENCO, imagensDoEscritorio} from "../dados/elenco.js";
 import {COR, FONTE} from "../dados/tema.js";
+import {carregarLogo} from "../ui/logo.js";
 import {aplicarPerfil, carregarCamadas, criarAnimacoesDoCorpo} from "../ui/montarJogador.js";
 import {carregarSons} from "../ui/som.js";
 import {aplicarFps} from "./CenaFPS.js";
@@ -37,6 +38,7 @@ export class CenaCarregamento extends Phaser.Scene {
 
         carregarCamadas(this);
         carregarSons(this);
+        carregarLogo(this);
 
         ["chao", "parede", "quadro_parede", "mesa_redonda"].concat(imagensDoEscritorio()).forEach(function (nome) {
             this.load.image(nome, "assets/" + nome + ".png");

@@ -10,6 +10,7 @@
 import {GUIA} from "../dados/guia.js";
 import {marcarGuiaVisto} from "../dados/configuracoes.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
+import {LADO_DA_LOGO, desenharLogo} from "../ui/logo.js";
 import {abrirPorCima, fecharPorCima} from "./sobreposicao.js";
 import {agora, anotar} from "../dados/diario.js";
 
@@ -17,6 +18,11 @@ const PAINEL = {x: 120, y: 72, largura: 720, altura: 392};
 const RECUO = 24;
 const RAIO_DO_PONTO = 4;
 const ESPACO_ENTRE_PONTOS = 18;
+const ESPACO_DA_LOGO = 16;
+
+// título, linha e corpo descem quando a página tem a logo
+const SEM_LOGO = {titulo: RECUO + 9, linha: 60, corpo: 80};
+const COM_LOGO = {titulo: RECUO + LADO_DA_LOGO / 2, linha: RECUO + LADO_DA_LOGO + 16, corpo: RECUO + LADO_DA_LOGO + 36};
 
 export function abrirGuia(cena) {
     abrirPorCima(cena, "CenaGuia");
@@ -83,13 +89,15 @@ export class CenaGuia extends Phaser.Scene {
         const x = PAINEL.x + RECUO;
         const largura = PAINEL.largura - RECUO * 2;
 
-        this.textoDoTitulo = this.add.text(x, PAINEL.y + RECUO, "", {
+        this.logo = desenharLogo(this, x, PAINEL.y + RECUO);
+
+        this.textoDoTitulo = this.add.text(x, PAINEL.y + SEM_LOGO.titulo, "", {
             fontFamily: FONTE,
             fontSize: "18px",
             color: COR.destaque
-        });
+        }).setOrigin(0, 0.5);
 
-        this.add.rectangle(x, PAINEL.y + 60, largura, 1, COR_HEX.contornoSuave).setOrigin(0, 0);
+        this.linha = this.add.rectangle(x, PAINEL.y + SEM_LOGO.linha, largura, 1, COR_HEX.contornoSuave).setOrigin(0, 0);
 
         this.textoDoCorpo = this.add.text(x, PAINEL.y + 80, "", {
             fontFamily: FONTE,
@@ -122,6 +130,7 @@ export class CenaGuia extends Phaser.Scene {
         this.textoDaPagina.setText((this.pagina + 1) + " DE " + this.paginas.length);
         this.textoDoTitulo.setText(pagina.titulo);
         this.textoDoCorpo.setText(pagina.texto);
+        this.posicionarPelaLogo(Boolean(pagina.logo));
 
         this.pontos.forEach(function (ponto, indice) {
             ponto.setFillStyle(indice === this.pagina ? COR_HEX.destaque : COR_HEX.painel);
@@ -130,6 +139,16 @@ export class CenaGuia extends Phaser.Scene {
         this.textoDeAjuda.setText(ultima
             ? "ENTER começa, ← volta" + (this.depois ? "; o guia completo fica no menu" : "")
             : "ENTER ou → avança, ← volta, clique para avançar");
+    }
+
+    posicionarPelaLogo(comLogo) {
+        const posicoes = comLogo ? COM_LOGO : SEM_LOGO;
+        const x = PAINEL.x + RECUO;
+
+        this.logo.setVisible(comLogo);
+        this.textoDoTitulo.setPosition(comLogo ? x + LADO_DA_LOGO + ESPACO_DA_LOGO : x, PAINEL.y + posicoes.titulo);
+        this.linha.setY(PAINEL.y + posicoes.linha);
+        this.textoDoCorpo.setY(PAINEL.y + posicoes.corpo);
     }
 
     criarControles() {

@@ -119,3 +119,9 @@ COR_DO_TROFEU = "#e6c85a"
 COR_DO_BRILHO_DO_TROFEU = "#f0d76e"
 COR_DA_PORTA = "#c9d3e6"
 COR_DA_MACANETA = "#5f7ba8"
+
+# ------------------------------------------------------------------
+# logo da Catavento: as pás alternam estas cores, da pá de cima em sentido
+# horário; o contorno de cada pá sai da cor dela
+
+CORES_DO_CATAVENTO = ("#ffffff", "#c20505")

@@ -17,6 +17,7 @@ DIR_TOOLS = os.path.dirname(os.path.abspath(__file__))
 JOGO = [
     "gerar_sprites.py",
     "gerar_sons.py",
+    "gerar_logo.py",
 ]
 
 FIGURAS = [

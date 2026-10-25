@@ -8,12 +8,14 @@
 //
 // Na primeira partida neste navegador, só aparecem as páginas de "entrada";
 // o resto o jogador aprende no caminho (o mentor na chegada, as dicas de
-// dados/dicas.js) e encontra completo pelo menu ou pela tecla H.
+// dados/dicas.js) e encontra completo pelo menu ou pela tecla H. A página
+// com "logo" mostra a logo da Catavento ao lado do título.
 
 export const GUIA = [
     {
         titulo: "Boas-vindas à Catavento Software",
         entrada: true,
+        logo: true,
         texto: "A Catavento é uma software house pequena, contratada pela "
             + "Escola Machado de Assis para construir um diário de classe "
             + "digital: chamada, notas e boletim.\n\n"

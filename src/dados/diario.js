@@ -2,7 +2,8 @@
 //
 // O que o jogador faz, em ordem, para a análise da avaliação: decisões (com a
 // opção, a avaliação e o tempo para decidir), cadeiras, sínteses, consultas
-// ao glossário e ao guia, aberturas do quadro, dicas e o FPS de cada sessão.
+// ao glossário, ao guia e às conquistas, aberturas do quadro, dicas e o FPS
+// de cada sessão.
 // Cada linha leva a sessão (uma por carregamento da página) e o tempo desde
 // o começo dela, em milissegundos; não leva data nem hora.
 //
