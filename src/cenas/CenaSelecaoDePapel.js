@@ -1,13 +1,15 @@
 // Seleção de papel
 //
-// Permite troca de cadeira. O guia vem antes, no começo da partida, e daqui
-// só abre pela tecla H.
+// Aparece no começo de uma partida nova e depois da síntese de cada cadeira:
+// a cadeira escolhida vale até a sprint dela terminar. O guia vem antes, no
+// começo da partida, e daqui só abre pela tecla H.
 
+import {CADEIRA_RECEM_ESCOLHIDA} from "../dados/boasVindas.js";
 import {CADEIRAS, ORDEM_DAS_CADEIRAS} from "../dados/cadeiras.js";
 import {DEPURACAO, marcarDepuracao, opcoesLigadas} from "../dados/depuracao.js";
 import {ELENCO} from "../dados/elenco.js";
 import {temPerfil} from "../dados/perfil.js";
-import {cadeirasConcluidas} from "../dados/progresso.js";
+import {cadeirasConcluidas, definirCadeiraEmAndamento} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {nomeDaCadeira} from "../dados/texto.js";
 import {abrirGuia} from "./CenaGuia.js";
@@ -272,9 +274,12 @@ export class CenaSelecaoDePapel extends Phaser.Scene {
         this.scene.start("CenaMenu");
     }
 
-    // O escritório pode estar pausado atrás, se a troca veio de lá
+    // O escritório pode estar pausado atrás, se a troca veio de lá; nos dois
+    // casos, o mentor da cadeira recebe o jogador
     confirmar() {
         this.registry.set("cadeira", this.cartoes[this.indice].chave);
+        this.registry.set(CADEIRA_RECEM_ESCOLHIDA, true);
+        definirCadeiraEmAndamento(this.registry, this.cartoes[this.indice].chave);
         this.scene.stop();
 
         if (this.scene.isPaused("CenaEscritorio")) {

@@ -5,12 +5,14 @@
 // pede confirmação, porque apaga o que foi salvo.
 //
 // Começar e Nova partida seguem guia, editor de personagem e escolha de
-// cadeira. Continuar vai direto à escolha, ou passa antes pelo editor se o
-// save não tiver perfil. PERSONAGEM edita o perfil e volta ao menu; a sprint
-// em andamento continua onde estava.
+// cadeira. Continuar volta à cadeira em andamento, direto no escritório, com
+// o mentor recebendo; sem cadeira em andamento (a última sprint fechou), vai
+// à escolha. Sem perfil no save, passa antes pelo editor. PERSONAGEM edita o
+// perfil e volta ao menu; a sprint em andamento continua onde estava.
 
 import {temPerfil} from "../dados/perfil.js";
-import {apagarProgresso, temProgresso} from "../dados/progresso.js";
+import {CADEIRA_RECEM_ESCOLHIDA} from "../dados/boasVindas.js";
+import {apagarProgresso, cadeiraEmAndamento, temProgresso} from "../dados/progresso.js";
 import {COR, COR_HEX, FONTE} from "../dados/tema.js";
 import {ListaDeOpcoes} from "../ui/ListaDeOpcoes.js";
 import {aplicarPerfil} from "../ui/montarJogador.js";
@@ -145,11 +147,18 @@ export class CenaMenu extends Phaser.Scene {
     }
 
     continuarPartida() {
+        const cadeira = cadeiraEmAndamento(this.registry);
+        const destino = cadeira ? "CenaEscritorio" : "CenaSelecaoDePapel";
+
+        if (cadeira) {
+            this.registry.set("cadeira", cadeira);
+            this.registry.set(CADEIRA_RECEM_ESCOLHIDA, true);
+        }
         if (temPerfil(this.registry)) {
-            this.scene.start("CenaSelecaoDePapel");
+            this.scene.start(destino);
             return;
         }
-        this.scene.start("CenaEditor", {depois: "CenaSelecaoDePapel", voltar: "CenaMenu"});
+        this.scene.start("CenaEditor", {depois: destino, voltar: "CenaMenu"});
     }
 
     cancelarConfirmacao() {

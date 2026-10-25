@@ -72,8 +72,8 @@ export const GUIA = [
             + "reuniões, as setas escolhem a resposta e ENTER confirma.\n\n"
             + "G abre o glossário em qualquer tela, para consultar um termo "
             + "sem perder o lugar, e O abre as configurações, com o volume "
-            + "da música, dos efeitos e das vozes. P troca de cadeira antes "
-            + "de a sprint começar."
+            + "da música, dos efeitos e das vozes. A cadeira se escolhe no "
+            + "começo da partida e de novo a cada sprint terminada."
     },
     {
         titulo: "Pontos e conquistas",

@@ -15,7 +15,7 @@ import {entregaDaSprint, lerItensDoQuadro, proximoPassoDoJogador} from "../dados
 import {falasDoEscritorio} from "../dados/falasDoEscritorio.js";
 import {acaoPendente} from "../dados/acoesDoEscritorio.js";
 import {COLUNAS} from "../dados/quadro.js";
-import {BOAS_VINDAS} from "../dados/boasVindas.js";
+import {BOAS_VINDAS, CADEIRA_RECEM_ESCOLHIDA} from "../dados/boasVindas.js";
 import {CADEIRAS} from "../dados/cadeiras.js";
 import {
     DIAS_DA_SPRINT,
@@ -41,6 +41,13 @@ import {abrirDicaUmaVez} from "./CenaDica.js";
 
 // passo do mentor quando vai receber o jogador, em pixels por segundo
 const VELOCIDADE_DO_MENTOR = 130;
+
+// "SPRINT PLANNING" vira "Sprint Planning", para caber numa fala
+function nomeDoEvento(nome) {
+    return nome.toLowerCase().replace(/(^|\s)\S/g, function (letra) {
+        return letra.toUpperCase();
+    });
+}
 
 export class CenaEscritorio extends Phaser.Scene {
 
@@ -73,19 +80,23 @@ export class CenaEscritorio extends Phaser.Scene {
     // ---------------------------------------------------------
     // boas-vindas do mentor
 
-    // no dia 1, antes do Planning, uma vez por sprint
+    // toda vez que o jogador entra numa cadeira pela escolha de cadeira; a
+    // volta de uma reunião ou de outra tela não conta
     receberSePreciso() {
         const cadeira = this.cadeiraAtual;
         const mentor = this.interativos.find(function (item) {
             return item.dados.chave === CADEIRAS[cadeira].titular;
         });
 
-        if (this.emChegada || !mentor || !mentor.dados.chegada || this.sprintComecou()
-            || foiRecebido(this.registry, cadeira)) {
+        if (this.emChegada || !this.registry.get(CADEIRA_RECEM_ESCOLHIDA)) {
+            return;
+        }
+        this.registry.set(CADEIRA_RECEM_ESCOLHIDA, false);
+        if (!mentor || !mentor.dados.chegada || this.sprintTerminou()) {
             return;
         }
 
-        const roteiro = BOAS_VINDAS[cadeira][conheceOTime(this.registry, cadeira) ? "seguinte" : "primeira"];
+        const roteiro = this.roteiroDasBoasVindas();
         registrarBoasVindas(this.registry, cadeira);
         this.emChegada = true;
         this.rotulo.setVisible(false);
@@ -104,6 +115,29 @@ export class CenaEscritorio extends Phaser.Scene {
                 cena.andar(mentor, volta, null);
             }, true);
         });
+    }
+
+    // antes do Planning, a apresentação (longa só na primeira vez que o
+    // jogador é recebido); com a sprint andando, o dia e o próximo
+    // compromisso
+    roteiroDasBoasVindas() {
+        const cadeira = this.cadeiraAtual;
+        const roteiros = BOAS_VINDAS[cadeira];
+
+        if (!this.sprintComecou()) {
+            const jaFoiRecebido = foiRecebido(this.registry, cadeira) || conheceOTime(this.registry, cadeira);
+            return roteiros[jaFoiRecebido ? "seguinte" : "primeira"];
+        }
+
+        const vez = compromissoDaVez(this.registry, cadeira);
+        const proximo = vez.reuniao ? nomeDoEvento(vez.evento.nome) : "um imprevisto";
+        const dia = String(diaDaSprint(this.registry, cadeira));
+        return {
+            falas: roteiros.retorno.falas.map(function (fala) {
+                return fala.replace("{dia}", dia).replace("{proximo}", proximo);
+            }),
+            expressoes: roteiros.retorno.expressoes
+        };
     }
 
     // o mentor anda de ponto em ponto, com o nome e o "!" junto; enquanto
@@ -402,14 +436,12 @@ export class CenaEscritorio extends Phaser.Scene {
         }, [], this);
     }
 
-    // A troca de cadeira volta para a cena de seleção
+    // A cadeira só muda ao terminar a sprint dela ou numa partida nova; o P
+    // fica para a depuração
     pedirTrocaDeCadeira() {
-        if (DEPURACAO.trocaDeCadeiraLivre || !this.sprintComecou()) {
+        if (DEPURACAO.trocaDeCadeiraLivre) {
             this.abrirSelecaoDePapel();
-            return;
         }
-
-        this.avisar("a sprint já começou nesta cadeira; ela termina na síntese");
     }
 
     sprintComecou() {
@@ -531,11 +563,7 @@ export class CenaEscritorio extends Phaser.Scene {
     linhaDeAjuda() {
         const base = "setas andam, ENTER interage, G glossário, O configurações, ESC menu";
 
-        if (DEPURACAO.trocaDeCadeiraLivre || !this.sprintComecou()) {
-            return base + ", P troca de cadeira";
-        }
-
-        return base;
+        return DEPURACAO.trocaDeCadeiraLivre ? base + ", P troca de cadeira" : base;
     }
 
     atualizarCadeira(cadeira) {
@@ -550,13 +578,6 @@ export class CenaEscritorio extends Phaser.Scene {
     update(tempo, delta) {
         this.caixa.atualizar(delta);
 
-        // o mentor está vindo: o jogador espera parado
-        if (this.emChegada && !this.emDialogo) {
-            this.jogador.setVelocity(0, 0);
-            this.jogador.anims.play("jogador_" + this.cadeiraAtual + "_parado", true);
-            return;
-        }
-
         if (Phaser.Input.Keyboard.JustDown(this.teclaGlossario)) {
             this.consultarGlossario();
             return;
@@ -565,6 +586,13 @@ export class CenaEscritorio extends Phaser.Scene {
         // O progresso já está salvo; a sprint continua de onde parou
         if (!this.emDialogo && Phaser.Input.Keyboard.JustDown(this.teclaMenu)) {
             this.scene.start("CenaMenu");
+            return;
+        }
+
+        // o mentor está vindo: o jogador espera parado (ESC e G ainda valem)
+        if (this.emChegada && !this.emDialogo) {
+            this.jogador.setVelocity(0, 0);
+            this.jogador.anims.play("jogador_" + this.cadeiraAtual + "_parado", true);
             return;
         }
 

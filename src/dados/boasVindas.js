@@ -1,9 +1,14 @@
 // Boas-vindas do mentor
 //
-// No dia 1 de cada cadeira, antes do Sprint Planning, o mentor sai do lugar,
-// vai até o jogador, diz o que acontece hoje e onde ir, e volta. Na primeira
-// cadeira ele se apresenta; nas seguintes, o jogador já conhece o time e a
-// conversa é curta. Marcadores como em dados/texto.js.
+// Toda vez que o jogador entra numa cadeira pela escolha de cadeira, o mentor
+// sai do lugar, vai até ele, diz o que acontece e onde ir, e volta. Antes do
+// Sprint Planning, na primeira vez, ele se apresenta ("primeira"); depois, a
+// conversa é curta ("seguinte"). Com a sprint andando, ele diz o dia e o
+// próximo compromisso ("retorno", com {dia} e {proximo}). Os outros
+// marcadores, como em dados/texto.js.
+
+// avisa o escritório que a cadeira acabou de ser escolhida
+export const CADEIRA_RECEM_ESCOLHIDA = "cadeiraRecemEscolhida";
 
 const N = "neutro";
 const A = "aprovacao";
@@ -24,6 +29,13 @@ export const BOAS_VINDAS = {
                 "Hoje tem Sprint Planning, e quem propõe a meta é você. A agenda, na parede, abre a reunião quando você quiser."
             ],
             expressoes: [A, N]
+        },
+        retorno: {
+            falas: [
+                "De volta, {nome}. Estamos no dia {dia} da sprint.",
+                "Na agenda, o próximo compromisso é {proximo}. Se quiser, olha o quadro antes."
+            ],
+            expressoes: [A, N]
         }
     },
     sm: {
@@ -41,6 +53,13 @@ export const BOAS_VINDAS = {
                 "Hoje tem Sprint Planning. A gente facilita; quem decide é o time. A agenda, na parede, abre a reunião quando você quiser."
             ],
             expressoes: [A, N]
+        },
+        retorno: {
+            falas: [
+                "Que bom que voltou, {nome}. Dia {dia} da sprint.",
+                "Na agenda, o próximo compromisso é {proximo}. Antes, vale ver no quadro o que está travando."
+            ],
+            expressoes: [A, N]
         }
     },
     dev: {
@@ -56,6 +75,13 @@ export const BOAS_VINDAS = {
             falas: [
                 "Agora você senta comigo, {nome}, na cadeira de {Desenvolvedor|Desenvolvedora}.",
                 "No Planning você estima com a gente, e um cartão do quadro vai ser seu. A agenda, na parede, abre a reunião quando você quiser."
+            ],
+            expressoes: [N, N]
+        },
+        retorno: {
+            falas: [
+                "Voltou? Dia {dia} da sprint, então.",
+                "Na agenda, o próximo compromisso é {proximo}. E dá uma olhada no seu cartão no quadro."
             ],
             expressoes: [N, N]
         }

@@ -90,6 +90,7 @@ function progressoVazio() {
         conquistas: [],
         guiaVisto: false,
         dicasVistas: [],
+        cadeiraEmAndamento: null,
         perfil: null
     };
 }
@@ -165,6 +166,19 @@ export function guiaJaVisto(registry) {
 export function marcarGuiaVisto(registry) {
     const progresso = lerProgresso(registry);
     progresso.guiaVisto = true;
+
+    return salvarProgresso(registry, progresso);
+}
+
+// A cadeira escolhida fica até a sprint dela fechar na síntese; só então, ou
+// numa partida nova, o jogador escolhe outra
+export function cadeiraEmAndamento(registry) {
+    return lerProgresso(registry).cadeiraEmAndamento || null;
+}
+
+export function definirCadeiraEmAndamento(registry, cadeira) {
+    const progresso = lerProgresso(registry);
+    progresso.cadeiraEmAndamento = cadeira;
 
     return salvarProgresso(registry, progresso);
 }
@@ -255,7 +269,8 @@ export function entregaRegistrada(registry, cadeira) {
     return sprintDaCadeira(registry, cadeira).entrega || null;
 }
 
-// O mentor recebe o jogador uma vez por sprint, no dia 1
+// Se o mentor já recebeu o jogador nesta sprint: daí em diante a conversa de
+// antes do Planning é a curta, e as outras cadeiras sabem que ele conhece o time
 export function registrarBoasVindas(registry, cadeira) {
     const progresso = lerProgresso(registry);
     progresso.sprints[cadeira].recebido = true;
@@ -404,6 +419,7 @@ export function fecharSprint(registry, cadeira) {
     const encerrada = progresso.sprints[cadeira];
 
     progresso.sprintsConcluidas[cadeira] += 1;
+    progresso.cadeiraEmAndamento = null;
     atualizarConquistas(progresso, cadeira, true);
     guardarUltimaSprint(progresso, cadeira, encerrada);
     progresso.sprints[cadeira] = sprintVazia();

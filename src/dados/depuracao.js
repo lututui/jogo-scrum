@@ -8,7 +8,7 @@ export const OPCOES_DE_DEPURACAO = {
     npcsDeTeste: "personagens da escola parados no escritório, fora da cena deles",
     expressoesEmCiclo: "retrato troca de expressão a cada fala, para conferir as três",
     eventosLivres: "agenda abre qualquer reunião, em qualquer ordem",
-    trocaDeCadeiraLivre: "P troca de cadeira mesmo com a sprint em andamento",
+    trocaDeCadeiraLivre: "P troca de cadeira a qualquer momento, sem terminar a sprint",
     atalhoDeSintese: "F encerra a sprint na hora e abre a síntese"
 };
 
