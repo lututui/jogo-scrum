@@ -103,9 +103,20 @@ export function acrescentarItem(registry, cadeira, item, coluna) {
 }
 
 // Itens do Product Backlog que entram no Sprint Backlog, em A FAZER. A marca
-// de planejado é o que a Review procura para a conquista
+// de planejado é o que a Review procura para a conquista. O time puxa os
+// itens na ordem do Product Backlog, que é a do PO: a ordem em que foram
+// marcados no Planning não conta, e o resultado depende da escolha, não do
+// clique
 export function planejarItens(registry, cadeira, itens) {
-    itens.forEach(function (item) {
+    const posicao = function (item) {
+        const indice = PRODUTO_BACKLOG.findIndex(function (outro) {
+            return outro.id === item.id;
+        });
+        return indice < 0 ? PRODUTO_BACKLOG.length : indice;
+    };
+    itens.slice().sort(function (a, b) {
+        return posicao(a) - posicao(b);
+    }).forEach(function (item) {
         acrescentarItem(registry, cadeira, cartaoPlanejado(cadeira, item), "afazer");
     });
 }
