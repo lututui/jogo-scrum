@@ -2,6 +2,7 @@
 #
 # As peças de cima (linhas) com todas as de baixo (colunas), no avatar
 # padrão com crachá, parado. As desbloqueáveis só entram com --desbloqueaveis.
+# Tamanho de folha ABNT: sem --escala, a maior escala que cabe.
 #
 # Uso:
 #   python3 tools/folhas/gerar_folha_roupas.py
@@ -21,20 +22,22 @@ from sprites.corpo import PECAS_DE_BAIXO, PECAS_DE_CIMA
 from sprites.elenco import APARENCIA_PADRAO
 from sprites.paleta import COR_DE_CALCA, COR_DE_ROUPA
 from sprites.personagem import montar_jogador
+from sprites.medidas import ALTURA_SPRITE, LARGURA_SPRITE
 from folhas_comuns import (
+    ALTURA_MAXIMA,
     COR_DA_LINHA_GUIA,
     COR_DE_FUNDO,
     COR_DO_TEXTO,
+    LARGURA_UTIL,
     ampliar,
-    carregar_fonte,
-    escrever_centralizado,
-    salvar,
+    cm,
+    fonte_em_pt,
+    maior_escala,
+    medidas_impressas,
+    salvar_abnt,
 )
 
-MARGEM = 24
-LARGURA_DOS_ROTULOS = 110
-ALTURA_DOS_ROTULOS = 30
-ESPACO = 24
+ESPACO = cm(0.3)
 
 # as que o editor oferece desde o começo; as outras dependem de conquista
 PECAS_BASICAS = ("camiseta", "moletom", "jaqueta")
@@ -61,31 +64,40 @@ def celula(aparencia, escala):
 
 
 def desenhar_folha(cores, escala, pecas_de_cima):
-    fonte = carregar_fonte(14)
-    amostra = celula(APARENCIA_PADRAO, escala)
-    largura_da_celula = amostra.width + ESPACO
-    altura_da_celula = amostra.height + ESPACO
+    fonte = fonte_em_pt(10)
+    medida = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+    rotulo_mais_largo = max(medida.textlength(NOME_DA_PECA[cima], font=fonte) for cima in pecas_de_cima)
+    largura_dos_rotulos = int(rotulo_mais_largo + cm(0.3))
+    altura_dos_rotulos = fonte.size + cm(0.3)
+    if escala is None:
+        escala = maior_escala(LARGURA_UTIL - largura_dos_rotulos, ALTURA_MAXIMA - altura_dos_rotulos,
+                              len(PECAS_DE_BAIXO), len(pecas_de_cima), LARGURA_SPRITE, ALTURA_SPRITE, ESPACO)
 
-    largura = MARGEM * 2 + LARGURA_DOS_ROTULOS + largura_da_celula * len(PECAS_DE_BAIXO)
-    altura = MARGEM * 2 + ALTURA_DOS_ROTULOS + altura_da_celula * len(pecas_de_cima)
+    largura_da_celula = LARGURA_SPRITE * escala + ESPACO
+    altura_da_celula = ALTURA_SPRITE * escala + ESPACO
+    # o nome da última coluna pode passar da célula
+    ultima = NOME_DA_PECA[list(PECAS_DE_BAIXO)[-1]]
+    sobra = max(cm(0.1), int(medida.textlength(ultima, font=fonte) - LARGURA_SPRITE * escala) // 2)
+    largura = largura_dos_rotulos + largura_da_celula * len(PECAS_DE_BAIXO) - ESPACO + sobra
+    altura = altura_dos_rotulos + altura_da_celula * len(pecas_de_cima) - ESPACO
     folha = Image.new("RGB", (largura, altura), COR_DE_FUNDO)
     d = ImageDraw.Draw(folha)
 
     for coluna, baixo in enumerate(PECAS_DE_BAIXO):
-        x = MARGEM + LARGURA_DOS_ROTULOS + coluna * largura_da_celula
-        escrever_centralizado(d, x + amostra.width / 2, MARGEM, NOME_DA_PECA[baixo], fonte, COR_DO_TEXTO)
+        x = largura_dos_rotulos + coluna * largura_da_celula
+        d.text((x + LARGURA_SPRITE * escala / 2, 0), NOME_DA_PECA[baixo], font=fonte, fill=COR_DO_TEXTO, anchor="ma")
 
     for linha, cima in enumerate(pecas_de_cima):
-        y = MARGEM + ALTURA_DOS_ROTULOS + linha * altura_da_celula
-        d.text((MARGEM, y + amostra.height / 2 - 8), NOME_DA_PECA[cima], font=fonte, fill=COR_DO_TEXTO)
+        y = altura_dos_rotulos + linha * altura_da_celula
+        d.text((0, y + ALTURA_SPRITE * escala / 2), NOME_DA_PECA[cima], font=fonte, fill=COR_DO_TEXTO, anchor="lm")
 
         for coluna, baixo in enumerate(PECAS_DE_BAIXO):
-            x = MARGEM + LARGURA_DOS_ROTULOS + coluna * largura_da_celula
+            x = largura_dos_rotulos + coluna * largura_da_celula
             aparencia = dict(APARENCIA_PADRAO, peca_de_cima=cima, peca_de_baixo=baixo, **cores)
             imagem = celula(aparencia, escala)
             folha.paste(imagem, (x, y), imagem)
-            d.line([x, y + imagem.height + 4, x + imagem.width, y + imagem.height + 4],
-                   fill=COR_DA_LINHA_GUIA)
+            guia = y + imagem.height + cm(0.05)
+            d.line([x, guia, x + imagem.width, guia], fill=COR_DA_LINHA_GUIA, width=2)
 
     return folha
 
@@ -101,7 +113,8 @@ def ler_cor(valor):
 
 def main():
     parser = argparse.ArgumentParser(description="Gera a folha com todas as combinações de roupa")
-    parser.add_argument("--escala", type=int, default=6, help="ampliação de cada sprite")
+    parser.add_argument("--escala", type=int, default=None,
+                        help="ampliação de cada sprite (padrão: a maior que cabe)")
     parser.add_argument("--superior", default="verde_escuro", help="cor da peça de cima")
     parser.add_argument("--interna", default="branco", help="cor da camiseta por baixo da jaqueta")
     parser.add_argument("--inferior", default="bege", help="cor da peça de baixo")
@@ -116,7 +129,7 @@ def main():
     }
     pecas = list(PECAS_DE_CIMA) if argumentos.desbloqueaveis else list(PECAS_BASICAS)
     folha = desenhar_folha(cores, argumentos.escala, pecas)
-    print("folha de roupas em %s" % salvar(folha, argumentos.saida))
+    print("folha de roupas em %s (%s)" % (salvar_abnt(folha, argumentos.saida), medidas_impressas(folha)))
 
 
 if __name__ == "__main__":

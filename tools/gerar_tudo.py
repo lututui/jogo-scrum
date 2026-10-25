@@ -25,6 +25,10 @@ FIGURAS = [
     os.path.join("folhas", "gerar_folha_expressoes.py"),
     os.path.join("folhas", "gerar_folha_roupas.py"),
     os.path.join("folhas", "gerar_folha_tons.py"),
+    os.path.join("folhas", "gerar_folha_camadas.py"),
+    os.path.join("folhas", "gerar_folha_agenda.py"),
+    os.path.join("folhas", "gerar_folha_desbloqueaveis.py"),
+    os.path.join("folhas", "gerar_folha_fluxo.py"),
 ]
 
 
