@@ -124,15 +124,16 @@ export const EVENTOS_CONTEXTUAIS = [
         id: "bloqueio-da-bia",
         dia: 4,
         cadeiras: ["sm"],
-        quem: "bia",
+        quem: "sandra",
         expressao: "tenso",
-        fala: "Segue sem acesso à base de matrículas. Mandei e-mail para a "
-            + "secretaria ontem e hoje. Nada.",
+        fala: "Alô? Aqui é a Sandra, da secretaria da escola. A Bia me mandou dois "
+            + "e-mails pedindo a base de matrículas. Não é má vontade minha: são "
+            + "dados de criança, e quem assina embaixo se algo vazar sou eu.",
         pergunta: "O que você faz?",
         semMentor: true,
         opcoes: [
             {
-                titulo: "Ir à escola no fim da tarde e entender o receio da Sandra",
+                titulo: "Ir à escola no fim da tarde e entender o receio dela",
                 detalhe: "O bloqueio tem um motivo humano",
                 avaliacao: "boa",
                 marca: "impedimento",
@@ -143,18 +144,18 @@ export const EVENTOS_CONTEXTUAIS = [
                 principio: "Remover impedimento começa por entender do que ele é feito."
             },
             {
-                titulo: "Escalar para a diretora por cima da secretaria",
+                titulo: "Escalar para a diretora por cima dela",
                 detalhe: "Resolve hoje, custa depois",
                 avaliacao: "media",
                 conceito: "Impedimento",
                 medidores: ["valor", "confianca"],
                 quadro: [{cartao: "pb02", desbloqueiaNoDia: 5}],
-                feedback: "O acesso saiu em um dia e a secretaria passou a "
+                feedback: "O acesso saiu em um dia e a Sandra passou a "
                     + "responder por obrigação. Vocês ainda dependem dela.",
                 principio: "Impedimento removido por autoridade volta como atrito."
             },
             {
-                titulo: "Pedir que ela trabalhe com dados inventados",
+                titulo: "Pedir que a Bia trabalhe com dados inventados",
                 detalhe: "Contornar em vez de remover",
                 avaliacao: "ruim",
                 conceito: "Impedimento",

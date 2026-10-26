@@ -4,6 +4,9 @@
 // por fala (neutro, tenso ou aprovacao). "voz" segue dados/voz.js.
 // "chegada", nos mentores, é o caminho do lugar até o ponto onde o jogador
 // começa, contornando as mesas; a volta é o mesmo caminho ao contrário.
+// "teste" marca quem é da escola e não fica no escritório: aparece com uma
+// ação pendente, na depuração ou enquanto o compromisso da vez for o de
+// "visita" (a Review, para a qual a escola vem).
 
 export const ELENCO = [
     {
@@ -106,12 +109,13 @@ export const ELENCO = [
         cor: "#c9a96a",
         voz: {timbre: "suave", altura: 2, melodia: 1, ritmo: 1},
         teste: true,
+        visita: "CenaSprintReview",
         x: 765,
         y: 312,
         expressoes: ["neutro", "tenso"],
         falas: [
             "Então é aqui que o sistema está sendo feito.",
-            "Vim conhecer o lugar e repetir uma data: em fevereiro as aulas começam, com ou sem sistema pronto."
+            "Vim para a Review e aproveitei para conhecer o lugar. Repito a data: em fevereiro as aulas começam, com ou sem sistema pronto."
         ]
     },
     {
@@ -121,6 +125,7 @@ export const ELENCO = [
         cor: "#3f7a52",
         voz: {timbre: "nasal", altura: -1, melodia: 2, ritmo: 2},
         teste: true,
+        visita: "CenaSprintReview",
         x: 818,
         y: 312,
         expressoes: ["neutro", "tenso"],
@@ -136,6 +141,7 @@ export const ELENCO = [
         cor: "#a87fc4",
         voz: {timbre: "soprada", altura: 0, melodia: 1, ritmo: 1},
         teste: true,
+        visita: "CenaSprintReview",
         x: 871,
         y: 312,
         expressoes: ["neutro", "tenso"],

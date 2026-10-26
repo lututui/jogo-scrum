@@ -292,9 +292,12 @@ export class CenaEscritorio extends Phaser.Scene {
         }, this);
     }
 
-    // Visitantes só aparecem quando têm algo a tratar com o jogador (ou na
-    // depuração); quem tem uma ação pendente ganha um "!"
+    // Visitantes só aparecem quando têm algo a tratar com o jogador, no dia
+    // da visita (antes da Review) ou na depuração; quem tem uma ação pendente
+    // ganha um "!"
     atualizarPresencas() {
+        const daVez = compromissoDaVez(this.registry, this.cadeiraAtual);
+
         this.interativos.forEach(function (item) {
             if (item.avisoDaParede) {
                 item.avisoDaParede.setVisible(!this.sprintComecou());
@@ -303,7 +306,8 @@ export class CenaEscritorio extends Phaser.Scene {
                 return;
             }
             const acao = acaoPendente(this.registry, this.cadeiraAtual, item.dados.chave);
-            const presente = !item.dados.teste || DEPURACAO.npcsDeTeste || Boolean(acao);
+            const deVisita = Boolean(item.dados.visita && daVez && daVez.chave === item.dados.visita);
+            const presente = !item.dados.teste || DEPURACAO.npcsDeTeste || Boolean(acao) || deVisita;
 
             item.ausente = !presente;
             item.sprite.setVisible(presente);

@@ -22,6 +22,11 @@ const N = "neutro";
 const T = "tenso";
 const A = "aprovacao";
 
+const DADOS_LIBERADOS = [
+    "Vim com a diretora para a Review.",
+    "Quero ver onde foram parar os dados que eu liberei."
+];
+
 export const FALAS_DO_ESCRITORIO = {
     marcia: [
         {dias: [1, 1], mentor: true, falas: [
@@ -119,6 +124,24 @@ export const FALAS_DO_ESCRITORIO = {
         {cadeiras: ["po", "sm"], dias: [5, 8], falas: [
             "Pensei no que conversamos. Espero que a Review deixe a diretora feliz."], expressoes: [N]},
         {falas: ["Esse contrato da escola é importante para a casa. Não esqueçam disso."], expressoes: [N]}
+    ],
+
+    // visitantes: só no dia da Review; sem situação que bata, vale a apresentação
+    helio: [
+        {cadeiras: ["po"], existe: "rev-feedback", falas: [
+            "Vi que os seis cliques entraram no quadro de vocês.",
+            "Hoje eu vim só ver o resto funcionando."], expressoes: [A, N]},
+        {cadeiras: ["po"], falas: [
+            "Os seis cliques para marcar falta continuam lá.",
+            "Alguém anotou isso, ou vou ter que pedir de novo?"], expressoes: [N, T]}
+    ],
+
+    sandra: [
+        {cadeiras: ["sm"], bloqueado: "pb02", falas: [
+            "A base de matrículas segue comigo.",
+            "Se quiserem conversar direito sobre ela, a secretaria fica aberta até as cinco."], expressoes: [N, T]},
+        {andando: "pb02", falas: DADOS_LIBERADOS, expressoes: [N, N]},
+        {concluido: "pb02", falas: DADOS_LIBERADOS, expressoes: [N, N]}
     ]
 };
 
