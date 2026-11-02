@@ -1,8 +1,13 @@
 # Folha do elenco
 #
+# Cada personagem com nome e papel, em tamanho de folha ABNT. Sai em duas
+# figuras de uma linha: o time da Catavento (5) e quem está em volta dele
+# (4), elenco_1.png e elenco_2.png, na mesma escala.
+#
 # Uso:
-#   python3 tools/gerar_folha_elenco.py
-#   python3 tools/gerar_folha_elenco.py --escala 8 --colunas 4
+#   python3 tools/folhas/gerar_folha_elenco.py
+#   python3 tools/folhas/gerar_folha_elenco.py --por-figura 3,3,3 --escala 8
+#   python3 tools/folhas/gerar_folha_elenco.py --por-figura 9
 
 import argparse
 import os
@@ -14,23 +19,29 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sprites.elenco import ELENCO
+from sprites.medidas import ALTURA_SPRITE, LARGURA_SPRITE
 from sprites.personagem import montar
 from folhas_comuns import (
+    ALTURA_MAXIMA,
     COR_DA_LINHA_GUIA,
     COR_DE_FUNDO,
     COR_DO_TEXTO,
     COR_DO_TEXTO_SECUNDARIO,
+    LARGURA_UTIL,
     ampliar,
-    carregar_fonte,
+    cm,
     descrever,
-    escrever_centralizado,
+    fonte_em_pt,
+    maior_escala,
+    medidas_impressas,
     nomes_do_elenco,
-    salvar,
+    quebrar_texto,
+    salvar_abnt,
 )
 
-MARGEM = 24
-ESPACO_ENTRE_COLUNAS = 20
-ALTURA_DO_RODAPE = 60
+ESPACO = cm(0.3)
+# folga acima dos sprites: o cabelo de alguns começa na primeira linha do sprite
+MARGEM_DE_CIMA = cm(0.2)
 
 
 def montar_cartoes(escala):
@@ -49,62 +60,81 @@ def montar_cartoes(escala):
     return cartoes
 
 
-def desenhar_folha(cartoes, colunas, titulo):
-    fonte_nome = carregar_fonte(15)
-    fonte_papel = carregar_fonte(12)
-    fonte_titulo = carregar_fonte(17)
+# uma figura de uma linha; célula e rodapé iguais em todas as figuras
+def desenhar_folha(cartoes, largura_da_celula, linhas_do_papel):
+    fonte_nome, fonte_papel = fonte_em_pt(10), fonte_em_pt(8)
+    medida = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+    largura_do_texto = largura_da_celula - ESPACO
 
-    largura_do_sprite = cartoes[0]["imagem"].width
+    papeis = [quebrar_texto(medida, cartao["papel"], fonte_papel, largura_do_texto) for cartao in cartoes]
     altura_do_sprite = cartoes[0]["imagem"].height
-    largura_da_celula = largura_do_sprite + ESPACO_ENTRE_COLUNAS
-    altura_da_celula = altura_do_sprite + ALTURA_DO_RODAPE
+    rodape = cm(0.2) + round(fonte_nome.size * 1.3) + linhas_do_papel * round(fonte_papel.size * 1.25)
 
-    linhas = (len(cartoes) + colunas - 1) // colunas
-    topo = MARGEM + (30 if titulo else 0)
-
-    largura = MARGEM * 2 + largura_da_celula * colunas
-    altura = topo + altura_da_celula * linhas + MARGEM
-
-    folha = Image.new("RGB", (largura, altura), COR_DE_FUNDO)
+    folha = Image.new("RGB", (largura_da_celula * len(cartoes), MARGEM_DE_CIMA + altura_do_sprite + rodape),
+                      COR_DE_FUNDO)
     d = ImageDraw.Draw(folha)
 
-    if titulo:
-        d.text((MARGEM, MARGEM - 6), titulo, font=fonte_titulo, fill=COR_DO_TEXTO)
-
     for indice, cartao in enumerate(cartoes):
-        coluna = indice % colunas
-        linha = indice // colunas
-        x = MARGEM + coluna * largura_da_celula
-        y = topo + linha * altura_da_celula
-        centro = x + largura_da_celula / 2 - ESPACO_ENTRE_COLUNAS / 2
+        x = indice * largura_da_celula
+        centro = x + largura_da_celula / 2
+        imagem = cartao["imagem"]
+        folha.paste(imagem, (int(centro - imagem.width / 2), MARGEM_DE_CIMA), imagem)
 
-        folha.paste(cartao["imagem"], (int(x), int(y)), cartao["imagem"])
-
-        base = y + altura_do_sprite + 6
-        d.line(
-            [x, base, x + largura_do_sprite, base],
-            fill=COR_DA_LINHA_GUIA,
-        )
-        escrever_centralizado(d, centro, base + 6, cartao["nome"], fonte_nome, COR_DO_TEXTO)
-        if cartao["papel"]:
-            escrever_centralizado(
-                d, centro, base + 24, cartao["papel"], fonte_papel, COR_DO_TEXTO_SECUNDARIO
-            )
+        base = MARGEM_DE_CIMA + altura_do_sprite + cm(0.05)
+        d.line([centro - imagem.width / 2, base, centro + imagem.width / 2, base],
+               fill=COR_DA_LINHA_GUIA, width=2)
+        y = base + cm(0.15)
+        d.text((centro, y), cartao["nome"], font=fonte_nome, fill=COR_DO_TEXTO, anchor="ma")
+        y += round(fonte_nome.size * 1.3)
+        for linha in papeis[indice]:
+            d.text((centro, y), linha, font=fonte_papel, fill=COR_DO_TEXTO_SECUNDARIO, anchor="ma")
+            y += round(fonte_papel.size * 1.25)
 
     return folha
 
 
+# "5,4" -> [5, 4]; sobrando personagens, o último tamanho se repete
+def ler_grupos(texto, total, parser):
+    try:
+        tamanhos = [int(parte) for parte in texto.split(",")]
+    except ValueError:
+        parser.error("--por-figura espera números separados por vírgula, como 5,4")
+    if any(tamanho < 1 for tamanho in tamanhos):
+        parser.error("--por-figura: cada figura precisa de pelo menos 1 personagem")
+
+    grupos, inicio = [], 0
+    while inicio < total:
+        tamanho = tamanhos[min(len(grupos), len(tamanhos) - 1)]
+        grupos.append((inicio, min(inicio + tamanho, total)))
+        inicio += tamanho
+    return grupos
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Gera a folha do elenco em uma única imagem")
-    parser.add_argument("--escala", type=int, default=6, help="ampliação de cada sprite")
-    parser.add_argument("--colunas", type=int, default=3, help="personagens por linha")
-    parser.add_argument("--saida", default="elenco.png", help="nome do arquivo em figuras/")
-    parser.add_argument("--titulo", default="", help="título; vazio para omitir")
+    parser = argparse.ArgumentParser(description="Gera a folha do elenco")
+    parser.add_argument("--por-figura", default="5,4",
+                        help="personagens em cada figura, na ordem do elenco (um número só: todos numa figura)")
+    parser.add_argument("--escala", type=int, default=None,
+                        help="ampliação de cada sprite (padrão: a maior que cabe)")
+    parser.add_argument("--saida", default="elenco.png", help="nome do arquivo em figuras/ (recebe _1, _2...)")
     argumentos = parser.parse_args()
 
-    cartoes = montar_cartoes(argumentos.escala)
-    folha = desenhar_folha(cartoes, argumentos.colunas, argumentos.titulo)
-    print("folha do elenco em %s" % salvar(folha, argumentos.saida))
+    grupos = ler_grupos(argumentos.por_figura, len(ELENCO), parser)
+    colunas = max(fim - inicio for inicio, fim in grupos)
+    largura_da_celula = LARGURA_UTIL // colunas
+    escala = argumentos.escala or maior_escala(LARGURA_UTIL, ALTURA_MAXIMA, colunas, 1,
+                                               LARGURA_SPRITE, ALTURA_SPRITE, ESPACO)
+    largura_da_celula = max(largura_da_celula, LARGURA_SPRITE * escala + ESPACO)
+
+    cartoes = montar_cartoes(escala)
+    medida = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+    linhas_do_papel = max(len(quebrar_texto(medida, cartao["papel"], fonte_em_pt(8), largura_da_celula - ESPACO))
+                          for cartao in cartoes)
+    base, extensao = os.path.splitext(argumentos.saida)
+    for numero, (inicio, fim) in enumerate(grupos, 1):
+        nome = argumentos.saida if len(grupos) == 1 else "%s_%d%s" % (base, numero, extensao)
+        folha = desenhar_folha(cartoes[inicio:fim], largura_da_celula, linhas_do_papel)
+        print("folha do elenco em %s (%s)" % (salvar_abnt(folha, nome), medidas_impressas(folha)))
 
 
 if __name__ == "__main__":
