@@ -3,11 +3,13 @@
 # O personagem do jogador montado camada por camada, na ordem do jogo
 # (ui/montarJogador.js): em cima, a folha da camada como sai de
 # assets/camadas, com magenta e ciano no lugar das cores; embaixo, o
-# personagem até aquela camada. Tamanho de folha ABNT.
+# personagem até aquela camada. Tamanho de folha ABNT, em duas figuras de
+# quatro etapas (camadas_1.png e camadas_2.png).
 #
 # Uso:
 #   python3 tools/folhas/gerar_folha_camadas.py
 #   python3 tools/folhas/gerar_folha_camadas.py --cadeira dev --saida camadas_dev.png
+#   python3 tools/folhas/gerar_folha_camadas.py --por-figura 8
 
 import argparse
 import os
@@ -77,30 +79,37 @@ def etapas(aparencia, cadeira):
     return lista
 
 
-def desenhar_folha(aparencia, cadeira):
+# a sequência inteira: (rótulo, camada crua, personagem até ela), na ordem do jogo
+def montar_etapas(aparencia, cadeira):
     folhas = carregar_folhas(DIR_CAMADAS)
-    lista = etapas(aparencia, cadeira)
+    acumulado = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    montadas = []
+    for rotulo, nome, cores in etapas(aparencia, cadeira):
+        if cores is None:
+            cores = [cor_da_sobrancelha(aparencia["cabelo"], fundo_da_sobrancelha(acumulado, aparencia["pele"]))]
+        bruta = quadro(folhas[nome], 0)
+        acumulado.alpha_composite(recolorir(bruta, cores))
+        montadas.append((rotulo, bruta, acumulado.copy()))
+    return montadas
+
+
+# uma figura com as etapas dadas; primeira é o número da primeira delas
+def desenhar_folha(montadas, primeira):
     fonte, fonte_menor = fonte_em_pt(10), fonte_em_pt(8)
 
     lado = 32 * ESCALA
     celula = (LARGURA_UTIL - LARGURA_DOS_ROTULOS) // COLUNAS
     titulo = fonte.size + cm(0.25)
     altura_da_linha = titulo + 2 * lado + ESPACO
-    linhas = (len(lista) + COLUNAS - 1) // COLUNAS
+    linhas = (len(montadas) + COLUNAS - 1) // COLUNAS
     folha = Image.new("RGB", (LARGURA_UTIL, linhas * altura_da_linha + (linhas - 1) * ENTRE_LINHAS), COR_DE_FUNDO)
     d = ImageDraw.Draw(folha)
 
-    acumulado = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    for i, (rotulo, nome, cores) in enumerate(lista):
-        if cores is None:
-            cores = [cor_da_sobrancelha(aparencia["cabelo"], fundo_da_sobrancelha(acumulado, aparencia["pele"]))]
-        bruta = quadro(folhas[nome], 0)
-        acumulado.alpha_composite(recolorir(bruta, cores))
-
+    for i, (rotulo, bruta, acumulado) in enumerate(montadas):
         coluna, linha = i % COLUNAS, i // COLUNAS
         x = LARGURA_DOS_ROTULOS + coluna * celula + (celula - lado) // 2
         y = linha * (altura_da_linha + ENTRE_LINHAS)
-        d.text((x + lado / 2, y), "%d. %s" % (i + 1, rotulo), font=fonte, fill=COR_DO_TEXTO, anchor="ma")
+        d.text((x + lado / 2, y), "%d. %s" % (primeira + i, rotulo), font=fonte, fill=COR_DO_TEXTO, anchor="ma")
 
         folha.paste(COR_DO_PALCO, (x, y + titulo, x + lado, y + titulo + lado))
         grande = bruta.resize((lado, lado), Image.NEAREST)
@@ -119,11 +128,20 @@ def desenhar_folha(aparencia, cadeira):
 def main():
     parser = argparse.ArgumentParser(description="Gera a folha com a montagem do personagem por camadas")
     parser.add_argument("--cadeira", default="sm", choices=sorted(COR_DE_CRACHA), help="cor do crachá")
-    parser.add_argument("--saida", default="camadas.png", help="nome do arquivo em figuras/")
+    parser.add_argument("--por-figura", type=int, default=4,
+                        help="etapas em cada figura; com todas numa só, sai sem número no nome")
+    parser.add_argument("--saida", default="camadas.png", help="nome do arquivo em figuras/ (recebe _1, _2...)")
     argumentos = parser.parse_args()
+    if argumentos.por_figura < 1:
+        parser.error("--por-figura precisa ser pelo menos 1")
 
-    folha = desenhar_folha(APARENCIA, argumentos.cadeira)
-    print("folha de camadas em %s (%s)" % (salvar_abnt(folha, argumentos.saida), medidas_impressas(folha)))
+    montadas = montar_etapas(APARENCIA, argumentos.cadeira)
+    partes = [montadas[i:i + argumentos.por_figura] for i in range(0, len(montadas), argumentos.por_figura)]
+    base, extensao = os.path.splitext(argumentos.saida)
+    for numero, parte in enumerate(partes, 1):
+        nome = argumentos.saida if len(partes) == 1 else "%s_%d%s" % (base, numero, extensao)
+        folha = desenhar_folha(parte, (numero - 1) * argumentos.por_figura + 1)
+        print("folha de camadas em %s (%s)" % (salvar_abnt(folha, nome), medidas_impressas(folha)))
 
 
 if __name__ == "__main__":
