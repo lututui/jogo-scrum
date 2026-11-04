@@ -3,7 +3,8 @@
 // O que o jogador faz, em ordem, para a análise da avaliação: decisões (com a
 // opção, a avaliação e o tempo para decidir), cadeiras, sínteses, consultas
 // ao glossário, ao guia e às conquistas, conquistas obtidas, aberturas do
-// quadro, dicas e o FPS de cada sessão.
+// quadro, dicas, o FPS de cada sessão e a saída da página, que fecha a
+// sessão.
 // Cada linha leva a sessão (uma por carregamento da página) e o tempo desde
 // o começo dela, em milissegundos; não leva data nem hora.
 //
@@ -71,6 +72,17 @@ export function anotar(tipo, dados) {
     const sessao = sessaoAtual();
     diario.eventos.push(Object.assign({sessao: sessao.numero, t: agora(), tipo: tipo}, dados));
     gravar();
+}
+
+// fechar, recarregar ou sair da página fecha a sessão com o evento "saida"; a
+// gravação é síncrona, então vale dentro do pagehide. Depois do "Limpar
+// tudo" não há sessão aberta e nada é gravado, para não sobrar uma sessão
+// vazia para o próximo participante
+export function anotarSaida() {
+    if (!diario || diario.sessoes.length === 0) {
+        return;
+    }
+    anotar("saida", {});
 }
 
 // média e mínimo de FPS da sessão, atualizados de tempos em tempos
